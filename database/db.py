@@ -139,7 +139,7 @@ class Database:
            ID                           INT NOT NULL,
            GuildID                      INT NOT NULL,
            NewYearPrises                INT DEFAULT 0 NOT NULL,
-           ValentineS                   INT DEFAULT 0 NOT NULL
+           Valentines                   INT DEFAULT 0 NOT NULL
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Card (
            ID                           INT NOT NULL,
@@ -836,3 +836,12 @@ class Database:
                         )
                     except discord.errors.Forbidden:
                         pass
+
+    def is_the_casino_allowed(self, channel_id: int) -> bool:
+        if self.cursor.execute("SELECT CasinoChannelID FROM Server WHERE GuildID = ?",
+                               (channel_id,)).fetchone() is None:
+            return True
+        if channel_id in [572705890524725248, 573712070864797706] or \
+                self.cursor.execute("SELECT CasinoChannelID FROM Server WHERE GuildID = ?", (channel_id,)).fetchone():
+            return True
+        return False

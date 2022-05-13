@@ -1,7 +1,3 @@
-import discord
-
-from discord.ext import commands
-
 from DPcoinBOTs.DPcoinBOT2.templates.helperfunction import *
 from DPcoinBOTs.DPcoinBOT2.config import *
 from DPcoinBOTs.DPcoinBOT2.version import __version__
