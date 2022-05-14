@@ -79,3 +79,10 @@ def logging(func):
 
 def datetime_to_str(datetime_):
     return datetime.strptime(datetime_, "%Y-%m-%d %H:%M:%S")
+
+
+def create_emb(title: str, color: discord.Color, args: list) -> discord.Embed:
+    emb = discord.Embed(title=title, colour=color)
+    for row in list(args):
+        emb.add_field(name=row["name"], value=row["value"], inline=row["inline"])
+    return emb
