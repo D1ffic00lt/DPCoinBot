@@ -39,52 +39,42 @@ class Casino(commands.Cog, name='Casino module', Database):
                                 color = [role for role in ctx.author.roles][-1].color
                                 if str([role for role in ctx.author.roles][-1]) == "@everyone":
                                     color = discord.Color.from_rgb(32, 34, 37)
-                                emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=color)
-                                emb.add_field(
-                                    name=f'Поздравляем!',
-                                    value=f'{ctx.author.mention}, Вы выиграли **{razr(num)}** DP коинов!',
-                                    inline=False
-                                )
                                 await ctx.send(embed=create_emb(title="🎰Вы выиграли!🎰", color=color, args=[
                                     {"name": f'Поздравляем!',
                                      "value": f'{ctx.author.mention}, '
                                               f'Вы выиграли **{razr(num)}** DP коинов!',
                                      "inline": False}]))
                                 wp = "Win "
-                                await stats_update(ctx, "rust_casinos", "rc", "wins", num)
-                            else:
-                                MainFuncs.take_coins_ctx(ctx, num)
-                                num = self.casino[0] * num
-                                color = [role for role in ctx.author.roles][-1].color
-                                if str([role for role in ctx.author.roles][-1]) == "@everyone":
-                                    color = discord.Color.from_rgb(32, 34, 37)
-                                # , colour = color
-                                emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=color)
-                                emb.add_field(
-                                    name=f'Поздравляем!',
-                                    value=f'{ctx.author.mention}, Вы выиграли **{razr(num)}** DP коинов!',
-                                    inline=False
-                                )
-                                await ctx.send(embed=emb)
-                                MainFuncs.add_coins_ctx(ctx, num)
-                                wp = "Win "
-                                await stats_update(ctx, "rust_casinos", "rc", "wins", num)
-                        elif self.casino[0] != count:
-                            MainFuncs.take_coins_ctx(ctx, num)
-                            wp = "Lose"
-                            num = -num
+                                await self.stats_update(ctx, "rust_casinos", "rc", "wins", num)
+
+                        else:
+                            self.take_coins(ctx.author.id, ctx.guild.id, num)
+                            num = self.casino[0] * num
                             color = [role for role in ctx.author.roles][-1].color
                             if str([role for role in ctx.author.roles][-1]) == "@everyone":
                                 color = discord.Color.from_rgb(32, 34, 37)
-                            # , colour = color
-                            emb = discord.Embed(title="🎰Вы проиграли!🎰", colour=color)
-                            emb.add_field(
-                                name=f'Вы проиграли:(',
-                                value=f'{ctx.author.mention}, выпало число {casino[0]}',
-                                inline=False
-                            )
-                            await ctx.send(embed=emb)
-                            await stats_update(ctx, "rust_casinos", "rc", "loses", num)
+                            await ctx.send(embed=create_emb(title="🎰Вы выиграли!🎰", color=color, args=[
+                                {"name": f'Поздравляем!',
+                                 "value": f'{ctx.author.mention}, '
+                                          f'Вы выиграли **{razr(num)}** DP коинов!',
+                                 "inline": False}]))
+                            self.add_coins(ctx.author.id, ctx.guild.id, num)
+                            wp = "Win "
+                            await self.stats_update(ctx, "rust_casinos", "rc", "wins", num)
+
+                    elif self.casino[0] != count:
+                        self.take_coins(ctx.author.id, ctx.guild.id, num)
+                        wp = "Lose"
+                        num = -num
+                        color = [role for role in ctx.author.roles][-1].color
+                        if str([role for role in ctx.author.roles][-1]) == "@everyone":
+                            color = discord.Color.from_rgb(32, 34, 37)
+                        await ctx.send(embed=create_emb(title="🎰Вы выиграли!🎰", color=color, args=[
+                            {"name": f'Поздравляем!',
+                             "value": f'{ctx.author.mention}, '
+                                      f'Вы выиграли **{razr(num)}** DP коинов!',
+                             "inline": False}]))
+                        await self.stats_update(ctx, "rust_casinos", "rc", "loses", num)
 
                     else:
                         await ctx.send(
