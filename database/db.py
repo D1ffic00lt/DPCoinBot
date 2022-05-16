@@ -116,7 +116,7 @@ class Database:
            Wins_10                      BOOLEAN DEFAULT false NOT NULL,
            Wins_20                      BOOLEAN DEFAULT false NOT NULL,
            Wins                         INT DEFAULT 0 NOT NULL,
-           fail_00                      BOOLEAN DEFAULT false NOT NULL
+           DroppingZeroInFail           BOOLEAN DEFAULT false NOT NULL
           )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS NewYearEvent (
            Name                         VARCHAR (255) NOT NULL,
@@ -163,33 +163,6 @@ class Database:
         return True
 
     @ignore_exceptions
-    def checking_for_card_existence_in_table(self, ID: int) -> bool:
-        if self.cursor.execute("SELECT * FROM `Card` WHERE `ID` = ?", (ID,)).fetchone() is None:
-            return False
-        return True
-
-    @ignore_exceptions
-    def checking_for_achievements_existence_in_table(self, ID: int, guild_id: int) -> bool:
-        if self.cursor.execute("SELECT * FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                               (ID, guild_id)).fetchone() is None:
-            return False
-        return True
-
-    @ignore_exceptions
-    def checking_for_inventory_existence_in_table(self, ID: int, guild_id: int) -> bool:
-        if self.cursor.execute("SELECT * FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
-                               (ID, guild_id)).fetchone() is None:
-            return False
-        return True
-
-    @ignore_exceptions
-    def checking_for_new_year_event_existence_in_table(self, ID: int, guild_id: int) -> bool:
-        if self.cursor.execute("SELECT * FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
-                               (ID, guild_id)).fetchone() is None:
-            return False
-        return True
-
-    @ignore_exceptions
     def checking_for_levels_existence_in_table(self) -> bool:
         if self.cursor.execute("SELECT * FROM `Levels` WHERE `Level` = 1").fetchone() is None:
             return False
@@ -202,24 +175,46 @@ class Database:
                                        (name, ID, starting_balance, guild_id))
 
     @ignore_exceptions
-    def insert_into_card(self, ID: int) -> Cursor:
+    def check_completion_dropping_zero_in_fail_achievement(self, ID: int, guild_id: int) -> bool:
+        if self.cursor.execute("SELECT DroppingZeroInFail FROM Achievements WHERE ID = ? AND GuildID = ?",
+                               (ID, guild_id)).fetchone()[0] == 0:
+            return False
+        return True
+
+    @ignore_exceptions
+    def complete_dropping_zero_in_fail_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("INSERT INTO `Card` VALUES (?)", (ID,))
+            return self.cursor.execute(
+                "UPDATE Achievements SET DroppingZeroInFail = true WHERE ID = ? AND GuildID = ?",
+                (ID, guild_id)
+            )
+
+    @ignore_exceptions
+    def insert_into_card(self, ID: int) -> Cursor:
+        if self.cursor.execute("SELECT * FROM `Card` WHERE `ID` = ?", (ID,)).fetchone() is None:
+            with self.connection:
+                return self.cursor.execute("INSERT INTO `Card` VALUES (?)", (ID,))
 
     @ignore_exceptions
     def insert_into_achievements(self, name: str, ID: int, guild_id) -> Cursor:
-        with self.connection:
-            return self.cursor.execute(f"INSERT INTO `Achievements` VALUES (?, ?, ?)", (name, ID, guild_id))
+        if self.cursor.execute("SELECT * FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+                               (ID, guild_id)).fetchone() is None:
+            with self.connection:
+                return self.cursor.execute(f"INSERT INTO `Achievements` VALUES (?, ?, ?)", (name, ID, guild_id))
 
     @ignore_exceptions
     def insert_into_inventory(self, name: str, ID: int, guild_id: int) -> Cursor:
-        with self.connection:
-            return self.cursor.execute(f"INSERT INTO `Inventory` VALUES (?, ?, ?)", (name, ID, guild_id))
+        if self.cursor.execute("SELECT * FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
+                               (ID, guild_id)).fetchone() is None:
+            with self.connection:
+                return self.cursor.execute(f"INSERT INTO `Inventory` VALUES (?, ?, ?)", (name, ID, guild_id))
 
     @ignore_exceptions
     def insert_into_new_year_event(self, name: str, ID: int, guild_id: int) -> Cursor:
-        with self.connection:
-            return self.cursor.execute(f"INSERT INTO `NewYearEvent` VALUES (?, ?, ?)", (name, ID, guild_id))
+        if self.cursor.execute("SELECT * FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
+                               (ID, guild_id)).fetchone() is None:
+            with self.connection:
+                return self.cursor.execute(f"INSERT INTO `NewYearEvent` VALUES (?, ?, ?)", (name, ID, guild_id))
 
     @ignore_exceptions
     def insert_into_levels(self, Level: int, xp: int, award: int) -> Cursor:
@@ -276,14 +271,10 @@ class Database:
                     else:
                         start_cash = self.get_start_cash(guild.id)
                     self.insert_into_users(str(member), member.id, start_cash, guild.id)
-                if not self.checking_for_card_existence_in_table(member.id):
-                    self.insert_into_card(member.id)
-                if not self.checking_for_achievements_existence_in_table(member.id, guild.id):
-                    self.insert_into_achievements(str(member), member.id, guild.id)
-                if not self.checking_for_inventory_existence_in_table(member.id, guild.id):
-                    self.insert_into_inventory(str(member), member.id, guild.id)
-                if not self.checking_for_new_year_event_existence_in_table(member.id, guild.id):
-                    self.insert_into_new_year_event(str(member), member.id, guild.id)
+                self.insert_into_card(member.id)
+                self.insert_into_achievements(str(member), member.id, guild.id)
+                self.insert_into_inventory(str(member), member.id, guild.id)
+                self.insert_into_new_year_event(str(member), member.id, guild.id)
                 if self.get_user_name(member.id) != member:
                     self.update_name(str(member), member.id)
 
@@ -407,25 +398,25 @@ class Database:
                                        (ID, guild_id))
 
     @ignore_exceptions
-    def update_user_stats1(self, arg: str, ID: int, guild_id: int) -> Cursor:
+    def update_user_stats_1(self, arg: str, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET ? = ?+ 1 WHERE `ID` = ? AND `GuildID` = ?",
                                        (arg, arg, ID, guild_id))
 
     @ignore_exceptions
-    def update_user_stats2(self, first_arg: str, second_arg: str, ID: int, guild_id: int) -> Cursor:
+    def update_user_stats_2(self, first_arg: str, second_arg: str, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET ?? = ?? + 1 WHERE `ID` = ? AND `GuildID` = ?",
                                        (first_arg, second_arg, first_arg, second_arg, ID, guild_id))
 
     @ignore_exceptions
-    def update_user_stats3(self, arg: str, ID: int, guild_id: int) -> Cursor:
+    def update_user_stats_3(self, arg: str, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET All? = All? + 1 WHERE `ID` = ? AND `GuildID` = ?",
                                        (arg, arg, ID, guild_id))
 
     @ignore_exceptions
-    def update_user_stats4(self, count: int, ID: int, guild_id: int) -> Cursor:
+    def update_user_stats_4(self, count: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET Count = Count + ? WHERE `ID` = ? AND `GuildID` = ?",
                                        (count, ID, guild_id))
@@ -440,10 +431,10 @@ class Database:
             third_arg: str,
             count: int
     ) -> None:
-        self.update_user_stats1(first_arg, ID, guild_id)
-        self.update_user_stats2(second_arg, third_arg, ID, guild_id)
-        self.update_user_stats3(third_arg, ID, guild_id)
-        self.update_user_stats4(count, ID, guild_id)
+        self.update_user_stats_1(first_arg, ID, guild_id)
+        self.update_user_stats_2(second_arg, third_arg, ID, guild_id)
+        self.update_user_stats_3(third_arg, ID, guild_id)
+        self.update_user_stats_4(count, ID, guild_id)
 
     @ignore_exceptions
     def get_time_from_online_stats(self, ID: int, guild_id: int) -> str:
@@ -764,10 +755,10 @@ class Database:
             second_arg: str,
             third_arg: str, count
     ) -> None:
-        self.update_user_stats1(first_arg, ctx.author.id, ctx.author.id)
-        self.update_user_stats2(second_arg, ctx.author.id, ctx.author.id)
-        self.update_user_stats3(third_arg, ctx.author.id, ctx.guild.id)
-        self.update_user_stats4(count, ctx.author.id, ctx.guild.id)
+        self.update_user_stats_1(first_arg, ctx.author.id, ctx.author.id)
+        self.update_user_stats_2(second_arg, ctx.author.id, ctx.author.id)
+        self.update_user_stats_3(third_arg, ctx.author.id, ctx.guild.id)
+        self.update_user_stats_4(count, ctx.author.id, ctx.guild.id)
 
         if third_arg == "loses":
             self.add_lose(ctx.author.id, ctx.guild.id)
