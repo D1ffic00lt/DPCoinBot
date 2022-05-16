@@ -86,3 +86,17 @@ def create_emb(title: str, color: discord.Color, args: list) -> discord.Embed:
     for row in list(args):
         emb.add_field(name=row["name"], value=row["value"], inline=row["inline"])
     return emb
+
+
+def fail_rand(user_id):
+    casino2[user_id] = []
+    for i in range(7):  # 10
+        casino2[user_id].append(float("%.2f" % (random.random() * random.randint(1, 2))))
+    for i in range(10):  # 10
+        casino2[user_id].append(float("%.2f" % (random.random() * (float(random.randint(1, 2))) / 4)))
+    for i in range(4):
+        casino2[user_id].append(float("%.2f" % (random.random() * random.randint(1, 5))))
+    for i in range(3):  # 3
+        casino2[user_id].append(float("%.2f" % (random.random() * random.randint(1, 10))))
+    random.shuffle(casino2[user_id])
+    return casino2[user_id][0], casino2[user_id]
