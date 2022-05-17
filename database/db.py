@@ -231,6 +231,14 @@ class Database:
         return self.cursor.execute(f"SELECT `Name` FROM `Users` WHERE `ID` = ?", (ID,)).fetchone()[0]
 
     @ignore_exceptions
+    def get_users_count(self) -> int:
+        return self.cursor.execute('SELECT COUNT(1) FROM `Users`').fetchone()[0]
+
+    @ignore_exceptions
+    def get_unique_users_count(self) -> int:
+        return self.cursor.execute('SELECT COUNT(1) FROM `Card`').fetchone()[0]
+
+    @ignore_exceptions
     def get_cash(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute(f"SELECT `Cash` FROM `Users` "
                                    f"WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id)).fetchone()[0]
@@ -239,6 +247,17 @@ class Database:
     def update_name(self, name: str, ID: int) -> Cursor:
         with self.connection:
             return self.cursor.execute('UPDATE `Users` SET `Name` = ? WHERE `ID` = ?', (name, ID))
+
+    @ignore_exceptions
+    def update_card(self, ID: int, type_of_card: str, mode: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute('UPDATE `Card` SET `?` = ? WHERE `ID` =?', (type_of_card, mode, ID))
+
+    @ignore_exceptions
+    def check_user(self, ID) -> bool:
+        if self.cursor.execute("SELECT * FROM `Users` WHERE `ID` = ?", (ID, )).fetchone() is None:
+            return False
+        return True
 
     @ignore_exceptions
     def clear_coinflip(self) -> Cursor:

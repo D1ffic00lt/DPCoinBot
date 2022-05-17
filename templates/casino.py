@@ -1,13 +1,12 @@
 import random
-
 import discord
 import reladdons
+
 from discord.ext import commands
-from reladdons import razr
 
 from ..database.db import Database
 from ..config import settings
-from .helperfunction import create_emb, fail_rand, get_color
+from .helperfunction import create_emb, fail_rand, get_color, divide_the_number
 
 
 class Casino(commands.Cog, name='Casino module', Database):
@@ -46,7 +45,7 @@ class Casino(commands.Cog, name='Casino module', Database):
                                 {
                                     "name": f'Поздравляем!',
                                     "value": f'{ctx.author.mention}, '
-                                             f'Вы выиграли **{razr(self.casino[0] * bid)}** DP коинов!',
+                                             f'Вы выиграли **{divide_the_number(self.casino[0] * bid)}** DP коинов!',
                                     "inline": False
                                 }
                             ]))
@@ -121,7 +120,7 @@ class Casino(commands.Cog, name='Casino module', Database):
                             {
                                 "name": f'🎰Поздравляем!🎰',
                                 "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}, Вы выиграли '
-                                         f'**{razr(int(bid * coefficient))}** DP коинов!"',
+                                         f'**{divide_the_number(int(bid * coefficient))}** DP коинов!"',
                                 "inline": False
                             }
                         ]))
@@ -182,7 +181,7 @@ class Casino(commands.Cog, name='Casino module', Database):
                                             *self.line1[0], *self.line1[1], *self.line1[2],
                                             *self.line2[0], *self.line2[1], *self.line2[2],
                                             *self.line3[0], *self.line3[1], *self.line3[2],
-                                            ctx.author.mention, razr(bid)
+                                            ctx.author.mention, divide_the_number(bid)
                                             ),
                                 "inline": False
                             }
@@ -199,7 +198,7 @@ class Casino(commands.Cog, name='Casino module', Database):
                                             *self.line1[0], *self.line1[1], *self.line1[2],
                                             *self.line2[0], *self.line2[1], *self.line2[2],
                                             *self.line3[0], *self.line3[1], *self.line3[2],
-                                            ctx.author.mention, razr(bid)
+                                            ctx.author.mention, divide_the_number(bid)
                                             ),
                                 "inline": False
                             }

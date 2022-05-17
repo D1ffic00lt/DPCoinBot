@@ -1,0 +1,161 @@
+import os
+import smtplib
+
+from discord import File
+from discord.ext import commands
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+from .helperfunction import get_time
+from ..database.db import Database
+from ..config import settings
+
+
+class Debug(commands.Cog, name='debug module', Database):
+    def __init__(self, bot):
+        super().__init__()
+        self.bot: commands.Bot = bot
+        self.js: dict
+        self.data: list
+
+    @commands.command(aliases=["debug"])
+    async def __debug_logs(self, ctx, count: int = None):
+        if ctx.author.id == 401555829620211723:
+            with open("logs/develop_logs.dpcb", encoding="utf-8", errors="ignore") as read_file, \
+                    open("prom_files/debug_send.txt", "w+", encoding="utf-8", errors="ignore") as write_file:
+                self.lines = read_file.readlines()
+                if count is None:
+                    count = 5
+                for i in range(count, 0, -1):
+                    try:
+                        write_file.write(self.lines[-i])
+                    except IndexError:
+                        for j in range(len(self.lines)):
+                            write_file.write(self.lines[j])
+                        break
+            await ctx.send(f"**debug logs**\nname:{os.name}\nusername: {os.getlogin()}\ndate: {get_time()}\n",
+                           file=File("prom_files/debug_send.txt"))
+            file_path = "prom_files/debug_send.txt"
+            os.remove(file_path)
+
+    @commands.command(aliases=['send_base'])  # это лучше не трогать
+    async def __bd_send(self, ctx):
+        if ctx.author.id == 401555829620211723:
+            part2 = MIMEBase('application', "octet-stream")
+            part2.set_payload(open('server.db', "rb").read())
+            encoders.encode_base64(part2)
+
+            part2.add_header(
+                'Content-Disposition',
+                "attachment; filename= %s" % os.path.basename('../database/server.db')
+            )
+            msg = MIMEMultipart()
+            msg['From'] = settings["sender_email"]
+            msg['To'] = settings["to_send_email"]
+            msg['Subject'] = "База данных"
+            msg.attach(part2)
+            msg.attach(MIMEText("База данных за {}".format(str(get_time()))))
+            server = smtplib.SMTP('smtp.gmail.com: 587')
+            server.starttls()
+            server.login(msg['From'], settings["password"])
+            server.sendmail(msg['From'], msg['To'], msg.as_string())
+            server.quit()
+
+            # with open(f'logs/develop_logs.dpcb', 'a+', encoding="utf-8", errors="ignore") as f:
+            #     f.write("\nБаза данных отправлена на почту\tдата: {}\n\n".format(str(get_time())))
+
+            await ctx.send("Копия бд отправлена на почту")
+
+        else:
+            await ctx.send("У Вас недостаточно прав")
+
+    @commands.command(aliases=["bot_stats"])
+    async def __bot_stats(self, ctx):
+        if ctx.author.id == 401555829620211723:
+            await ctx.send(
+                f"Guilds: {len(self.bot.guilds)}\nMembers: {self.get_users_count()}\n"
+                f"Unique members: {self.get_unique_users_count()}")
+
+    @commands.command(aliases=["card_add"])
+    async def __card_add(self, ctx, user_id: int = 0, type_of_card: str = None):
+        if ctx.author.id == 401555829620211723 and self.check_user(user_id):
+            if type_of_card == "gg":
+                self.update_card(user_id, "Verification", 1)
+                await ctx.message.add_reaction('✅')
+            elif type_of_card == "bg":
+                self.update_card(user_id, "Verification", 2)
+                await ctx.message.add_reaction('✅')
+            elif type_of_card == "dv":
+                self.update_card(user_id, "Developer", 1)
+                await ctx.message.add_reaction('✅')
+            elif type_of_card == "cd":
+                self.update_card(user_id, "Coder", 1)
+            await ctx.message.add_reaction('✅')
+
+    @commands.command(aliases=["card_remove"])
+    async def __card_remove(self, ctx, user_id: int = 0, param: str = None):
+        if ctx.author.id == 401555829620211723 and self.check_user(user_id):
+            if param == "gg":
+                self.update_card(user_id, "Verification", 0)
+                await ctx.message.add_reaction('✅')
+            elif param == "bg":
+                self.update_card(user_id, "Verification", 0)
+                await ctx.message.add_reaction('✅')
+            elif param == "dv":
+                self.update_card(user_id, "Developer", 0)
+                await ctx.message.add_reaction('✅')
+            elif param == "cd":
+                self.update_card(user_id, "Coder", 0)
+                await ctx.message.add_reaction('✅')
+
+    # @commands.command(aliases=['develop_stats'])
+    # async def __develop_stats(self, ctx, place: str = None, arg: str = None):
+    #     if ctx.author.id == 401555829620211723:
+    #         if place is not None and arg is not None:
+    #             if place in ["lb", "slb"] and arg in ["on", "off"]:
+    #                 if not os.path.exists("json_/develop_get.json"):
+    #                     with open('json_/develop_get.json', 'w+') as outfile:
+    #                         json.dump({"lb": True, "slb": True}, outfile)
+    #                         self.js = {"lb": True, "slb": True}
+    #                 else:
+    #                     with open("json_/develop_get.json", "r") as f:
+    #                         self.js = json.loads(f.read())
+    #                 if arg == "on":
+    #                     arg = True
+    #                 else:
+    #                     arg = False
+    #                 self.js[place] = arg
+    #                 with open('json_/develop_get.json', 'w+') as outfile:
+    #                     json.dump(self.js, outfile)
+
+    # @commands.command(aliases=['add_to_ban_list'])
+    # @commands.cooldown(1, 4, commands.BucketType.user)
+    # async def __add_ban_list(self, ctx, server_id: int = None):
+    #     if ctx.author.id == 401555829620211723:
+    #         if not os.path.exists("ban_list/last_save.json"):
+    #             with open('json_/ban_list.json', 'w+') as outfile:
+    #                 json.dump([], outfile)
+    #         else:
+    #             with open("json_/ban_list.json", "r") as f:
+    #                 self.data = json.loads(f.read())
+    #             self.data.append(server_id)
+    #             with open('json_/ban_list.json', 'w+') as outfile:
+    #                 json.dump(self.data, outfile)
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error: Exception):
+        if isinstance(error, commands.CommandOnCooldown):
+            pass
+        elif isinstance(error, commands.CommandNotFound):
+            pass
+        else:
+            print(error)
+            try:
+                # with open('logs/develop_logs.dpcb', 'a+', encoding="utf-8", errors="ignore") as f:
+                #     f.write("error: " + str(ctx.author) +
+                #             f"({ctx.author.id})" + f"{ctx.guild} "
+                #                                    f"({ctx.guild.id})" + '\t' + str(error) + '\t' + get_time() + "\n")
+                pass
+            except AttributeError:
+                pass
