@@ -100,3 +100,10 @@ def fail_rand(user_id):
         casino2[user_id].append(float("%.2f" % (random.random() * random.randint(1, 10))))
     random.shuffle(casino2[user_id])
     return casino2[user_id][0], casino2[user_id]
+
+
+def get_color(roles: list):
+    last_role = [role for role in roles][-1]
+    if str(last_role) == "@everyone":
+        return discord.Color.from_rgb(32, 34, 37)
+    return last_role.color
