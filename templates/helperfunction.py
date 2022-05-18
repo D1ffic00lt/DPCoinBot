@@ -5,6 +5,7 @@ import emoji
 from datetime import datetime
 from discord.ext import commands
 from PIL import Image, ImageDraw
+from vk_api import VkApi
 
 from ..config import settings
 
@@ -107,3 +108,14 @@ def get_color(roles: list):
     if str(last_role) == "@everyone":
         return discord.Color.from_rgb(32, 34, 37)
     return last_role.color
+
+
+def write_msg(user_id: int, message: str, vk: VkApi):
+    vk.method(
+        'messages.send',
+        {
+            'user_id': user_id,
+            'message': message,
+            'random_id': random.randint(1, 1000056785700)
+        }
+    )

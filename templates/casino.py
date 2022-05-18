@@ -1,13 +1,12 @@
 import random
-
 import discord
 import reladdons
+
 from discord.ext import commands
-from reladdons import razr
 
 from ..database.db import Database
 from ..config import settings
-from .helperfunction import create_emb, fail_rand, get_color
+from .helperfunction import create_emb, fail_rand, get_color, divide_the_number
 
 
 class Casino(commands.Cog, name='Casino module', Database):
@@ -42,23 +41,36 @@ class Casino(commands.Cog, name='Casino module', Database):
                         random.shuffle(self.casino)
                         if self.casino[0] == number:
                             self.add_coins(ctx.author.id, ctx.guild.id, self.casino[0] * bid)
-                            await ctx.send(embed=create_emb(title="🎰Вы выиграли!🎰", color=self.color, args=[
-                                {
-                                    "name": f'Поздравляем!',
-                                    "value": f'{ctx.author.mention}, '
-                                             f'Вы выиграли **{razr(self.casino[0] * bid)}** DP коинов!',
-                                    "inline": False
-                                }
-                            ]))
+                            await ctx.send(
+                                embed=create_emb(
+                                    title="🎰Вы выиграли!🎰",
+                                    color=self.color,
+                                    args=[
+                                        {
+                                            "name": f'Поздравляем!',
+                                            "value": f'{ctx.author.mention}, '
+                                                     f'Вы выиграли **{divide_the_number(self.casino[0] * bid)}** '
+                                                     f'DP коинов!',
+                                            "inline": False
+                                        }
+                                    ]
+                                )
+                            )
                             await self.stats_update(ctx, "rust_casinos", "rc", "wins", bid)
                     elif self.casino[0] != number:
-                        await ctx.send(embed=create_emb(title="🎰Вы проиграли!🎰", color=self.color, args=[
-                            {
-                                "name": f'Вы проиграли:(',
-                                "value": f'{ctx.author.mention}, выпало число {self.casino[0]}',
-                                "inline": False
-                            }
-                        ]))
+                        await ctx.send(
+                            embed=create_emb(
+                                title="🎰Вы проиграли!🎰",
+                                color=self.color,
+                                args=[
+                                    {
+                                        "name": f'Вы проиграли:(',
+                                        "value": f'{ctx.author.mention}, выпало число {self.casino[0]}',
+                                        "inline": False
+                                    }
+                                ]
+                            )
+                        )
                         await self.stats_update(ctx, "rust_casinos", "rc", "loses", -bid)
 
                     else:
@@ -90,16 +102,20 @@ class Casino(commands.Cog, name='Casino module', Database):
                 self.dropped_coefficient = fail_rand(ctx.author.id)[0]
                 self.color = get_color(ctx.author.roles)
                 if self.dropped_coefficient > coefficient:
-                    await ctx.send(embed=create_emb(
-                        title="🎰Вы проиграли!🎰" + [" Вам выпал 0.00...🎰" if self.dropped_coefficient == 0 else ""][
-                            0],
-                        color=self.color, args=[
-                            {
-                                "name": f':(',
-                                "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}',
-                                "inline": False
-                            }
-                        ]))
+                    await ctx.send(
+                        embed=create_emb(
+                            title="🎰Вы проиграли!🎰" +
+                                  [" Вам выпал 0.00...🎰" if self.dropped_coefficient == 0 else ""][0],
+                            color=self.color,
+                            args=[
+                                {
+                                    "name": f':(',
+                                    "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}',
+                                    "inline": False
+                                }
+                                ]
+                        )
+                    )
                     await self.stats_update(ctx, "fails", "f", "loses", -bid)
                     if self.dropped_coefficient == 0:
                         if not self.check_completion_dropping_zero_in_fail_achievement(ctx.author.id, ctx.guild.id):
@@ -115,16 +131,20 @@ class Casino(commands.Cog, name='Casino module', Database):
                                 pass
                 else:
                     self.add_coins(ctx.author.id, ctx.guild.id, int(bid * coefficient))
-                    await ctx.send(embed=create_emb(
-                        title="🎰Вы выиграли!🎰",
-                        color=self.color, args=[
-                            {
-                                "name": f'🎰Поздравляем!🎰',
-                                "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}, Вы выиграли '
-                                         f'**{razr(int(bid * coefficient))}** DP коинов!"',
-                                "inline": False
-                            }
-                        ]))
+                    await ctx.send(
+                        embed=create_emb(
+                            title="🎰Вы выиграли!🎰",
+                            color=self.color,
+                            args=[
+                                {
+                                    "name": f'🎰Поздравляем!🎰',
+                                    "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}, Вы выиграли '
+                                             f'**{divide_the_number(int(bid * coefficient))}** DP коинов!"',
+                                    "inline": False
+                                }
+                            ]
+                        )
+                    )
                     await self.stats_update(ctx, "fails", "f", "wins", bid * coefficient)
         else:
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
@@ -172,56 +192,66 @@ class Casino(commands.Cog, name='Casino module', Database):
                 if self.line2[0] == self.line2[1] and self.line2[1] == self.line2[2]:
                     self.add_coins(ctx.author.id, ctx.guild.id, self.result_bid)
                     await self.stats_update(ctx, "ssss", "s", "wins", self.result_bid)
-                    await ctx.send(embed=create_emb(
-                        title="🎰Вы выиграли!🎰",
-                        color=self.color, args=[
-                            {
-                                "name": f'🎰Поздравляем!🎰',
-                                "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, '
-                                         'Вы выиграли **{}** DP коинов!'.format(
-                                            *self.line1[0], *self.line1[1], *self.line1[2],
-                                            *self.line2[0], *self.line2[1], *self.line2[2],
-                                            *self.line3[0], *self.line3[1], *self.line3[2],
-                                            ctx.author.mention, razr(bid)
-                                            ),
-                                "inline": False
-                            }
-                        ]))
+                    await ctx.send(
+                        embed=create_emb(
+                            title="🎰Вы выиграли!🎰",
+                            color=self.color,
+                            args=[
+                                {
+                                    "name": f'🎰Поздравляем!🎰',
+                                    "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, '
+                                             'Вы выиграли **{}** DP коинов!'.format(
+                                                *self.line1[0], *self.line1[1], *self.line1[2],
+                                                *self.line2[0], *self.line2[1], *self.line2[2],
+                                                *self.line3[0], *self.line3[1], *self.line3[2],
+                                                ctx.author.mention, divide_the_number(bid)
+                                                ),
+                                    "inline": False
+                                }
+                            ]
+                        )
+                    )
                 elif self.line1[2] == self.line2[1] and self.line2[1] == self.line3[0]:
                     self.add_coins(ctx.author.id, ctx.guild.id, self.result_bid)
-                    await ctx.send(embed=create_emb(
-                        title="🎰Вы выиграли!🎰",
-                        color=self.color, args=[
-                            {
-                                "name": f'🎰Поздравляем!🎰',
-                                "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, '
-                                         'Вы выиграли **{}** DP коинов!'.format(
-                                            *self.line1[0], *self.line1[1], *self.line1[2],
-                                            *self.line2[0], *self.line2[1], *self.line2[2],
-                                            *self.line3[0], *self.line3[1], *self.line3[2],
-                                            ctx.author.mention, razr(bid)
-                                            ),
-                                "inline": False
-                            }
-                        ]))
+                    await ctx.send(
+                        embed=create_emb(
+                            title="🎰Вы выиграли!🎰",
+                            color=self.color,
+                            args=[
+                                {
+                                    "name": f'🎰Поздравляем!🎰',
+                                    "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, Вы выиграли **{}** DP '
+                                             'коинов!'.format(
+                                                *self.line1[0], *self.line1[1], *self.line1[2],
+                                                *self.line2[0], *self.line2[1], *self.line2[2],
+                                                *self.line3[0], *self.line3[1], *self.line3[2],
+                                                ctx.author.mention, divide_the_number(bid)
+                                                ),
+                                    "inline": False
+                                }
+                            ])
+                    )
                     self.add_coins(ctx.author.id, ctx.guild.id, self.result_bid)
                     await self.stats_update(ctx, "ssss", "s", "wins", self.result_bid)
 
                 else:
-                    await ctx.send(embed=create_emb(
-                        title="🎰Вы проиграли:(🎰",
-                        color=self.color, args=[
-                            {
-                                "name": f':(',
-                                "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}'.format(
-                                    *self.line1[0], *self.line1[1], *self.line1[2],
-                                    *self.line2[0], *self.line2[1], *self.line2[2],
-                                    *self.line3[0], *self.line3[1], *self.line3[2],
-                                    ctx.author.mention
-                                ),
-                                "inline": False
-                            }
-                        ]))
+                    await ctx.send(
+                        embed=create_emb(
+                            title="🎰Вы проиграли:(🎰",
+                            color=self.color, args=[
+                                {
+                                    "name": f':(',
+                                    "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}'.format(
+                                        *self.line1[0], *self.line1[1], *self.line1[2],
+                                        *self.line2[0], *self.line2[1], *self.line2[2],
+                                        *self.line3[0], *self.line3[1], *self.line3[2],
+                                        ctx.author.mention
+                                    ),
+                                    "inline": False
+                                }
+                            ]
+                        )
+                    )
                     await self.stats_update(ctx, "ssss", "s", "loses", -bid)
 
         else:

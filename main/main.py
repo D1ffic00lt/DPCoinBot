@@ -3,7 +3,7 @@ from config import *
 from version import __version__
 from bot import DPcoinBOT
 from templates.casino import Casino
-
+from templates.debug import Debug
 
 def main() -> None:
     BOT = DPcoinBOT(
@@ -21,6 +21,7 @@ def main() -> None:
     print("Bot connected")
     print("version: {}\n".format(__version__))
     BOT.add_cog(Casino(BOT))
+    BOT.add_cog(Debug(BOT))
     BOT.run(settings["token"])
 
 
