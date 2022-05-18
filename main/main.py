@@ -5,8 +5,9 @@ from bot import DPcoinBOT
 from templates.casino import Casino
 from templates.debug import Debug
 
+
 def main() -> None:
-    BOT = DPcoinBOT(
+    BOT: DPcoinBOT = DPcoinBOT(
         command_prefix=settings["prefix"],
         intents=discord.Intents.all()
     )
@@ -23,7 +24,6 @@ def main() -> None:
     BOT.add_cog(Casino(BOT))
     BOT.add_cog(Debug(BOT))
     BOT.run(settings["token"])
-
 
 if __name__ == '__main__':
     main()

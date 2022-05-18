@@ -6,9 +6,9 @@ from ..database.db import Database
 
 
 class DPcoinBOT(commands.Bot):
-    def __init__(self, command_prefix, **options):
-        super().__init__(command_prefix, **options)
-        self.db = Database("server.db")
+    def __init__(self, command_prefix: str, **kwargs):
+        super().__init__(command_prefix, **kwargs)
+        self.db: Database = Database("server.db")
 
     async def on_ready(self):
         self.db.server_add()

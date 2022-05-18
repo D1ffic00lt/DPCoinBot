@@ -1,4 +1,5 @@
 import random
+
 import discord
 import emoji
 
@@ -12,6 +13,11 @@ from ..config import settings
 bot = commands.Bot(command_prefix=settings["prefix"], intents=discord.Intents.all())
 
 casino2 = {}
+
+
+def write_log(text: str):
+    with open("../logs/develop_logs.dpcb", "a+", encoding="utf-8", errors="ignore") as file:
+        file.write(text)
 
 
 def prepare_mask(size, antialias=2):
@@ -29,7 +35,7 @@ def crop(im, s):
     return im.resize(s, Image.ANTIALIAS)
 
 
-def casino2ch(us_id):
+def casino2ch(us_id: int) -> tuple:
     casino2[us_id] = []
     for i in range(4):
         casino2[us_id].append(random.randint(1, 2))
@@ -39,11 +45,11 @@ def casino2ch(us_id):
     return casino2[us_id][0], casino2[us_id]
 
 
-def get_time():
+def get_time() -> str:
     return str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
-def remove_emoji(text):
+def remove_emoji(text) -> str:
     return str(emoji.get_emoji_regexp().sub(u'', str(text)))
 
 
@@ -51,7 +57,7 @@ def divide_the_number(num):
     return '{:,}'.format(int(num)).replace('.', ' ')
 
 
-def get_promo_code(num_chars):
+def get_promo_code(num_chars) -> str:
     code_chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
     code = ''
     for i in range(0, num_chars):
