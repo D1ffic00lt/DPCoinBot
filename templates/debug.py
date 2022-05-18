@@ -1,16 +1,22 @@
 import os
 import smtplib
+import vk_api
+import requests
 
-from discord import File
+from discord import File, Webhook, RequestsWebhookAdapter
 from discord.ext import commands
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from vk_api import VkApi
 
-from .helperfunction import get_time
+from .helperfunction import get_time, write_msg, get_color, create_emb
+from .texts import *
+from .json_ import Json
 from ..database.db import Database
 from ..config import settings
+from ..version import __version__
 
 
 class Debug(commands.Cog, name='debug module', Database):
@@ -110,39 +116,87 @@ class Debug(commands.Cog, name='debug module', Database):
                 self.update_card(user_id, "Coder", 0)
                 await ctx.message.add_reaction('✅')
 
-    # @commands.command(aliases=['develop_stats'])
-    # async def __develop_stats(self, ctx, place: str = None, arg: str = None):
-    #     if ctx.author.id == 401555829620211723:
-    #         if place is not None and arg is not None:
-    #             if place in ["lb", "slb"] and arg in ["on", "off"]:
-    #                 if not os.path.exists("json_/develop_get.json"):
-    #                     with open('json_/develop_get.json', 'w+') as outfile:
-    #                         json.dump({"lb": True, "slb": True}, outfile)
-    #                         self.js = {"lb": True, "slb": True}
-    #                 else:
-    #                     with open("json_/develop_get.json", "r") as f:
-    #                         self.js = json.loads(f.read())
-    #                 if arg == "on":
-    #                     arg = True
-    #                 else:
-    #                     arg = False
-    #                 self.js[place] = arg
-    #                 with open('json_/develop_get.json', 'w+') as outfile:
-    #                     json.dump(self.js, outfile)
+    @commands.command(aliases=['develop_stats'])
+    async def __develop_stats(self, ctx, place: str = None, arg: str = None):
+        if ctx.author.id == 401555829620211723:
+            if place is not None and arg is not None:
+                if place in ["lb", "slb"] and arg in ["on", "off"]:
+                    if not os.path.exists("json_/develop_get.json"):
+                        Json("develop_get.json").json_dump({"lb": True, "slb": True})
+                        self.js = {"lb": True, "slb": True}
+                    else:
+                        self.js = Json("develop_get.json").json_load()
+                    if arg == "on":
+                        arg = True
+                    else:
+                        arg = False
+                    self.js[place] = arg
+                    Json("develop_get.json").json_dump(self.js)
 
-    # @commands.command(aliases=['add_to_ban_list'])
-    # @commands.cooldown(1, 4, commands.BucketType.user)
-    # async def __add_ban_list(self, ctx, server_id: int = None):
-    #     if ctx.author.id == 401555829620211723:
-    #         if not os.path.exists("ban_list/last_save.json"):
-    #             with open('json_/ban_list.json', 'w+') as outfile:
-    #                 json.dump([], outfile)
-    #         else:
-    #             with open("json_/ban_list.json", "r") as f:
-    #                 self.data = json.loads(f.read())
-    #             self.data.append(server_id)
-    #             with open('json_/ban_list.json', 'w+') as outfile:
-    #                 json.dump(self.data, outfile)
+    @commands.command(aliases=['add_to_ban_list'])
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def __add_ban_list(self, ctx, server_id: int = None):
+        if ctx.author.id == 401555829620211723:
+            if not os.path.exists("../.json/ban_list.json"):
+                Json("ban_list.json").json_dump([])
+            else:
+                self.data = Json("ban_list.json").json_load()
+                self.data.append(server_id)
+                Json("ban_list.json").json_dump(self.data)
+
+    @commands.command(aliases=['send_webhook'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __send_webhook(self, ctx, par: str = None):
+        if ctx.author.id == 401555829620211723:
+            if par == "push":
+                self.webhook = Webhook.from_url(
+                    "https://discord.com/api/webhooks/798442296265408542/" + settings["webhook"],
+                    adapter=RequestsWebhookAdapter()
+                )
+                requests.post(
+                    'https://api.vk.com/method/wall.post', data={
+                        'access_token': settings["token"],
+                        'owner_id': settings["owner_id_group"],
+                        'from_group': 1,
+                        'message': foo,
+                        'signed': 0,
+                        'v': "5.52"
+                    }
+                ).json()
+                if not os.path.exists("../.json/send.json") or os.stat("../.json/send.json").st_size == 0:
+                    Json("send.json").create_json("[]")
+                else:
+                    self.js = Json("send.json").json_load()
+                    if len(self.js) != 0:
+                        self.vk: VkApi = vk_api.VkApi(token=settings["vk_token"])
+                        self.vk.auth_token()
+                        # self.vk.auth_token()
+                        # немного изменили код VkApi, переименовав функцию, так как она вызывает ошибку pep8
+                        for i in self.js:
+                            try:
+                                write_msg(i, f"Обновление {__version__}! Быстрее смотреть!\n{foo}", self.vk)
+                            except vk_api.exceptions.ApiError:
+                                pass
+
+            else:
+                self.webhook = Webhook.from_url(
+                    "https://discord.com/api/webhooks/798211458352939008/" + settings["test_webhook"],
+                    adapter=RequestsWebhookAdapter()
+                )
+            self.color = get_color(ctx.author.roles)
+            self.webhook.send(
+                embed=create_emb(
+                    title="Обновление DPcoin BOT",
+                    color=self.color, args=[
+                        {
+                            "name": f'Версия {__version__}',
+                            "value": discord_foo,
+                            "inline": False
+                        }
+                    ]
+                )
+            )
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error: Exception):
         if isinstance(error, commands.CommandOnCooldown):
@@ -152,10 +206,8 @@ class Debug(commands.Cog, name='debug module', Database):
         else:
             print(error)
             try:
-                # with open('logs/develop_logs.dpcb', 'a+', encoding="utf-8", errors="ignore") as f:
-                #     f.write("error: " + str(ctx.author) +
-                #             f"({ctx.author.id})" + f"{ctx.guild} "
-                #                                    f"({ctx.guild.id})" + '\t' + str(error) + '\t' + get_time() + "\n")
-                pass
+                with open('../logs/develop_logs.dpcb', 'a+', encoding="utf-8", errors="ignore") as f:
+                    f.write(f"error: {str(ctx.author)} ({ctx.author.id}) "
+                            f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
             except AttributeError:
                 pass
