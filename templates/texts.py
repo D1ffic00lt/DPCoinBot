@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ..version import __version__
 
 foo: str = f'Обновление!\nВерсия {__version__}\n\nДобавлено:\n\n- Выдача и снятие коинов по роли(give-role, ' \

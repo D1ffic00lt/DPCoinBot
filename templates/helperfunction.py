@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import random
+from typing import Callable, List, Any
 
 import discord
 import emoji
@@ -66,7 +68,12 @@ def get_promo_code(num_chars) -> str:
     return code
 
 
-def ignore_exceptions(func):
+def ignore_exceptions(func: Callable) -> Callable:
+    """
+    decorator
+    :param func:
+    :return:
+    """
     def decorator(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -76,7 +83,12 @@ def ignore_exceptions(func):
     return decorator
 
 
-def logging(func):
+def logging(func: Callable) -> Callable:
+    """
+    decorator
+    :param func:
+    :return:
+    """
     def decorator(*args, **kwargs):
         print("[INFO]: ", end="")
         return func(*args, **kwargs)
@@ -88,7 +100,7 @@ def datetime_to_str(datetime_):
     return datetime.strptime(datetime_, "%Y-%m-%d %H:%M:%S")
 
 
-def create_emb(title: str, color: discord.Color, args: list) -> discord.Embed:
+def create_emb(title: str, color: discord.Color, args: List[Any]) -> discord.Embed:
     emb = discord.Embed(title=title, colour=color)
     for row in list(args):
         emb.add_field(name=row["name"], value=row["value"], inline=row["inline"])
@@ -109,7 +121,7 @@ def fail_rand(user_id):
     return casino2[user_id][0], casino2[user_id]
 
 
-def get_color(roles: list):
+def get_color(roles: List[discord.Role]):
     last_role = [role for role in roles][-1]
     if str(last_role) == "@everyone":
         return discord.Color.from_rgb(32, 34, 37)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import _io
@@ -20,7 +21,3 @@ class Json(object):
     def json_dump(self, data: dict | list) -> None:
         with open(f".json/{self.filename}", "w+") as self.file:
             json.dump(data, self.file)
-
-    def __repr__(self):
-        return f"Json({self.filename})"
-    

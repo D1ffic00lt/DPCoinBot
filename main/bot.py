@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import math
 
 from discord.ext import commands

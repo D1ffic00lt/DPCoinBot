@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sqlite3
 
 from sqlite3 import Cursor
@@ -8,13 +9,15 @@ from ..templates.helperfunction import *
 class Database:
     @ignore_exceptions
     def __init__(self, filename: str) -> None:
-        self.day = None
-        self.month = None
-        self.minutes = None
-        self.prises = {}
-        self.valentine = {}
-        self.connection = sqlite3.connect(filename, check_same_thread=False)
-        self.cursor = self.connection.cursor()
+        self.time = None
+        self.now2 = None
+        self.minutes: int = 0
+        self.day: int = 0
+        self.month: int = 0
+        self.prises: dict = {}
+        self.valentine: dict = {}
+        self.connection: sqlite3.Connection = sqlite3.connect(filename, check_same_thread=False)
+        self.cursor: sqlite3.Cursor = self.connection.cursor()
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Users (
             Name                         VARCHAR (255) NOT NULL,
             ID                           INT NOT NULL,
@@ -157,7 +160,7 @@ class Database:
         return True
 
     @ignore_exceptions
-    def checking_for_guild_existence_in_table(self, guild_id) -> bool:
+    def checking_for_guild_existence_in_table(self, guild_id: int) -> bool:
         if self.cursor.execute("SELECT * FROM `Server` WHERE `GuildID` = ?", (guild_id,)).fetchone() is None:
             return False
         return True
@@ -169,7 +172,13 @@ class Database:
         return True
 
     @ignore_exceptions
-    def insert_into_users(self, name: str, ID: int, starting_balance, guild_id: int) -> Cursor:
+    def insert_into_users(
+            self,
+            name: str,
+            ID: int,
+            starting_balance: int,
+            guild_id: int
+    ) -> Cursor:
         with self.connection:
             return self.cursor.execute("INSERT INTO `Users` VALUES (?, ?, ?, 0, 1, ?)",
                                        (name, ID, starting_balance, guild_id))
@@ -196,7 +205,7 @@ class Database:
                 return self.cursor.execute("INSERT INTO `Card` VALUES (?)", (ID,))
 
     @ignore_exceptions
-    def insert_into_achievements(self, name: str, ID: int, guild_id) -> Cursor:
+    def insert_into_achievements(self, name: str, ID: int, guild_id: int) -> Cursor:
         if self.cursor.execute("SELECT * FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                (ID, guild_id)).fetchone() is None:
             with self.connection:
@@ -222,10 +231,14 @@ class Database:
             return self.cursor.execute("INSERT INTO `Levels` VALUES (?, ?, ?)", (Level, xp, award))
 
     @ignore_exceptions
-    def get_start_cash(self, guild_id: int = 0) -> int:
+    def get_start_cash(self, guild_id: int) -> int:
         return self.cursor.execute("SELECT `StartingBalance` FROM `Server` "
                                    "WHERE `GuildID` = ?", (guild_id,)).fetchone()[0]
 
+    @ignore_exceptions
+    def get_name_id_and_cash(self, guild_id: int) -> Cursor:
+        return self.cursor.execute("SELECT Name, Cash, ID FROM Users WHERE GuildID = ? ORDER BY Cash DESC",
+                                   (guild_id, ))
     @ignore_exceptions
     def get_user_name(self, ID: int) -> str:
         return self.cursor.execute(f"SELECT `Name` FROM `Users` WHERE `ID` = ?", (ID,)).fetchone()[0]
@@ -255,7 +268,7 @@ class Database:
 
     @ignore_exceptions
     def check_user(self, ID) -> bool:
-        if self.cursor.execute("SELECT * FROM `Users` WHERE `ID` = ?", (ID, )).fetchone() is None:
+        if self.cursor.execute("SELECT * FROM `Users` WHERE `ID` = ?", (ID,)).fetchone() is None:
             return False
         return True
 
@@ -281,7 +294,7 @@ class Database:
             )
 
     @ignore_exceptions
-    def server_add(self, Bot) -> None:
+    def server_add(self, Bot: commands.Bot) -> None:
         for guild in Bot.guilds:
             for member in guild.members:
                 if not self.checking_for_user_existence_in_table(member.id, guild.id):
@@ -578,40 +591,48 @@ class Database:
                                        "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
 
     @ignore_exceptions
-    def add_win(self, ID: int, guild_id: int, null: bool = False):
+    def add_win(self, ID: int, guild_id: int, null: bool = False) -> Cursor:
         with self.connection:
             if null:
-                self.cursor.execute("UPDATE `Achievements` SET `Wins` = 0 WHERE `ID` = ? AND `GuildID` = ?",
-                                    (ID, guild_id))
+                return self.cursor.execute(
+                    "UPDATE `Achievements` SET `Wins` = 0 WHERE `ID` = ? AND `GuildID` = ?",
+                    (ID, guild_id)
+                )
             else:
-                self.cursor.execute("UPDATE `Achievements` SET `Wins` = `Wins` + 1 WHERE `ID` = ? AND `GuildID` = ?",
-                                    (ID, guild_id))
+                return self.cursor.execute(
+                    "UPDATE `Achievements` SET `Wins` = `Wins` + 1 WHERE `ID` = ? AND `GuildID` = ?",
+                    (ID, guild_id)
+                )
 
     @ignore_exceptions
-    def add_lose(self, ID: int, guild_id: int, null: bool = False):
+    def add_lose(self, ID: int, guild_id: int, null: bool = False) -> Cursor:
         with self.connection:
             if null:
-                self.cursor.execute("UPDATE `Achievements` SET `Loses` = 0 WHERE `ID` = ? AND `GuildID` = ?",
-                                    (ID, guild_id))
+                return self.cursor.execute(
+                    "UPDATE `Achievements` SET `Loses` = 0 WHERE `ID` = ? AND `GuildID` = ?",
+                    (ID, guild_id)
+                )
             else:
-                self.cursor.execute("UPDATE `Achievements` SET `Loses` = `Loses` + 1 WHERE `ID` = ? AND `GuildID` = ?",
-                                    (ID, guild_id))
+                return self.cursor.execute(
+                    "UPDATE `Achievements` SET `Loses` = `Loses` + 1 WHERE `ID` = ? AND `GuildID` = ?",
+                    (ID, guild_id)
+                )
 
     @ignore_exceptions
-    def get_level(self, ID, guild_id):
+    def get_level(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT Lvl FROM `Users` WHERE `GuildID` = ? AND `ID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
     @ignore_exceptions
-    async def voice_delete_stats(self, member: discord.member, arg: bool) -> None:
+    async def voice_delete_stats(self, member: discord.Member, arg: bool) -> None:
         try:
-            now2 = self.get_time_from_online_stats(member.id, member.guild.id)
+            self.now2 = self.get_time_from_online_stats(member.id, member.guild.id)
         except TypeError:
             pass
         else:
-            time = datetime_to_str(get_time()) - now2
+            self.time = datetime_to_str(get_time()) - self.now2
             self.delete_from_online_stats(member.id)
-            self.update_minutes_in_voice_channels(int(time.total_seconds() // 60), member.id, member.guild.id)
+            self.update_minutes_in_voice_channels(int(self.time.total_seconds() // 60), member.id, member.guild.id)
 
             if arg is True:
                 self.insert_into_online_stats(member.id, member.guild.id)
@@ -658,7 +679,7 @@ class Database:
                                   f"получено достижение «А у меня есть личная жизнь?»!\nВам начислено 56000 коинов!")
 
     @ignore_exceptions
-    async def achievement(self, ctx) -> None:
+    async def achievement(self, ctx: commands.context.Context) -> None:
         loses = self.get_loses_count(ctx.author.id, ctx.guild.id)
         wins = self.get_wins_count(ctx.author.id, ctx.guild.id)
         if self.get_three_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and loses >= 3:
@@ -698,7 +719,7 @@ class Database:
                                   f"получено достижение «Кажется меня не любят...»!\nВам начислено 20000 коинов!")
 
     @ignore_exceptions
-    async def achievement_member(self, member: discord.member) -> None:
+    async def achievement_member(self, member: discord.Member) -> None:
         loses = self.get_loses_count(member.id, member.guild.id)
         wins = self.get_wins_count(member.id, member.guild.id)
         if self.get_three_losses_in_row_achievement(member.id, member.guild.id) == 0 and loses >= 3:
@@ -740,7 +761,7 @@ class Database:
     @ignore_exceptions
     async def cash_check(
             self,
-            ctx,
+            ctx: commands.context.Context,
             cash: int,
             max_cash: int = None,
             min_cash: int = 1,
@@ -769,10 +790,11 @@ class Database:
     @ignore_exceptions
     async def stats_update(
             self,
-            ctx,
+            ctx: commands.context.Context,
             first_arg: str,
             second_arg: str,
-            third_arg: str, count
+            third_arg: str,
+            count: int
     ) -> None:
         self.update_user_stats_1(first_arg, ctx.author.id, ctx.author.id)
         self.update_user_stats_2(second_arg, ctx.author.id, ctx.author.id)
@@ -790,7 +812,7 @@ class Database:
         await self.achievement(ctx)
 
     @ignore_exceptions
-    async def voice_delete(self, member) -> None:
+    async def voice_delete(self, member: discord.Member) -> None:
         try:
             now2 = self.get_time_from_online_stats(member.id, member.guild.id)
         except TypeError:

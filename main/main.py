@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from templates.helperfunction import *
 from config import *
 from version import __version__

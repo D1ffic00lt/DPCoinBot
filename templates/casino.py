@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 import random
+from typing import List
+
 import discord
 import reladdons
 
@@ -13,16 +16,16 @@ from .helperfunction import (
 
 
 class Casino(commands.Cog, name='Casino module', Database):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         super().__init__()
         self.result_bid: int
         self.bot: commands.Bot = bot
-        self.casino: list = settings["casino"]
+        self.casino: List[int] = settings["casino"]
         self.color: discord.Color
         self.dropped_coefficient: float
-        self.line1: list
-        self.line2: list
-        self.line3: list
+        self.line1: List[int]
+        self.line2: List[int]
+        self.line3: List[int]
 
     @commands.command(aliases=['rust_casino'])
     @commands.cooldown(1, 2, commands.BucketType.user)
@@ -36,7 +39,7 @@ class Casino(commands.Cog, name='Casino module', Database):
             if bid is None:
                 await ctx.send("Вы ну ввели Вашу ставку!")
             elif bid <= 0:
-                await ctx.send("Вы не можете поставить отрицательную ставку и 0!")
+                await ctx.send("Вы не можете поставить ставку, которая меньше 1!")
             elif self.get_cash(ctx.author.id, ctx.guild.id) < bid:
                 await ctx.send("У Вас не достаточно денег для этой ставки!")
             else:

@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import os
 import smtplib
+
+import discord
 import vk_api
 import requests
 
+from typing import Any
 from discord import File, Webhook, RequestsWebhookAdapter
 from discord.ext import commands
 from email import encoders
@@ -26,12 +31,13 @@ class Debug(commands.Cog, name='debug module', Database):
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__()
         self.bot: commands.Bot = bot
-        self.js: dict
-        self.data: list
+        self.js: dict[Any]
+        self.data: list[int | dict]
         self.part2: MIMEBase
         self.msg: MIMEMultipart
         self.server: smtplib.SMTP
         self.arg: bool
+        self.color: discord.Color
 
     @commands.command(aliases=["debug"])
     async def __debug_logs(
@@ -151,7 +157,7 @@ class Debug(commands.Cog, name='debug module', Database):
         if ctx.author.id == 401555829620211723:
             if place is not None and arg is not None:
                 if place in ["lb", "slb"] and arg in ["on", "off"]:
-                    if not os.path.exists("json_/develop_get.json"):
+                    if not os.path.exists(".json/develop_get.json"):
                         Json("develop_get.json").json_dump({"lb": True, "slb": True})
                         self.js = {"lb": True, "slb": True}
                     else:
