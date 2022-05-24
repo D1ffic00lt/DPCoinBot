@@ -6,6 +6,8 @@ import discord
 import emoji
 
 from datetime import datetime
+
+from discord.embeds import EmptyEmbed
 from discord.ext import commands
 from PIL import Image, ImageDraw
 from vk_api import VkApi
@@ -74,6 +76,7 @@ def ignore_exceptions(func: Callable) -> Callable:
     :param func:
     :return:
     """
+
     def decorator(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -89,6 +92,7 @@ def logging(func: Callable) -> Callable:
     :param func:
     :return:
     """
+
     def decorator(*args, **kwargs):
         print("[INFO]: ", end="")
         return func(*args, **kwargs)
@@ -100,10 +104,16 @@ def datetime_to_str(datetime_):
     return datetime.strptime(datetime_, "%Y-%m-%d %H:%M:%S")
 
 
-def create_emb(title: str, color: discord.Color, args: List[Any]) -> discord.Embed:
-    emb = discord.Embed(title=title, colour=color)
-    for row in list(args):
-        emb.add_field(name=row["name"], value=row["value"], inline=row["inline"])
+def create_emb(
+        title: str,
+        color: discord.Color = discord.Color.from_rgb(32, 34, 37),
+        args: List[Any] = None,
+        description: str = EmptyEmbed
+) -> discord.Embed:
+    emb = discord.Embed(title=title, colour=color, description=description)
+    if args is not EmptyEmbed:
+        for row in list(args):
+            emb.add_field(name=row["name"], value=row["value"], inline=row["inline"])
     return emb
 
 

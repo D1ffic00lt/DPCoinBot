@@ -103,7 +103,7 @@ class Debug(commands.Cog, name='debug module', Database):
         if ctx.author.id == 401555829620211723:
             await ctx.send(
                 f"Guilds: {len(self.bot.guilds)}\nMembers: {self.get_users_count()}\n"
-                f"Unique members: {self.get_unique_users_count()}")
+                f"Unique members: {self.get_users_count(unique=True)}")
 
     @commands.command(aliases=["card_add"])
     async def __card_add(
@@ -204,7 +204,7 @@ class Debug(commands.Cog, name='debug module', Database):
                     }
                 ).json()
                 if not os.path.exists("../.json/send.json") or os.stat("../.json/send.json").st_size == 0:
-                    Json("send.json").create_json("[]")
+                    Json("send.json").json_dump([])
                 else:
                     self.js = Json("send.json").json_load()
                     if len(self.js) != 0:

@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
 import sqlite3
 
 from sqlite3 import Cursor
+from typing import Tuple
 
 from ..templates.helperfunction import *
 
 
 class Database:
-    @ignore_exceptions
     def __init__(self, filename: str) -> None:
         self.time = None
         self.now2 = None
@@ -37,9 +39,9 @@ class Database:
             FailsCount                   INT DEFAULT 0 NOT NULL, 
             FailsWinsCount               INT DEFAULT 0 NOT NULL, 
             FailsLosesCount              INT DEFAULT 0 NOT NULL,
-            ThreeSvensCount              INT DEFAULT 0 NOT NULL, 
-            ThreeSvensWinsCount          INT DEFAULT 0 NOT NULL, 
-            ThreeSvensLosesCount         INT DEFAULT 0 NOT NULL,
+            ThreeSevensCount             INT DEFAULT 0 NOT NULL, 
+            ThreeSevensWinsCount         INT DEFAULT 0 NOT NULL, 
+            ThreeSevensLosesCount        INT DEFAULT 0 NOT NULL,
             AllWins                      INT DEFAULT 0 NOT NULL,
             AllLoses                     INT DEFAULT 0 NOT NULL,
             EntireAmountOfWinnings       BIGINT DEFAULT 0 NOT NULL,
@@ -236,24 +238,24 @@ class Database:
                                    "WHERE `GuildID` = ?", (guild_id,)).fetchone()[0]
 
     @ignore_exceptions
-    def get_name_id_and_cash(self, guild_id: int) -> Cursor:
-        return self.cursor.execute("SELECT Name, Cash, ID FROM Users WHERE GuildID = ? ORDER BY Cash DESC",
-                                   (guild_id, ))
-    @ignore_exceptions
     def get_user_name(self, ID: int) -> str:
         return self.cursor.execute(f"SELECT `Name` FROM `Users` WHERE `ID` = ?", (ID,)).fetchone()[0]
 
     @ignore_exceptions
-    def get_users_count(self) -> int:
-        return self.cursor.execute('SELECT COUNT(1) FROM `Users`').fetchone()[0]
+    def get_from_user(self, guild_id: int, *args: Tuple[str], order_by: str) -> Any:
+        return self.cursor.execute(
+            f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Users` WHERE `GuildID` = ? ORDER BY `{order_by}` DESC",
+            (guild_id,)
+        )
 
     @ignore_exceptions
-    def get_unique_users_count(self) -> int:
-        return self.cursor.execute('SELECT COUNT(1) FROM `Card`').fetchone()[0]
+    def get_users_count(self, unique: bool = False) -> int:
+        return self.cursor.execute('SELECT COUNT(1) FROM `Users`').fetchone()[0] \
+            if not unique else self.cursor.execute('SELECT COUNT(1) FROM `Card`').fetchone()[0]
 
     @ignore_exceptions
-    def get_cash(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute(f"SELECT `Cash` FROM `Users` "
+    def get_cash(self, ID: int, guild_id: int, bank: bool = False) -> int:
+        return self.cursor.execute(f"SELECT `{'Cash' if not bank else 'CashInBank'}` FROM `Users` "
                                    f"WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id)).fetchone()[0]
 
     @ignore_exceptions
@@ -340,18 +342,36 @@ class Database:
             return self.cursor.execute("INSERT INTO `OnlineStats` VALUES (?, ?, ?)", (ID, guild_id, get_time()))
 
     @ignore_exceptions
-    def add_coins_to_the_bank(self, ID: int, guild_id: int, cash: int) -> Cursor:
+    def add_coins_to_the_bank(
+            self,
+            ID: int,
+            guild_id: int,
+            cash: int,
+    ) -> Cursor:
         with self.connection:
+
             self.take_coins(ID, guild_id, cash)
             return self.cursor.execute("UPDATE  `Users` SET `CashInBank` = `CashInBank` + ? "
                                        "WHERE `ID` = ? AND `GuildID` = ?", (cash, ID, guild_id))
 
     @ignore_exceptions
-    def take_coins_from_the_bank(self, ID: int, guild_id: int, cash: int) -> Cursor:
+    def take_coins_from_the_bank(
+            self,
+            ID: int,
+            guild_id: int,
+            cash: int | str,
+    ) -> Cursor:
         with self.connection:
-            self.add_coins(ID, guild_id, cash)
-            return self.cursor.execute("UPDATE `Users` SET `CashInBank` = `CashInBank` - ? "
-                                       "WHERE `ID` = ? AND `GuildID` = ?", (cash, ID, guild_id))
+            self.add_coins(
+                ID,
+                guild_id,
+                self.get_cash(ID, guild_id, bank=True) if isinstance(cash, str) else cash)
+            if isinstance(cash, str):
+                return self.cursor.execute("UPDATE `Users` SET `CashInBank` = 0 "
+                                           "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
+            else:
+                return self.cursor.execute("UPDATE `Users` SET `CashInBank` = `CashInBank` - ? "
+                                           "WHERE `ID` = ? AND `GuildID` = ?", (cash, ID, guild_id))
 
     @ignore_exceptions
     def get_loses_count(self, ID: int, guild_id: int) -> int:
