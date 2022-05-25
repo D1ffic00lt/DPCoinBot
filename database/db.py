@@ -53,7 +53,7 @@ class Database:
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Shop (
             RoleId                       INT NOT NULL,
-            ID                           INT NOT NULL,
+            GuildID                      INT NOT NULL,
             RoleCost                     BIGINT DEFAULT 0 NOT NULL
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Server (
@@ -67,10 +67,10 @@ class Database:
             BankInterest                 INT DEFAULT 0 NOT NULL
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS ItemsShop (
-            ProductID                    INT NOT NULL,
-            Name                         VARCHAR (255) NOT NULL,
-            ID                           INT NOT NULL,
-            Cost                         BIGINT NOT NULL
+            ItemID                       INT NOT NULL,
+            ItemName                     VARCHAR (255) NOT NULL,
+            GuildID                      INT NOT NULL,
+            ItemCost                     BIGINT NOT NULL
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Online (
             ID                           INT NOT NULL,
@@ -78,9 +78,10 @@ class Database:
             Time                         VARCHAR (255) NOT NULL
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS OnlineStats (
-            ID INT NOT NULL,
-            GuildID INT NOT NULL,
-            Time TIME NOT NULL)""")
+            ID                           INT NOT NULL,
+            GuildID                      INT NOT NULL,
+            Time                         TIME NOT NULL
+           )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS CoinFlip (
             FirstPlayerID                INT NOT NULL,
             SecondPlayerID               INT NOT NULL,
@@ -242,11 +243,75 @@ class Database:
         return self.cursor.execute(f"SELECT `Name` FROM `Users` WHERE `ID` = ?", (ID,)).fetchone()[0]
 
     @ignore_exceptions
-    def get_from_user(self, guild_id: int, *args: Tuple[str], order_by: str) -> Any:
+    def get_from_user(
+            self,
+            guild_id: int,
+            *args: Tuple[str],
+            order_by: str,
+            limit: int = None
+    ) -> Any:
+        if limit is None:
+            return self.cursor.execute(
+                f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Users` WHERE "
+                f"`GuildID` = ? ORDER BY `{order_by}` DESC",
+                (guild_id,)
+            )
+        else:
+            return self.cursor.execute(
+                f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Users` WHERE "
+                f"`GuildID` = ? ORDER BY `{order_by}` DESC LIMIT 10",
+                (guild_id,)
+            )
+
+    @ignore_exceptions
+    def get_from_shop(self, guild_id: int, *args: Tuple[str], order_by: str, role_id: int = None) -> Any:
+        if role_id is None:
+            return self.cursor.execute(
+                f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Shop` WHERE "
+                f"`GuildID` = ? ORDER BY `{order_by}` ASC",
+                (guild_id,)
+            )
+        else:
+            return self.cursor.execute(
+                f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Shop` WHERE `GuildID` = ? AND RoleID = ?",
+                (guild_id, role_id)
+            ).fetchone()[0]
+
+    @ignore_exceptions
+    def get_from_item_shop(self, guild_id: int, *args: Tuple[str], order_by: str) -> Any:
         return self.cursor.execute(
-            f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Users` WHERE `GuildID` = ? ORDER BY `{order_by}` DESC",
+            f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `ItemShop` "
+            f"WHERE `GuildID` = ? ORDER BY `{order_by}` ASC",
             (guild_id,)
         )
+
+    @ignore_exceptions
+    def get_item_from_item_shop(
+            self,
+            guild_id: int,
+            item_id: int,
+            *args: Tuple[str],
+            order_by: str
+    ) -> Any:
+        return self.cursor.execute(
+            f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `ItemShop` "
+            f"WHERE `GuildID` = ? AND ItemID = ? ORDER BY `{order_by}` ASC",
+            (guild_id, item_id)
+        )
+
+    @ignore_exceptions
+    def get_level(self, ID: int, guild_id: int) -> int:
+        return self.cursor.execute(
+            "SELECT `Lvl` FROM `Users` WHERE ID = ? AND GuildID = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
+
+    @ignore_exceptions
+    def get_from_server(self, guild_id: int, *args: Tuple[str]) -> Any:
+        return self.cursor.execute(
+            f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Server` WHERE `GuildID` = ?",
+            (guild_id, )
+        ).fetchall()
 
     @ignore_exceptions
     def get_users_count(self, unique: bool = False) -> int:
@@ -353,6 +418,14 @@ class Database:
             self.take_coins(ID, guild_id, cash)
             return self.cursor.execute("UPDATE  `Users` SET `CashInBank` = `CashInBank` + ? "
                                        "WHERE `ID` = ? AND `GuildID` = ?", (cash, ID, guild_id))
+
+    @ignore_exceptions
+    def add_reputation(self, ID: int, GuildID: int, reputation: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE `Users` SET `Reputation` = `Reputation` + ? WHERE `ID` = ? AND `GuildID` = ?",
+                (reputation, ID, GuildID)
+            )
 
     @ignore_exceptions
     def take_coins_from_the_bank(
@@ -526,6 +599,14 @@ class Database:
     def get_voice_1_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Voice_1` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
+
+    @ignore_exceptions
+    def add_level(self, ID: int, guild_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE `Users` SET Lvl = Lvl + 1 WHERE ID = ? AND GuildID = ?",
+                (ID, guild_id)
+            )
 
     @ignore_exceptions
     def set_voice_1_achievement(self, ID: int, guild_id: int) -> Cursor:
