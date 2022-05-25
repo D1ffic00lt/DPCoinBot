@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 import random
+from typing import List
+
 import discord
 import reladdons
 
@@ -6,29 +9,37 @@ from discord.ext import commands
 
 from ..database.db import Database
 from ..config import settings
-from .helperfunction import create_emb, fail_rand, get_color, divide_the_number
+from .helperfunction import (
+    create_emb, fail_rand,
+    get_color, divide_the_number
+)
 
 
 class Casino(commands.Cog, name='Casino module', Database):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot) -> None:
         super().__init__()
-        self.result_bid = None
+        self.result_bid: int
         self.bot: commands.Bot = bot
-        self.casino: list = settings["casino"]
+        self.casino: List[int] = settings["casino"]
         self.color: discord.Color
         self.dropped_coefficient: float
-        self.line1: list
-        self.line2: list
-        self.line3: list
+        self.line1: List[int]
+        self.line2: List[int]
+        self.line3: List[int]
 
     @commands.command(aliases=['rust_casino'])
     @commands.cooldown(1, 2, commands.BucketType.user)
-    async def __casino_3(self, ctx, bid: int = None, number: int = None) -> None:
+    async def __casino_3(
+            self,
+            ctx: commands.context.Context,
+            bid: int = None,
+            number: int = None
+    ) -> None:
         if self.is_the_casino_allowed(ctx.message.channel.id):
             if bid is None:
                 await ctx.send("Вы ну ввели Вашу ставку!")
             elif bid <= 0:
-                await ctx.send("Вы не можете поставить отрицательную ставку и 0!")
+                await ctx.send("Вы не можете поставить ставку, которая меньше 1!")
             elif self.get_cash(ctx.author.id, ctx.guild.id) < bid:
                 await ctx.send("У Вас не достаточно денег для этой ставки!")
             else:
@@ -83,7 +94,12 @@ class Casino(commands.Cog, name='Casino module', Database):
 
     @commands.command(aliases=['fail'])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __fail(self, ctx, bid: int = None, coefficient: float = None):
+    async def __fail(
+            self,
+            ctx: commands.context.Context,
+            bid: int = None,
+            coefficient: float = None
+    ) -> None:
         if self.is_the_casino_allowed(ctx.message.channel.id):
             if bid is None:
                 await ctx.send(f"{ctx.author.mention}, Вы не ввели вашу ставку")
@@ -151,7 +167,7 @@ class Casino(commands.Cog, name='Casino module', Database):
 
     @commands.command(aliases=['777'])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __casino777(self, ctx, bid: int = None):
+    async def __casino777(self, ctx: commands.context.Context, bid: int = None) -> None:
         if self.is_the_casino_allowed(ctx.message.channel.id):
             if bid is None:
                 await ctx.send(f"{ctx.author.mention}, Вы не ввели вашу ставку")

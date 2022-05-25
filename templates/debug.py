@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import os
 import smtplib
+
+import discord
 import vk_api
 import requests
 
+from typing import Any
 from discord import File, Webhook, RequestsWebhookAdapter
 from discord.ext import commands
 from email import encoders
@@ -11,7 +16,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from vk_api import VkApi
 
-from .helperfunction import get_time, write_msg, get_color, create_emb
+from .helperfunction import (
+    get_time, write_msg, get_color,
+    create_emb, write_log
+)
 from .texts import *
 from .json_ import Json
 from ..database.db import Database
@@ -20,14 +28,23 @@ from ..version import __version__
 
 
 class Debug(commands.Cog, name='debug module', Database):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot) -> None:
         super().__init__()
         self.bot: commands.Bot = bot
-        self.js: dict
-        self.data: list
+        self.js: dict[Any]
+        self.data: list[int | dict]
+        self.part2: MIMEBase
+        self.msg: MIMEMultipart
+        self.server: smtplib.SMTP
+        self.arg: bool
+        self.color: discord.Color
 
     @commands.command(aliases=["debug"])
-    async def __debug_logs(self, ctx, count: int = None):
+    async def __debug_logs(
+            self,
+            ctx: commands.context.Context,
+            count: int = None
+    ) -> None:
         if ctx.author.id == 401555829620211723:
             with open("logs/develop_logs.dpcb", encoding="utf-8", errors="ignore") as read_file, \
                     open("prom_files/debug_send.txt", "w+", encoding="utf-8", errors="ignore") as write_file:
@@ -47,45 +64,54 @@ class Debug(commands.Cog, name='debug module', Database):
             os.remove(file_path)
 
     @commands.command(aliases=['send_base'])  # это лучше не трогать
-    async def __bd_send(self, ctx):
+    async def __bd_send(self, ctx: commands.context.Context) -> None:
         if ctx.author.id == 401555829620211723:
-            part2 = MIMEBase('application', "octet-stream")
-            part2.set_payload(open('server.db', "rb").read())
-            encoders.encode_base64(part2)
+            self.part2 = MIMEBase('application', "octet-stream")
+            self.part2.set_payload(open('server.db', "rb").read())
+            encoders.encode_base64(self.part2)
 
-            part2.add_header(
+            self.part2.add_header(
                 'Content-Disposition',
                 "attachment; filename= %s" % os.path.basename('../database/server.db')
             )
-            msg = MIMEMultipart()
-            msg['From'] = settings["sender_email"]
-            msg['To'] = settings["to_send_email"]
-            msg['Subject'] = "База данных"
-            msg.attach(part2)
-            msg.attach(MIMEText("База данных за {}".format(str(get_time()))))
-            server = smtplib.SMTP('smtp.gmail.com: 587')
-            server.starttls()
-            server.login(msg['From'], settings["password"])
-            server.sendmail(msg['From'], msg['To'], msg.as_string())
-            server.quit()
-
-            # with open(f'logs/develop_logs.dpcb', 'a+', encoding="utf-8", errors="ignore") as f:
-            #     f.write("\nБаза данных отправлена на почту\tдата: {}\n\n".format(str(get_time())))
-
+            self.msg = MIMEMultipart()
+            self.msg['From'] = settings["sender_email"]
+            self.msg['To'] = settings["to_send_email"]
+            self.msg['Subject'] = "База данных"
+            self.msg.attach(self.part2)
+            self.msg.attach(MIMEText("База данных за {}".format(str(get_time()))))
+            self.server = smtplib.SMTP('smtp.gmail.com: 587')
+            self.server.starttls()
+            self.server.login(
+                self.msg['From'],
+                settings["password"]
+            )
+            self.server.sendmail(
+                self.msg['From'],
+                self.msg['To'],
+                self.msg.as_string()
+            )
+            self.server.quit()
+            write_log("\nБаза данных отправлена на почту\tдата: {}\n\n".format(str(get_time())))
             await ctx.send("Копия бд отправлена на почту")
 
         else:
             await ctx.send("У Вас недостаточно прав")
 
     @commands.command(aliases=["bot_stats"])
-    async def __bot_stats(self, ctx):
+    async def __bot_stats(self, ctx: commands.context.Context) -> None:
         if ctx.author.id == 401555829620211723:
             await ctx.send(
                 f"Guilds: {len(self.bot.guilds)}\nMembers: {self.get_users_count()}\n"
-                f"Unique members: {self.get_unique_users_count()}")
+                f"Unique members: {self.get_users_count(unique=True)}")
 
     @commands.command(aliases=["card_add"])
-    async def __card_add(self, ctx, user_id: int = 0, type_of_card: str = None):
+    async def __card_add(
+            self,
+            ctx: commands.context.Context,
+            user_id: int = 0,
+            type_of_card: str = None
+    ) -> None:
         if ctx.author.id == 401555829620211723 and self.check_user(user_id):
             if type_of_card == "gg":
                 self.update_card(user_id, "Verification", 1)
@@ -101,7 +127,12 @@ class Debug(commands.Cog, name='debug module', Database):
             await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["card_remove"])
-    async def __card_remove(self, ctx, user_id: int = 0, param: str = None):
+    async def __card_remove(
+            self,
+            ctx: commands.context.Context,
+            user_id: int = 0,
+            param: str = None
+    ) -> None:
         if ctx.author.id == 401555829620211723 and self.check_user(user_id):
             if param == "gg":
                 self.update_card(user_id, "Verification", 0)
@@ -117,25 +148,34 @@ class Debug(commands.Cog, name='debug module', Database):
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['develop_stats'])
-    async def __develop_stats(self, ctx, place: str = None, arg: str = None):
+    async def __develop_stats(
+            self,
+            ctx: commands.context.Context,
+            place: str = None,
+            arg: str = None
+    ) -> None:
         if ctx.author.id == 401555829620211723:
             if place is not None and arg is not None:
                 if place in ["lb", "slb"] and arg in ["on", "off"]:
-                    if not os.path.exists("json_/develop_get.json"):
+                    if not os.path.exists(".json/develop_get.json"):
                         Json("develop_get.json").json_dump({"lb": True, "slb": True})
                         self.js = {"lb": True, "slb": True}
                     else:
                         self.js = Json("develop_get.json").json_load()
                     if arg == "on":
-                        arg = True
+                        self.arg = True
                     else:
-                        arg = False
-                    self.js[place] = arg
+                        self.arg = False
+                    self.js[place] = self.arg
                     Json("develop_get.json").json_dump(self.js)
 
     @commands.command(aliases=['add_to_ban_list'])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __add_ban_list(self, ctx, server_id: int = None):
+    async def __add_ban_list(
+            self,
+            ctx: commands.context.Context,
+            server_id: int = None
+    ) -> None:
         if ctx.author.id == 401555829620211723:
             if not os.path.exists("../.json/ban_list.json"):
                 Json("ban_list.json").json_dump([])
@@ -146,7 +186,7 @@ class Debug(commands.Cog, name='debug module', Database):
 
     @commands.command(aliases=['send_webhook'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __send_webhook(self, ctx, par: str = None):
+    async def __send_webhook(self, ctx: commands.context.Context, par: str = None) -> None:
         if ctx.author.id == 401555829620211723:
             if par == "push":
                 self.webhook = Webhook.from_url(
@@ -164,7 +204,7 @@ class Debug(commands.Cog, name='debug module', Database):
                     }
                 ).json()
                 if not os.path.exists("../.json/send.json") or os.stat("../.json/send.json").st_size == 0:
-                    Json("send.json").create_json("[]")
+                    Json("send.json").json_dump([])
                 else:
                     self.js = Json("send.json").json_load()
                     if len(self.js) != 0:
@@ -198,7 +238,11 @@ class Debug(commands.Cog, name='debug module', Database):
             )
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error: Exception):
+    async def on_command_error(
+            self,
+            ctx: commands.context.Context,
+            error: Exception
+    ) -> None:
         if isinstance(error, commands.CommandOnCooldown):
             pass
         elif isinstance(error, commands.CommandNotFound):
@@ -206,8 +250,7 @@ class Debug(commands.Cog, name='debug module', Database):
         else:
             print(error)
             try:
-                with open('../logs/develop_logs.dpcb', 'a+', encoding="utf-8", errors="ignore") as f:
-                    f.write(f"error: {str(ctx.author)} ({ctx.author.id}) "
-                            f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
+                write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
+                          f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
             except AttributeError:
                 pass
