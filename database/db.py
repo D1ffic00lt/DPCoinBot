@@ -310,7 +310,7 @@ class Database:
     def get_from_server(self, guild_id: int, *args: Tuple[str]) -> Any:
         return self.cursor.execute(
             f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Server` WHERE `GuildID` = ?",
-            (guild_id, )
+            (guild_id,)
         ).fetchall()
 
     @ignore_exceptions
@@ -414,7 +414,6 @@ class Database:
             cash: int,
     ) -> Cursor:
         with self.connection:
-
             self.take_coins(ID, guild_id, cash)
             return self.cursor.execute("UPDATE  `Users` SET `CashInBank` = `CashInBank` + ? "
                                        "WHERE `ID` = ? AND `GuildID` = ?", (cash, ID, guild_id))
@@ -723,6 +722,13 @@ class Database:
     def get_level(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT Lvl FROM `Users` WHERE `GuildID` = ? AND `ID` = ?",
                                    (ID, guild_id)).fetchone()[0]
+
+    @ignore_exceptions
+    def get_stat(self, ID: int, guild_id: int, stat: str) -> int | float:
+        return self.cursor.execute(
+            f"SELECT `?` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
+            (stat, ID, guild_id)
+        ).fetchone()[0]
 
     @ignore_exceptions
     async def voice_delete_stats(self, member: discord.Member, arg: bool) -> None:

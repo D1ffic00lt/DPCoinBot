@@ -106,8 +106,8 @@ def datetime_to_str(datetime_):
 
 def create_emb(
         title: str,
-        color: discord.Color = discord.Color.from_rgb(32, 34, 37),
         args: List[Any] = None,
+        color: discord.Color = discord.Color.from_rgb(32, 34, 37),
         description: str = EmptyEmbed
 ) -> discord.Embed:
     emb = discord.Embed(title=title, colour=color, description=description)
