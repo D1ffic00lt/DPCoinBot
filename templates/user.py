@@ -519,52 +519,64 @@ class User(commands.Cog, name='user module', Database):
                     title="Статистика {}".format(ctx.author),
                     args=[
                         {
-                            "name": 'Coinflips - {}'.format(coinflips),
-                            "value": 'Wins - {}\n Loses - {}'.format(cf_wins, cf_loses),
+                            "name": f'Coinflips - {self.get_stat(ctx.author.id, ctx.guild.id, "CoinFlipsCount")}',
+                            "value": f'Wins - {self.get_stat(ctx.author.id, ctx.guild.id, "CoinFlipsWinsCount")}\n '
+                                     f'Loses - {self.get_stat(ctx.author.id, ctx.guild.id, "CoinFlipsLosesCount")}',
                             "inline": True
                         },
                         {
-                            "name": 'Rust casinos - {}'.format(rust_casinos),
-                            "value": 'Wins - {}\n Loses - {}'.format(rc_wins, rc_loses),
+                            "name": f'Rust casinos - {self.get_stat(ctx.author.id, ctx.guild.id, "RustCasinosCount")}',
+                            "value": f'Wins - {self.get_stat(ctx.author.id, ctx.guild.id, "RustCasinoWinsCount")}\n '
+                                     f'Loses - {self.get_stat(ctx.author.id, ctx.guild.id, "RustCasinoLosesCount")}',
                             "inline": True
                         },
                         {
-                            "name": 'Rolls - {}'.format(rolls),
-                            "value": 'Wins - {}\n Loses - {}'.format(r_wins, r_loses),
+                            "name": f'Rolls - {self.get_stat(ctx.author.id, ctx.guild.id, "RollsCount")}',
+                            "value": f'Wins - {self.get_stat(ctx.author.id, ctx.guild.id, "RollsWinsCount")}\n '
+                                     f'Loses - {self.get_stat(ctx.author.id, ctx.guild.id, "RollsLosesCount")}',
                             "inline": True
                         },
                         {
-                            "name": 'Fails - {}'.format(fails),
-                            "value": 'Wins - {}\n Loses - {}'.format(f_wins, f_loses),
+                            "name": f'Fails - {self.get_stat(ctx.author.id, ctx.guild.id, "FailsCount")}',
+                            "value": f'Wins - {self.get_stat(ctx.author.id, ctx.guild.id, "FailsWinsCount")}\n '
+                                     f'Loses - {self.get_stat(ctx.author.id, ctx.guild.id, "FailsLosesCount")}',
                             "inline": True
                         },
                         {
-                            "name": '777s - {}'.format(ssss),
-                            "value": 'Wins - {}\n Loses - {}'.format(s_wins, s_loses),
+                            "name": f'777s - {self.get_stat(ctx.author.id, ctx.guild.id, "ThreeSevensCount")}',
+                            "value": f'Wins - {self.get_stat(ctx.author.id, ctx.guild.id, "ThreeSevensWinsCount")}\n '
+                                     f'Loses - {self.get_stat(ctx.author.id, ctx.guild.id, "ThreeSevensLosesCount")}',
                             "inline": True
                         },
                         {
                             "name": 'Побед/Поражений всего',
-                            "value": 'Wins - {}\n Loses - {}'.format(all_wins, all_loses),
+                            "value": f'Wins - {self.get_stat(ctx.author.id, ctx.guild.id, "AllWins")}\n '
+                                     f'Loses - {self.get_stat(ctx.author.id, ctx.guild.id, "AllLoses")}',
                             "inline": True
                         },
                         {
                             "name": 'Выиграно всего',
-                            "value": divide_the_number(count),
+                            "value": divide_the_number(
+                                self.get_stat(
+                                    ctx.author.id,
+                                    ctx.guild.id,
+                                    "EntireAmountOfWinnings"
+                                )
+                            ),
                             "inline": True
                         },
                         {
-                            "name": 'Минут в голосовых чатах',
-                            "value": '{} минут в голосовых чатах',
+                            "name": 'Минут в голосовых каналах',
+                            "value": f'{self.get_stat(ctx.author.id, ctx.guild.id, "MinutesInVoiceChannels")} минут',
                             "inline": True
                         },
                         {
                             "name": 'Сообщений в чате',
-                            "value": '{} сообщений в чате',
+                            "value": f'{self.get_stat(ctx.author.id, ctx.guild.id, "MessagesCount")} сообщений в чате',
                             "inline": True
                         },
                         {
-                            "name": '{} левел',
+                            "name": f'{self.get_stat(ctx.author.id, ctx.guild.id, "ChatLevel")} левел в чате',
                             "value": '{} опыта до следующего левела, {} опыта всего',
                             "inline": True
                         }
