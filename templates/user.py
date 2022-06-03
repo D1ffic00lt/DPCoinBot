@@ -21,6 +21,8 @@ class User(commands.Cog, name='user module', Database):
         self.level: int
         self.counter: int = 0
         self.index: int = 0
+        self.ID: int = 0
+        self.guild_id: int = 0
 
     @commands.command(aliases=['slb'])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -455,148 +457,77 @@ class User(commands.Cog, name='user module', Database):
             )
         await ctx.send(embed=self.emb)
 
-    # @commands.command(aliases=["stats"])
-    # @commands.cooldown(1, 10, commands.BucketType.user)
-    # async def __stats(self, ctx, member: discord.Member = None):
-    #     if member is None:
-    #         coinflips = cursor.execute("SELECT coinflips FROM users WHERE id = ? AND server_id = ?",
-    #                                    [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         cf_wins = cursor.execute("SELECT cf_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                  [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         cf_loses = cursor.execute("SELECT cf_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                   [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         rust_casinos = cursor.execute("SELECT rust_casinos FROM users WHERE id = ? AND server_id = ?",
-    #                                       [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         rc_wins = cursor.execute("SELECT rc_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                  [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         rc_loses = cursor.execute("SELECT rc_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                   [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         rolls = cursor.execute("SELECT rolls FROM users WHERE id = ? AND server_id = ?",
-    #                                [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         r_wins = cursor.execute("SELECT r_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                 [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         r_loses = cursor.execute("SELECT r_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                  [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         fails = cursor.execute("SELECT fails FROM users WHERE id = ? AND server_id = ?",
-    #                                [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         f_wins = cursor.execute("SELECT f_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                 [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         f_loses = cursor.execute("SELECT f_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                  [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         ssss = cursor.execute("SELECT ssss FROM users WHERE id = ? AND server_id = ?",
-    #                               [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         s_wins = cursor.execute("SELECT s_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                 [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         s_loses = cursor.execute("SELECT s_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                  [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         all_wins = cursor.execute("SELECT all_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                   [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         all_loses = cursor.execute("SELECT all_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                    [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         count = cursor.execute("SELECT count FROM users WHERE id = ? AND server_id = ?",
-    #                                [ctx.author.id, ctx.guild.id]).fetchone()[0]
-    #         chat_lvl = cursor.execute(
-    #             "SELECT chat_lvl FROM users WHERE id = ? AND server_id = ?",
-    #             [ctx.author.id, ctx.author.guild.id]).fetchone()[0]
-    #         xp = cursor.execute(
-    #             "SELECT xp FROM users WHERE id = ? AND server_id = ?",
-    #             [ctx.author.id, ctx.author.guild.id]).fetchone()[0]
-    #         all_xp = xp
-    #         xp = cursor.execute("SELECT xp FROM levels WHERE level = ?", [chat_lvl + 1]).fetchone()[0] - xp
-    #         emb = discord.Embed(title="Статистика {}".format(ctx.author))
-    #         emb.add_field(name='Coinflips - {}'.format(coinflips),
-    #                       value='Wins - {}\n Loses - {}'.format(cf_wins, cf_loses))
-    #         emb.add_field(name='Rust casinos - {}'.format(rust_casinos),
-    #                       value='Wins - {}\n Loses - {}'.format(rc_wins, rc_loses))
-    #         emb.add_field(name='Rolls - {}'.format(rolls),
-    #                       value='Wins - {}\n Loses - {}'.format(r_wins, r_loses))
-    #         emb.add_field(name='Fails - {}'.format(fails),
-    #                       value='Wins - {}\n Loses - {}'.format(f_wins, f_loses))
-    #         emb.add_field(name='777s - {}'.format(ssss),
-    #                       value='Wins - {}\n Loses - {}'.format(s_wins, s_loses))
-    #         emb.add_field(name='Побед/Поражений всего'.format(ssss),
-    #                       value='Wins - {}\n Loses - {}'.format(all_wins, all_loses))
-    #         emb.add_field(name='Выиграно всего'.format(ssss),
-    #                       value=razr(count))
-    #         emb.add_field(name='Минут в голосовых чатах'.format(ssss),
-    #                       value="{} минут в голосовых чатах".format(
-    #                           cursor.execute("SELECT voice_minutes FROM users WHERE id = ? AND server_id = ?",
-    #                                          [ctx.author.id, ctx.guild.id]).fetchone()[0]))
-    #         emb.add_field(name='Сообщений в чате'.format(ssss),
-    #                       value="{} сообщений в чате".format(
-    #                           cursor.execute("SELECT messages FROM users WHERE id = ? AND server_id = ?",
-    #                                          [ctx.author.id, ctx.guild.id]).fetchone()[0]))
-    #         emb.add_field(name='{} левел'.format(chat_lvl),
-    #                       value="{} опыта до следующего левела, {} опыта всего".format(xp, all_xp))
-    #         await ctx.send(embed=emb)
-    #     else:
-    #         coinflips = cursor.execute("SELECT coinflips FROM users WHERE id = ? AND server_id = ?",
-    #                                    [member.id, member.guild.id]).fetchone()[0]
-    #         cf_wins = cursor.execute("SELECT cf_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                  [member.id, member.guild.id]).fetchone()[0]
-    #         cf_loses = cursor.execute("SELECT cf_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                   [member.id, member.guild.id]).fetchone()[0]
-    #         rust_casinos = cursor.execute("SELECT rust_casinos FROM users WHERE id = ? AND server_id = ?",
-    #                                       [member.id, member.guild.id]).fetchone()[0]
-    #         rc_wins = cursor.execute("SELECT rc_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                  [member.id, member.guild.id]).fetchone()[0]
-    #         rc_loses = cursor.execute("SELECT rc_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                   [member.id, member.guild.id]).fetchone()[0]
-    #         rolls = cursor.execute("SELECT rolls FROM users WHERE id = ? AND server_id = ?",
-    #                                [member.id, member.guild.id]).fetchone()[0]
-    #         r_wins = cursor.execute("SELECT r_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                 [member.id, member.guild.id]).fetchone()[0]
-    #         r_loses = cursor.execute("SELECT r_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                  [member.id, member.guild.id]).fetchone()[0]
-    #         fails = cursor.execute("SELECT fails FROM users WHERE id = ? AND server_id = ?",
-    #                                [member.id, member.guild.id]).fetchone()[0]
-    #         f_wins = cursor.execute("SELECT f_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                 [member.id, member.guild.id]).fetchone()[0]
-    #         f_loses = cursor.execute("SELECT f_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                  [member.id, member.guild.id]).fetchone()[0]
-    #         ssss = cursor.execute("SELECT ssss FROM users WHERE id = ? AND server_id = ?",
-    #                               [member.id, member.guild.id]).fetchone()[0]
-    #         s_wins = cursor.execute("SELECT s_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                 [member.id, member.guild.id]).fetchone()[0]
-    #         s_loses = cursor.execute("SELECT s_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                  [member.id, member.guild.id]).fetchone()[0]
-    #         all_wins = cursor.execute("SELECT all_wins FROM users WHERE id = ? AND server_id = ?",
-    #                                   [member.id, member.guild.id]).fetchone()[0]
-    #         all_loses = cursor.execute("SELECT all_loses FROM users WHERE id = ? AND server_id = ?",
-    #                                    [member.id, member.guild.id]).fetchone()[0]
-    #         count = cursor.execute("SELECT count FROM users WHERE id = ? AND server_id = ?",
-    #                                [member.id, member.guild.id]).fetchone()[0]
-    #         chat_lvl = cursor.execute(
-    #             "SELECT chat_lvl FROM users WHERE id = ? AND server_id = ?",
-    #             [member.id, member.guild.id]).fetchone()[0]
-    #         xp = cursor.execute(
-    #             "SELECT xp FROM users WHERE id = ? AND server_id = ?",
-    #             [member.id, member.guild.id]).fetchone()[0]
-    #         all_xp = xp
-    #         xp = cursor.execute("SELECT xp FROM levels WHERE level = ?", [chat_lvl + 1]).fetchone()[0] - xp
-    #         emb = discord.Embed(title="Статистика {}".format(member))
-    #         emb.add_field(name='Coinflips - {}'.format(coinflips),
-    #                       value='Wins - {}\n Loses - {}'.format(cf_wins, cf_loses))
-    #         emb.add_field(name='Rust casinos - {}'.format(rust_casinos),
-    #                       value='Wins - {}\n Loses - {}'.format(rc_wins, rc_loses))
-    #         emb.add_field(name='Rolls - {}'.format(rolls),
-    #                       value='Wins - {}\n Loses - {}'.format(r_wins, r_loses))
-    #         emb.add_field(name='Fails - {}'.format(fails),
-    #                       value='Wins - {}\n Loses - {}'.format(f_wins, f_loses))
-    #         emb.add_field(name='777s - {}'.format(ssss),
-    #                       value='Wins - {}\n Loses - {}'.format(s_wins, s_loses))
-    #         emb.add_field(name='Побед/Поражений всего'.format(ssss),
-    #                       value='Wins - {}\n Loses - {}'.format(all_wins, all_loses))
-    #         emb.add_field(name='Выиграно всего'.format(ssss),
-    #                       value=razr(count))
-    #         emb.add_field(name='Минут в голосовых чатах'.format(ssss),
-    #                       value="{} минут в голосовых чатах".format(
-    #                           cursor.execute("SELECT voice_minutes FROM users WHERE id = ? AND server_id = ?",
-    #                                          [member.id, member.guild.id]).fetchone()[0]))
-    #         emb.add_field(name='Сообщений в чате'.format(ssss),
-    #                       value="{} сообщений в чате".format(
-    #                           cursor.execute("SELECT messages FROM users WHERE id = ? AND server_id = ?",
-    #                                          [member.id, member.guild.id]).fetchone()[0]))
-    #         emb.add_field(name='{} левел'.format(chat_lvl),
-    #                       value="{} опыта до следующего левела, {} опыта всего".format(xp, all_xp))
-    #         await ctx.send(embed=emb)
+    @commands.command(aliases=["stats"])
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __stats(self, ctx, member: discord.Member = None):
+        self.ID = ctx.author.id if member is None else member.id
+        self.guild_id = ctx.guild.id if member is None else member.guild.id
+        await ctx.send(
+            embed=create_emb(
+                title="Статистика {}".format(ctx.author),
+                args=[
+                    {
+                        "name": f'Coinflips - {self.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}',
+                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}\n '
+                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "CoinFlipsLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": f'Rust casinos - {self.get_stat(self.ID, self.guild_id, "RustCasinosCount")}',
+                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "RustCasinoWinsCount")}\n '
+                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "RustCasinoLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": f'Rolls - {self.get_stat(self.ID, self.guild_id, "RollsCount")}',
+                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "RollsWinsCount")}\n '
+                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "RollsLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": f'Fails - {self.get_stat(self.ID, self.guild_id, "FailsCount")}',
+                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "FailsWinsCount")}\n '
+                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "FailsLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": f'777s - {self.get_stat(self.ID, self.guild_id, "ThreeSevensCount")}',
+                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "ThreeSevensWinsCount")}\n '
+                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "ThreeSevensLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": 'Побед/Поражений всего',
+                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "AllWins")}\n '
+                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "AllLoses")}',
+                        "inline": True
+                    },
+                    {
+                        "name": 'Выиграно всего',
+                        "value": divide_the_number(
+                            self.get_stat(
+                                self.ID,
+                                self.guild_id,
+                                "EntireAmountOfWinnings"
+                            )
+                        ),
+                        "inline": True
+                    },
+                    {
+                        "name": 'Минут в голосовых каналах',
+                        "value": f'{self.get_stat(self.ID, self.guild_id, "MinutesInVoiceChannels")} минут',
+                        "inline": True
+                    },
+                    {
+                        "name": 'Сообщений в чате',
+                        "value": f'{self.get_stat(self.ID, self.guild_id, "MessagesCount")} сообщений в чате',
+                        "inline": True
+                    },
+                    {
+                        "name": f'{self.get_stat(self.ID, self.guild_id, "ChatLevel")} левел в чате',
+                        "value": '{} опыта до следующего левела, {} опыта всего',
+                        "inline": True
+                    }
+                ]
+            )
+        )
