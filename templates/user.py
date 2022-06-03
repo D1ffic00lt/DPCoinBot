@@ -13,7 +13,7 @@ from .texts import *
 
 class User(commands.Cog, name='user module', Database):
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
+        super().__init__("server.db")
         self.bot: commands.Bot = bot
         self.name: discord.Member
         self.color: discord.Color

@@ -29,7 +29,7 @@ from ..version import __version__
 
 class Debug(commands.Cog, name='debug module', Database):
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
+        super().__init__("server.db")
         self.bot: commands.Bot = bot
         self.js: dict[Any]
         self.data: list[int | dict]

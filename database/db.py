@@ -10,7 +10,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from sqlite3 import Cursor
-from typing import Tuple
+from typing import Tuple, Any
 
 from ..templates.helperfunction import *
 
@@ -151,7 +151,7 @@ class Database:
            SaltedRedFishsCount          INT DEFAULT 0 NOT NULL,
            DobryJuiceCount              INT DEFAULT 0 NOT NULL,
            BabyChampagneCount           INT DEFAULT 0 NOT NULL,
-           moodCount                    INT DEFAULT 0 NOT NULL
+           MoodCount                    INT DEFAULT 0 NOT NULL
           )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Inventory (
            Name                         VARCHAR (255) NOT NULL,
@@ -248,8 +248,24 @@ class Database:
 
     @ignore_exceptions
     def get_start_cash(self, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `StartingBalance` FROM `Server` "
-                                   "WHERE `GuildID` = ?", (guild_id,)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `StartingBalance` FROM `Server` WHERE `GuildID` = ?",
+            (guild_id,)
+        ).fetchone()[0]
+
+    @ignore_exceptions
+    def get_from_inventory(self, ID: int, guild_id: int, item: str) -> int:
+        return self.cursor.execute(
+            "SELECT `?` FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
+            (item, ID, guild_id)
+        ).fetchone()[0]
+
+    @ignore_exceptions
+    def get_from_new_year_event(self, ID: int, guild_id: int, item: str) -> int:
+        return self.cursor.execute(
+            "SELECT `?` FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
+            (item, ID, guild_id)
+        ).fetchone()[0]
 
     @ignore_exceptions
     def get_user_name(self, ID: int) -> str:
@@ -345,6 +361,22 @@ class Database:
                                    f"WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id)).fetchone()[0]
 
     @ignore_exceptions
+    def update_new_year_event(self, ID: int, guild_id: int, item: str, value: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                'UPDATE `NewYearEvent` SET `?` = `?` + ? WHERE `ID` = ? AND `GuildID` = ?',
+                (item, item, value, ID, guild_id)
+            )
+
+    @ignore_exceptions
+    def update_inventory(self, ID: int, guild_id: int, item: str, value: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                'UPDATE `Inventory` SET `?` = `?` + ? WHERE `ID` = ? AND `GuildID` = ?',
+                (item, item, value, ID, guild_id)
+            )
+
+    @ignore_exceptions
     def update_name(self, name: str, ID: int) -> Cursor:
         with self.connection:
             return self.cursor.execute('UPDATE `Users` SET `Name` = ? WHERE `ID` = ?', (name, ID))
@@ -366,7 +398,7 @@ class Database:
             return self.cursor.execute('DELETE FROM `CoinFlip`')
 
     @ignore_exceptions
-    def add_prises(self, prises: int, ID: int, guild_id: int) -> Cursor:
+    def add_present(self, prises: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
                 "UPDATE Inventory SET NewYearPrises = NewYearPrises + ? WHERE ID = ? AND GuildID = ?",
@@ -585,6 +617,16 @@ class Database:
     def get_time_from_online_stats(self, ID: int, guild_id: int) -> str:
         return datetime_to_str(self.cursor.execute("SELECT `Time` FROM `OnlineStats` WHERE `ID` = ? AND `GuildID` = ?",
                                                    (ID, guild_id)).fetchone()[0])
+
+    @ignore_exceptions
+    def get_active_coinflip(
+            self, first_player_id: int,
+            second_player_id: int,
+            guild_id: int
+    ) -> tuple[Any, Any]:
+        return self.cursor.execute("SELECT num FROM coinflip WHERE player2_id = ? AND guild_id = ? AND "
+                                   "player1_id = ?", [first_player_id, guild_id, second_player_id]).fetchone() is None, self.cursor.execute("SELECT num FROM coinflip WHERE player2_id = ? AND guild_id = ? AND player1_id = ?",
+                                   [second_player_id, guild_id, first_player_id]).fetchone() is None
 
     @ignore_exceptions
     def delete_from_online_stats(self, ID: int) -> Cursor:
@@ -975,7 +1017,7 @@ class Database:
                                         if random.randint(1, 3) == 3:
                                             self.prises[member.id] += 1
                     if self.prises[member.id] != 0:
-                        self.add_prises(self.prises[member.id], member.id, member.guild.id)
+                        self.add_present(self.prises[member.id], member.id, member.guild.id)
                         try:
                             await member.send(
                                 "Вам начислено {} новогодних подарков! Чтобы открыть их пропишите //open\n"

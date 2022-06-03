@@ -21,7 +21,7 @@ discord_foo: str = f'**Добавлено:** \n' \
                    f'> Баг со снятием денег\n\n' \
                    f'> Визуализация выигрыша\\проигрыша в 777, roll, rust casino, fail'
 
-levels = {
+levels: dict = {
     "level1": f'Стандарт для всех участников. За одну минуту в голосовом канале даётся 1 DP коин, за одно '
               f'сообщение, соответствующее условиям, начисляется 1 DP коин',
     "level2": f'За одну минуту в голосовом канале даётся 4 коина, за одно '
@@ -33,4 +33,98 @@ levels = {
     "level5": f'Максимальный левел! За одну минуту в голосовом канале даётся 20 коинов, за одно '
               f'сообщение, соответствующее условиям, начисляется 20 коинов\n**Стоимость: 400000 DP коинов**',
     "LevelUp": f"""```diff\n- {settings["prefix"]}lvl_up - поднимет Вам левел\n```"""
+}
+
+new_year: dict = {
+    "MandarinsCount":
+        {
+            "price": 200,
+            "ylt_%": 10,
+            "xp": 20,
+            "mood": 100,
+            "name": "Мандарин",
+            "index": 0
+        },
+    "OlivierSaladCount":
+        {
+            "price": 400,
+            "ylt_%": 20,
+            "xp": 50,
+            "mood": 200,
+            "name": "Оливье",
+            "index": 1
+        },
+    "CaesarSaladCount":
+        {
+            "price": 300,
+            "ylt_%": 20,
+            "xp": 50,
+            "mood": 200,
+            "name": "Цезарь",
+            "index": 2
+        },
+    "RedСaviarCount":
+        {
+            "price": 500,
+            "ylt_%": 30,
+            "xp": 80,
+            "mood": 400,
+            "name": "Красная Икра",
+            "index": 3
+        },
+    "BlackСaviarCount":
+        {
+            "price": 1000,
+            "ylt_%": 35,
+            "xp": 60,
+            "mood": 700,
+            "name": "Чёрная Икра",
+            "index": 4
+        },
+    "SlicedMeatCount":
+        {
+            "price": 350,
+            "ylt_%": 25,
+            "xp": 200,
+            "mood": 100,
+            "name": "Мясная Нарезка",
+            "index": 5
+        },
+    "DucksCount":
+        {
+            "price": 500,
+            "ylt_%": 30,
+            "xp": 60,
+            "mood": 200,
+            "name": "Утка",
+            "index": 6
+        },
+    "SaltedRedFishsCount":
+        {
+            "price": 550,
+            "ylt_%": 35,
+            "xp": 80,
+            "mood": 250,
+            "name": "Красная Рыба(Солёная)",
+            "index": 7
+        },
+    "DobryJuiceCount":
+        {
+            "price": 350,
+            "ylt_%": 15,
+            "xp": 20,
+            "mood": 150,
+            "name": "Сок \"Добрый\"",
+            "index": 8
+        },
+    "BabyChampagneCount":
+        {
+            "price": 1000,
+            "ylt_%": 20,
+            "xp": 50,
+            "mood": 400,
+            "name": "Детское Шампанское",
+            "index": 9
+        }
+
 }
