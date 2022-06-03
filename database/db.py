@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import os
+import smtplib
 import sqlite3
 
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from sqlite3 import Cursor
 from typing import Tuple
 
@@ -11,6 +17,11 @@ from ..templates.helperfunction import *
 
 class Database:
     def __init__(self, filename: str) -> None:
+        self.server: smtplib.SMTP = smtplib.SMTP('smtp.gmail.com: 587')
+        self.msg: MIMEMultipart = MIMEMultipart()
+        self.part2: MIMEBase = MIMEBase('application', "octet-stream")
+        self.part1: MIMEBase = MIMEBase('application', "octet-stream")
+        self.filename: str = filename
         self.time = None
         self.now2 = None
         self.minutes: int = 0
@@ -18,8 +29,10 @@ class Database:
         self.month: int = 0
         self.prises: dict = {}
         self.valentine: dict = {}
-        self.connection: sqlite3.Connection = sqlite3.connect(filename, check_same_thread=False)
+
+        self.connection: sqlite3.Connection = sqlite3.connect(self.filename, check_same_thread=False)
         self.cursor: sqlite3.Cursor = self.connection.cursor()
+
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Users (
             Name                         VARCHAR (255) NOT NULL,
             ID                           INT NOT NULL,
@@ -46,7 +59,7 @@ class Database:
             AllLoses                     INT DEFAULT 0 NOT NULL,
             EntireAmountOfWinnings       BIGINT DEFAULT 0 NOT NULL,
             MinutesInVoiceChannels       INT DEFAULT 0 NOT NULL,
-             BIGINT                    DEFAULT 0 NOT NULL,
+            Xp BIGINT                    DEFAULT 0 NOT NULL,
             ChatLevel                    INT DEFAULT 0 NOT NULL,
             MessagesCount                INT DEFAULT 0 NOT NULL,
             CashInBank BIGINT            DEFAULT 0 NOT NULL 
@@ -241,6 +254,14 @@ class Database:
     @ignore_exceptions
     def get_user_name(self, ID: int) -> str:
         return self.cursor.execute(f"SELECT `Name` FROM `Users` WHERE `ID` = ?", (ID,)).fetchone()[0]
+
+    @ignore_exceptions
+    def get_xp(self, level: int) -> int:
+        return self.cursor.execute("SELECT XP FROM Levels WHERE Level = ?", (level,)).fetchone()[0]
+
+    @ignore_exceptions
+    def get_from_levels(self, *args: Tuple[str]) -> Any:
+        return self.cursor.execute(f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Levels`")
 
     @ignore_exceptions
     def get_from_user(
@@ -590,6 +611,12 @@ class Database:
                                        (ID, guild_id, get_time()))
 
     @ignore_exceptions
+    def insert_into_stats(self, ID: int, guild_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute("INSERT INTO `Online` VALUES (?, ?, ?)",
+                                       (ID, guild_id, get_time()))
+
+    @ignore_exceptions
     def get_minutes(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `MinutesInVoiceChannels` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
@@ -731,7 +758,7 @@ class Database:
         ).fetchone()[0]
 
     @ignore_exceptions
-    async def voice_delete_stats(self, member: discord.Member, arg: bool) -> None:
+    async def voice_delete_stats(self, member: discord.Member, arg: bool = True) -> None:
         try:
             self.now2 = self.get_time_from_online_stats(member.id, member.guild.id)
         except TypeError:
@@ -919,7 +946,7 @@ class Database:
         await self.achievement(ctx)
 
     @ignore_exceptions
-    async def voice_delete(self, member: discord.Member) -> None:
+    async def voice_delete(self, member: discord.Member, arg: bool = True) -> None:
         try:
             now2 = self.get_time_from_online_stats(member.id, member.guild.id)
         except TypeError:
@@ -975,7 +1002,10 @@ class Database:
                         )
                     except discord.errors.Forbidden:
                         pass
+            if arg:
+                self.insert_into_stats(member.id, member.guild.id)
 
+    @ignore_exceptions
     def is_the_casino_allowed(self, channel_id: int) -> bool:
         if self.cursor.execute("SELECT CasinoChannelID FROM Server WHERE GuildID = ?",
                                (channel_id,)).fetchone() is None:
@@ -984,3 +1014,45 @@ class Database:
                 self.cursor.execute("SELECT CasinoChannelID FROM Server WHERE GuildID = ?", (channel_id,)).fetchone():
             return True
         return False
+
+    @ignore_exceptions
+    def update_stat(self, ID: int, GuildID: int, stat: str, value: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE `Users` SET `?` = `?` + ? WHERE `ID` = ? AND `GuildID` = ?",
+                (stat, stat, value, ID, GuildID)
+            )
+
+    @ignore_exceptions
+    def send_files(self):
+        self.server = smtplib.SMTP('smtp.gmail.com: 587')
+        self.msg = MIMEMultipart()
+        self.part2 = MIMEBase('application', "octet-stream")
+        self.part1 = MIMEBase('application', "octet-stream")
+
+        self.part1.set_payload(open(self.filename, "rb").read())
+        self.part2.set_payload(open("../logs/develop_logs.dpcb", "rb").read())
+
+        encoders.encode_base64(self.part1)
+        encoders.encode_base64(self.part2)
+
+        self.part1.add_header(
+            'Content-Disposition', "attachment; filename= %s" % os.path.basename(self.filename)
+        )
+        self.part2.add_header(
+            'Content-Disposition', "attachment; filename= %s" % os.path.basename("../logs/develop_logs.dpcb")
+        )
+
+        self.msg['From'] = settings["sender_email"]
+        self.msg['To'] = settings["sender_email"]
+        self.msg['Subject'] = "Копии"
+
+        self.msg.attach(self.part1)
+        self.msg.attach(self.part2)
+
+        self.msg.attach(MIMEText("Копии от {}".format(str(get_time()))))
+        self.server.starttls()
+        self.server.login(self.msg['From'], settings["password"])
+        self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
+        self.server.quit()
+        write_log("Копии данных отправлена на почту\tдата: {}\n".format(str(get_time())))

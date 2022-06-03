@@ -33,7 +33,7 @@ class Debug(commands.Cog, name='debug module', Database):
         self.bot: commands.Bot = bot
         self.js: dict[Any]
         self.data: list[int | dict]
-        self.part2: MIMEBase
+        self.part: MIMEBase
         self.msg: MIMEMultipart
         self.server: smtplib.SMTP
         self.arg: bool
@@ -66,11 +66,11 @@ class Debug(commands.Cog, name='debug module', Database):
     @commands.command(aliases=['send_base'])  # это лучше не трогать
     async def __bd_send(self, ctx: commands.context.Context) -> None:
         if ctx.author.id == 401555829620211723:
-            self.part2 = MIMEBase('application', "octet-stream")
-            self.part2.set_payload(open('server.db', "rb").read())
-            encoders.encode_base64(self.part2)
+            self.part = MIMEBase('application', "octet-stream")
+            self.part.set_payload(open('server.db', "rb").read())
+            encoders.encode_base64(self.part)
 
-            self.part2.add_header(
+            self.part.add_header(
                 'Content-Disposition',
                 "attachment; filename= %s" % os.path.basename('../database/server.db')
             )
@@ -78,7 +78,7 @@ class Debug(commands.Cog, name='debug module', Database):
             self.msg['From'] = settings["sender_email"]
             self.msg['To'] = settings["to_send_email"]
             self.msg['Subject'] = "База данных"
-            self.msg.attach(self.part2)
+            self.msg.attach(self.part)
             self.msg.attach(MIMEText("База данных за {}".format(str(get_time()))))
             self.server = smtplib.SMTP('smtp.gmail.com: 587')
             self.server.starttls()
@@ -97,13 +97,6 @@ class Debug(commands.Cog, name='debug module', Database):
 
         else:
             await ctx.send("У Вас недостаточно прав")
-
-    @commands.command(aliases=["bot_stats"])
-    async def __bot_stats(self, ctx: commands.context.Context) -> None:
-        if ctx.author.id == 401555829620211723:
-            await ctx.send(
-                f"Guilds: {len(self.bot.guilds)}\nMembers: {self.get_users_count()}\n"
-                f"Unique members: {self.get_users_count(unique=True)}")
 
     @commands.command(aliases=["card_add"])
     async def __card_add(
