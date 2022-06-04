@@ -129,7 +129,7 @@ class Casino(commands.Cog, name='Casino module', Database):
                                     "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}',
                                     "inline": False
                                 }
-                                ]
+                            ]
                         )
                     )
                     await self.stats_update(ctx, "fails", "f", "loses", -bid)
@@ -217,11 +217,11 @@ class Casino(commands.Cog, name='Casino module', Database):
                                     "name": f'🎰Поздравляем!🎰',
                                     "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, '
                                              'Вы выиграли **{}** DP коинов!'.format(
-                                                *self.line1[0], *self.line1[1], *self.line1[2],
-                                                *self.line2[0], *self.line2[1], *self.line2[2],
-                                                *self.line3[0], *self.line3[1], *self.line3[2],
-                                                ctx.author.mention, divide_the_number(bid)
-                                                ),
+                                        *self.line1[0], *self.line1[1], *self.line1[2],
+                                        *self.line2[0], *self.line2[1], *self.line2[2],
+                                        *self.line3[0], *self.line3[1], *self.line3[2],
+                                        ctx.author.mention, divide_the_number(bid)
+                                    ),
                                     "inline": False
                                 }
                             ]
@@ -236,13 +236,13 @@ class Casino(commands.Cog, name='Casino module', Database):
                             args=[
                                 {
                                     "name": f'🎰Поздравляем!🎰',
-                                    "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, Вы выиграли **{}** DP '
-                                             'коинов!'.format(
-                                                *self.line1[0], *self.line1[1], *self.line1[2],
-                                                *self.line2[0], *self.line2[1], *self.line2[2],
-                                                *self.line3[0], *self.line3[1], *self.line3[2],
-                                                ctx.author.mention, divide_the_number(bid)
-                                                ),
+                                    "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, '
+                                             'Вы выиграли **{}** DP коинов!'.format(
+                                        *self.line1[0], *self.line1[1], *self.line1[2],
+                                        *self.line2[0], *self.line2[1], *self.line2[2],
+                                        *self.line3[0], *self.line3[1], *self.line3[2],
+                                        ctx.author.mention, divide_the_number(bid)
+                                    ),
                                     "inline": False
                                 }
                             ])
@@ -273,41 +273,36 @@ class Casino(commands.Cog, name='Casino module', Database):
         else:
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
-
     @commands.command(aliases=['coinflip'])
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def __casino_2(self, ctx, count: int = None, member: discord.Member = None):
-        date_now = get_time()
-        color = get_color(ctx.author.roles)
+        self.date_now = get_time()
+        self.color = get_color(ctx.author.roles)
         if self.is_the_casino_allowed(ctx.message.channel.id):
             if member is None:
                 if await self.cash_check(ctx, count, min_cash=10, check=True):
                     self.take_coins(ctx.author.id, ctx.guild.id, count)
-
-                    # ch = random.randint(1, 2)
                     self.casino_num = casino2ch(ctx.author.id)[0]
                     if self.casino_num == 1:
-                        emb = discord.Embed(title="Вы выиграли!", colour=color)
-                        emb.add_field(
+                        self.emb = discord.Embed(title="Вы выиграли!", colour=self.color)
+                        self.emb.add_field(
                             name=f'Поздравляем!',
                             value=f'{ctx.author.mention}, Вы выиграли **{divide_the_number(count * 2)}** DP коинов!',
                             inline=False
                         )
-                        await ctx.send(embed=emb)
+                        await ctx.send(embed=self.emb)
                         self.add_coins(ctx.author.id, ctx.guild.id, count * 2)
-                        win_sum = count * 2
-                        await self.stats_update(ctx, "coinflips", "cf", "wins", win_sum)
+                        await self.stats_update(ctx, "coinflips", "cf", "wins", count * 2)
 
                     else:
-                        emb = discord.Embed(title="Вы проиграли:(", colour=color)
-                        emb.add_field(
+                        self.emb = discord.Embed(title="Вы проиграли:(", colour=self.color)
+                        self.emb.add_field(
                             name=f'Вы проиграли:(',
                             value=f'{ctx.author.mention}, значит в следующий раз',
                             inline=False
                         )
-                        await ctx.send(embed=emb)
-                        win_sum = -count
-                        await self.stats_update(ctx, "coinflips", "cf", "loses", win_sum)
+                        await ctx.send(embed=self.emb)
+                        await self.stats_update(ctx, "coinflips", "cf", "loses", -count)
 
             elif member is not None:
                 if count <= 9:
@@ -321,27 +316,28 @@ class Casino(commands.Cog, name='Casino module', Database):
                 elif self.get_cash(member.id, ctx.guild.id) < count:
                     await ctx.send(f"{ctx.author.mention}, У Вашего оппонента недостаточно средств")
                 else:
-                    if cursor.execute("SELECT num FROM coinflip WHERE player2_id = ? AND guild_id = ? AND "
-                                      "player1_id = ?", [member.id, ctx.guild.id, ctx.author.id]).fetchone() is \
-                            not None:
+                    if self.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
                         await ctx.send(
                             f"{ctx.author.mention}, такая игра уже существует! Для удаления - "
                             f"{settings['prefix']}del_games "
-                            f"{member.mention}")
+                            f"{member.mention}"
+                        )
                     else:
-                        cursor.execute(
-                            "INSERT INTO coinflip VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                            [ctx.author.id, member.id, str(ctx.author), str(member),
-                             ctx.guild.id, str(ctx.guild), count, str(date_now)])
-                        emb = discord.Embed(title=f"{member}, вас упомянули в коинфлипе!", colour=color)
-                        emb.add_field(
+                        self.insert_into_coinflip(
+                            ctx.author.id, member.id,
+                            str(ctx.author), str(member),
+                            ctx.guild.id, str(ctx.guild),
+                            count, str(self.date_now)
+                        )
+                        self.emb = discord.Embed(title=f"{member}, вас упомянули в коинфлипе!", colour=self.color)
+                        self.emb.add_field(
                             name=f'Коинфлип на {count} DP коинов!',
                             value=f"{ctx.author.mention}, значит в следующий раз"
                                   f"{settings['prefix']}accept {ctx.author.mention}\n\nЧтобы отменить - "
                                   f"{settings['prefix']}reject {ctx.author.mention}",
                             inline=False
                         )
-                        await ctx.send(embed=emb)
+                        await ctx.send(embed=self.emb)
                         await ctx.send(member.mention)
         else:
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")

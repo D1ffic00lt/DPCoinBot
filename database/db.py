@@ -624,9 +624,15 @@ class Database:
             second_player_id: int,
             guild_id: int
     ) -> tuple[Any, Any]:
-        return self.cursor.execute("SELECT num FROM coinflip WHERE player2_id = ? AND guild_id = ? AND "
-                                   "player1_id = ?", [first_player_id, guild_id, second_player_id]).fetchone() is None, self.cursor.execute("SELECT num FROM coinflip WHERE player2_id = ? AND guild_id = ? AND player1_id = ?",
-                                   [second_player_id, guild_id, first_player_id]).fetchone() is None
+        return self.cursor.execute(
+            "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
+            (first_player_id, guild_id, second_player_id)
+        ).fetchone() is None \
+               or \
+               self.cursor.execute(
+            "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
+            (second_player_id, guild_id, first_player_id)
+        ).fetchone() is None
 
     @ignore_exceptions
     def delete_from_online_stats(self, ID: int) -> Cursor:
@@ -649,8 +655,27 @@ class Database:
     @ignore_exceptions
     def insert_into_online_stats(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("INSERT INTO `OnlineStats` VALUES (?, ?, ?)",
-                                       (ID, guild_id, get_time()))
+            return self.cursor.execute(
+                "INSERT INTO `OnlineStats` VALUES (?, ?, ?)",
+                (ID, guild_id, get_time())
+            )
+
+    @ignore_exceptions
+    def insert_into_coinflip(
+            self, first_player_id: int, second_player_id: int,
+            first_player_name: str, second_player_name: str,
+            guild_id: int, guild_name: str,
+            cash: int, date: str
+    ) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "INSERT INTO `Coinflip` VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    first_player_id, second_player_id,
+                    first_player_name, second_player_name,
+                    guild_id, guild_name, cash, date
+                )
+            )
 
     @ignore_exceptions
     def insert_into_stats(self, ID: int, guild_id: int) -> Cursor:
