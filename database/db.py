@@ -1,16 +1,27 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import os
+import smtplib
 import sqlite3
 
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from sqlite3 import Cursor
-from typing import Tuple
+from typing import Tuple, Any
 
 from ..templates.helperfunction import *
 
 
 class Database:
     def __init__(self, filename: str) -> None:
+        self.server: smtplib.SMTP = smtplib.SMTP('smtp.gmail.com: 587')
+        self.msg: MIMEMultipart = MIMEMultipart()
+        self.part2: MIMEBase = MIMEBase('application', "octet-stream")
+        self.part1: MIMEBase = MIMEBase('application', "octet-stream")
+        self.filename: str = filename
         self.time = None
         self.now2 = None
         self.minutes: int = 0
@@ -18,8 +29,10 @@ class Database:
         self.month: int = 0
         self.prises: dict = {}
         self.valentine: dict = {}
-        self.connection: sqlite3.Connection = sqlite3.connect(filename, check_same_thread=False)
+
+        self.connection: sqlite3.Connection = sqlite3.connect(self.filename, check_same_thread=False)
         self.cursor: sqlite3.Cursor = self.connection.cursor()
+
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Users (
             Name                         VARCHAR (255) NOT NULL,
             ID                           INT NOT NULL,
@@ -46,7 +59,7 @@ class Database:
             AllLoses                     INT DEFAULT 0 NOT NULL,
             EntireAmountOfWinnings       BIGINT DEFAULT 0 NOT NULL,
             MinutesInVoiceChannels       INT DEFAULT 0 NOT NULL,
-             BIGINT                    DEFAULT 0 NOT NULL,
+            Xp BIGINT                    DEFAULT 0 NOT NULL,
             ChatLevel                    INT DEFAULT 0 NOT NULL,
             MessagesCount                INT DEFAULT 0 NOT NULL,
             CashInBank BIGINT            DEFAULT 0 NOT NULL 
@@ -138,7 +151,7 @@ class Database:
            SaltedRedFishsCount          INT DEFAULT 0 NOT NULL,
            DobryJuiceCount              INT DEFAULT 0 NOT NULL,
            BabyChampagneCount           INT DEFAULT 0 NOT NULL,
-           moodCount                    INT DEFAULT 0 NOT NULL
+           MoodCount                    INT DEFAULT 0 NOT NULL
           )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Inventory (
            Name                         VARCHAR (255) NOT NULL,
@@ -235,12 +248,36 @@ class Database:
 
     @ignore_exceptions
     def get_start_cash(self, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `StartingBalance` FROM `Server` "
-                                   "WHERE `GuildID` = ?", (guild_id,)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `StartingBalance` FROM `Server` WHERE `GuildID` = ?",
+            (guild_id,)
+        ).fetchone()[0]
+
+    @ignore_exceptions
+    def get_from_inventory(self, ID: int, guild_id: int, item: str) -> int:
+        return self.cursor.execute(
+            "SELECT `?` FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
+            (item, ID, guild_id)
+        ).fetchone()[0]
+
+    @ignore_exceptions
+    def get_from_new_year_event(self, ID: int, guild_id: int, item: str) -> int:
+        return self.cursor.execute(
+            "SELECT `?` FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
+            (item, ID, guild_id)
+        ).fetchone()[0]
 
     @ignore_exceptions
     def get_user_name(self, ID: int) -> str:
         return self.cursor.execute(f"SELECT `Name` FROM `Users` WHERE `ID` = ?", (ID,)).fetchone()[0]
+
+    @ignore_exceptions
+    def get_xp(self, level: int) -> int:
+        return self.cursor.execute("SELECT XP FROM Levels WHERE Level = ?", (level,)).fetchone()[0]
+
+    @ignore_exceptions
+    def get_from_levels(self, *args: Tuple[str]) -> Any:
+        return self.cursor.execute(f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Levels`")
 
     @ignore_exceptions
     def get_from_user(
@@ -324,6 +361,22 @@ class Database:
                                    f"WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id)).fetchone()[0]
 
     @ignore_exceptions
+    def update_new_year_event(self, ID: int, guild_id: int, item: str, value: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                'UPDATE `NewYearEvent` SET `?` = `?` + ? WHERE `ID` = ? AND `GuildID` = ?',
+                (item, item, value, ID, guild_id)
+            )
+
+    @ignore_exceptions
+    def update_inventory(self, ID: int, guild_id: int, item: str, value: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                'UPDATE `Inventory` SET `?` = `?` + ? WHERE `ID` = ? AND `GuildID` = ?',
+                (item, item, value, ID, guild_id)
+            )
+
+    @ignore_exceptions
     def update_name(self, name: str, ID: int) -> Cursor:
         with self.connection:
             return self.cursor.execute('UPDATE `Users` SET `Name` = ? WHERE `ID` = ?', (name, ID))
@@ -345,7 +398,7 @@ class Database:
             return self.cursor.execute('DELETE FROM `CoinFlip`')
 
     @ignore_exceptions
-    def add_prises(self, prises: int, ID: int, guild_id: int) -> Cursor:
+    def add_present(self, prises: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
                 "UPDATE Inventory SET NewYearPrises = NewYearPrises + ? WHERE ID = ? AND GuildID = ?",
@@ -566,6 +619,22 @@ class Database:
                                                    (ID, guild_id)).fetchone()[0])
 
     @ignore_exceptions
+    def get_active_coinflip(
+            self, first_player_id: int,
+            second_player_id: int,
+            guild_id: int
+    ) -> tuple[Any, Any]:
+        return self.cursor.execute(
+            "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
+            (first_player_id, guild_id, second_player_id)
+        ).fetchone() is None \
+               or \
+               self.cursor.execute(
+            "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
+            (second_player_id, guild_id, first_player_id)
+        ).fetchone() is None
+
+    @ignore_exceptions
     def delete_from_online_stats(self, ID: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("DELETE FROM `OnlineStats` WHERE `ID` = ?", (ID,))
@@ -586,7 +655,32 @@ class Database:
     @ignore_exceptions
     def insert_into_online_stats(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("INSERT INTO `OnlineStats` VALUES (?, ?, ?)",
+            return self.cursor.execute(
+                "INSERT INTO `OnlineStats` VALUES (?, ?, ?)",
+                (ID, guild_id, get_time())
+            )
+
+    @ignore_exceptions
+    def insert_into_coinflip(
+            self, first_player_id: int, second_player_id: int,
+            first_player_name: str, second_player_name: str,
+            guild_id: int, guild_name: str,
+            cash: int, date: str
+    ) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "INSERT INTO `Coinflip` VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    first_player_id, second_player_id,
+                    first_player_name, second_player_name,
+                    guild_id, guild_name, cash, date
+                )
+            )
+
+    @ignore_exceptions
+    def insert_into_stats(self, ID: int, guild_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute("INSERT INTO `Online` VALUES (?, ?, ?)",
                                        (ID, guild_id, get_time()))
 
     @ignore_exceptions
@@ -731,7 +825,7 @@ class Database:
         ).fetchone()[0]
 
     @ignore_exceptions
-    async def voice_delete_stats(self, member: discord.Member, arg: bool) -> None:
+    async def voice_delete_stats(self, member: discord.Member, arg: bool = True) -> None:
         try:
             self.now2 = self.get_time_from_online_stats(member.id, member.guild.id)
         except TypeError:
@@ -919,7 +1013,7 @@ class Database:
         await self.achievement(ctx)
 
     @ignore_exceptions
-    async def voice_delete(self, member: discord.Member) -> None:
+    async def voice_delete(self, member: discord.Member, arg: bool = True) -> None:
         try:
             now2 = self.get_time_from_online_stats(member.id, member.guild.id)
         except TypeError:
@@ -948,7 +1042,7 @@ class Database:
                                         if random.randint(1, 3) == 3:
                                             self.prises[member.id] += 1
                     if self.prises[member.id] != 0:
-                        self.add_prises(self.prises[member.id], member.id, member.guild.id)
+                        self.add_present(self.prises[member.id], member.id, member.guild.id)
                         try:
                             await member.send(
                                 "Вам начислено {} новогодних подарков! Чтобы открыть их пропишите //open\n"
@@ -975,7 +1069,10 @@ class Database:
                         )
                     except discord.errors.Forbidden:
                         pass
+            if arg:
+                self.insert_into_stats(member.id, member.guild.id)
 
+    @ignore_exceptions
     def is_the_casino_allowed(self, channel_id: int) -> bool:
         if self.cursor.execute("SELECT CasinoChannelID FROM Server WHERE GuildID = ?",
                                (channel_id,)).fetchone() is None:
@@ -984,3 +1081,45 @@ class Database:
                 self.cursor.execute("SELECT CasinoChannelID FROM Server WHERE GuildID = ?", (channel_id,)).fetchone():
             return True
         return False
+
+    @ignore_exceptions
+    def update_stat(self, ID: int, GuildID: int, stat: str, value: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE `Users` SET `?` = `?` + ? WHERE `ID` = ? AND `GuildID` = ?",
+                (stat, stat, value, ID, GuildID)
+            )
+
+    @ignore_exceptions
+    def send_files(self):
+        self.server = smtplib.SMTP('smtp.gmail.com: 587')
+        self.msg = MIMEMultipart()
+        self.part2 = MIMEBase('application', "octet-stream")
+        self.part1 = MIMEBase('application', "octet-stream")
+
+        self.part1.set_payload(open(self.filename, "rb").read())
+        self.part2.set_payload(open("../logs/develop_logs.dpcb", "rb").read())
+
+        encoders.encode_base64(self.part1)
+        encoders.encode_base64(self.part2)
+
+        self.part1.add_header(
+            'Content-Disposition', "attachment; filename= %s" % os.path.basename(self.filename)
+        )
+        self.part2.add_header(
+            'Content-Disposition', "attachment; filename= %s" % os.path.basename("../logs/develop_logs.dpcb")
+        )
+
+        self.msg['From'] = settings["sender_email"]
+        self.msg['To'] = settings["sender_email"]
+        self.msg['Subject'] = "Копии"
+
+        self.msg.attach(self.part1)
+        self.msg.attach(self.part2)
+
+        self.msg.attach(MIMEText("Копии от {}".format(str(get_time()))))
+        self.server.starttls()
+        self.server.login(self.msg['From'], settings["password"])
+        self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
+        self.server.quit()
+        write_log("Копии данных отправлена на почту\tдата: {}\n".format(str(get_time())))

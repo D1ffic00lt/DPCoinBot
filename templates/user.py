@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import io
 import os
 import discord
+import requests
 
 from discord.ext import commands
+from PIL import Image, ImageFont, ImageDraw
 
 from .helperfunction import divide_the_number, create_emb, get_color, ignore_exceptions
 from ..database.db import Database
@@ -13,7 +16,7 @@ from .texts import *
 
 class User(commands.Cog, name='user module', Database):
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
+        super().__init__("server.db")
         self.bot: commands.Bot = bot
         self.name: discord.Member
         self.color: discord.Color
@@ -531,3 +534,116 @@ class User(commands.Cog, name='user module', Database):
                 ]
             )
         )
+
+    @commands.command(aliases=["card"])
+    async def __Card(self, ctx):
+        img = Image.new("RGBA", (500, 300), "#323642")
+        Image.open(
+            io.BytesIO(
+                requests.get(
+                    str(ctx.author.avatar_url)[:-10],
+                    stream=True
+                ).content
+            )
+        ).convert("RGBA").resize(
+            (100, 100), Image.ANTIALIAS
+        ).save(f"prom_files/avatar{ctx.author.id}.png")
+        crop(
+            Image.open(f'prom_files/avatar{ctx.author.id}.png'),
+            (100, 100)
+        ).putalpha(
+            prepare_mask(
+                (100, 100),
+                4
+            )
+        ).save(f'prom_files/out_avatar{ctx.author.id}.png')
+
+        img.alpha_composite(
+            Image.open(
+                f'prom_files/out_avatar{ctx.author.id}.png',
+            ).convert("RGBA").resize(
+                (100, 100), Image.ANTIALIAS
+            ), (15, 15)
+        )
+
+        imagedraw = ImageDraw.Draw(img)
+        wins = 0
+        loses = 0
+        vm = 0
+        messages = 0
+
+        for i in self.get_from_user(
+                ctx.author.id, ctx.guild.id,
+                "AllWins", "AllLoses", "MinutesInVoiceChannels", "MessagesCount",
+                order_by="AllWins"
+        ):
+            wins += i[0]
+            loses += i[1]
+            vm += i[2]
+            messages += i[3]
+
+        imagedraw.text(
+            (130, 15),
+            f"{ctx.author.name}#{ctx.author.discriminator}",
+            font=ImageFont.truetype('calibri.ttf', size=30)
+        )
+        imagedraw.text(
+            (130, 45),
+            f"ID: {ctx.author.id}",
+            font=ImageFont.truetype("calibri.ttf", size=20)
+        )
+        imagedraw.text(
+            (15, 125),
+            f"Wins: {wins}",
+            font=ImageFont.truetype("calibrib.ttf", size=25)
+        )
+        imagedraw.text(
+            (15, 160),
+            f"Loses: {divide_the_number(loses)}",
+            font=ImageFont.truetype("calibrib.ttf", size=25)
+        )
+        imagedraw.text(
+            (15, 195),
+            f"Minutes in voice: {divide_the_number(vm)}",
+            font=ImageFont.truetype("calibrib.ttf", size=25)
+        )
+        imagedraw.text(
+            (15, 230),
+            f"Messages: {divide_the_number(messages)}",
+            font=ImageFont.truetype("calibrib.ttf", size=25)
+        )
+        images = []
+        ver, dev, cod = cursor.execute("SELECT verification, developer, coder FROM card WHERE id = ?",
+                                       [ctx.author.id]).fetchone()
+        if int(ver) == 1:
+            image = Image.open("progfiles/images/green_galka.png")
+            image = image.convert("RGBA")
+            image = image.resize((30, 30), Image.ANTIALIAS)
+            images.append(image)
+        elif int(ver) == 2:
+            image = Image.open("progfiles/images/galka.png")
+            image = image.convert("RGBA")
+            image = image.resize((30, 30), Image.ANTIALIAS)
+            images.append(image)
+        if int(dev) == 1:
+            image = Image.open("progfiles/images/developer.png")
+            image = image.convert("RGBA")
+            image = image.resize((30, 30), Image.ANTIALIAS)
+            images.append(image)
+        if int(cod) == 1:
+            image = Image.open("progfiles/images/cmd.png")
+            image = image.convert("RGBA")
+            image = image.resize((30, 30), Image.ANTIALIAS)
+            images.append(image)
+        if len(images) != 0:
+            x = 128
+            for i in range(len(images)):
+                img.alpha_composite(images[i], (x, 70))
+                x += 35
+
+        img.save(f'prom_files/user_card{ctx.author.id}.png')
+
+        await ctx.send(file=discord.File(fp=f'prom_files/user_card{ctx.author.id}.png'))
+        os.remove(f"prom_files/user_card{ctx.author.id}.png")
+        os.remove(f"prom_files/avatar{ctx.author.id}.png")
+        os.remove(f"prom_files/out_avatar{ctx.author.id}.png")

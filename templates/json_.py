@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import _io
 import json
+import os
 
 
 class Json(object):
@@ -17,3 +18,13 @@ class Json(object):
     def json_dump(self, data: dict | list) -> None:
         with open(f".json/{self.filename}", "w+") as self.file:
             json.dump(data, self.file)
+
+    @staticmethod
+    def get_ban_list() -> list:
+        return []
+
+    @staticmethod
+    def check_file_exists(filename: str) -> bool:
+        if os.path.exists(f".json/{filename}"):
+            return True
+        return False

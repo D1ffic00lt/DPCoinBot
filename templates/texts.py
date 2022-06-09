@@ -21,7 +21,7 @@ discord_foo: str = f'**Добавлено:** \n' \
                    f'> Баг со снятием денег\n\n' \
                    f'> Визуализация выигрыша\\проигрыша в 777, roll, rust casino, fail'
 
-levels = {
+levels: dict = {
     "level1": f'Стандарт для всех участников. За одну минуту в голосовом канале даётся 1 DP коин, за одно '
               f'сообщение, соответствующее условиям, начисляется 1 DP коин',
     "level2": f'За одну минуту в голосовом канале даётся 4 коина, за одно '
@@ -34,3 +34,113 @@ levels = {
               f'сообщение, соответствующее условиям, начисляется 20 коинов\n**Стоимость: 400000 DP коинов**',
     "LevelUp": f"""```diff\n- {settings["prefix"]}lvl_up - поднимет Вам левел\n```"""
 }
+
+new_year: dict = {
+    "MandarinsCount":
+        {
+            "price": 200,
+            "ylt_%": 10,
+            "xp": 20,
+            "mood": 100,
+            "name": "Мандарин",
+            "index": 0
+        },
+    "OlivierSaladCount":
+        {
+            "price": 400,
+            "ylt_%": 20,
+            "xp": 50,
+            "mood": 200,
+            "name": "Оливье",
+            "index": 1
+        },
+    "CaesarSaladCount":
+        {
+            "price": 300,
+            "ylt_%": 20,
+            "xp": 50,
+            "mood": 200,
+            "name": "Цезарь",
+            "index": 2
+        },
+    "RedСaviarCount":
+        {
+            "price": 500,
+            "ylt_%": 30,
+            "xp": 80,
+            "mood": 400,
+            "name": "Красная Икра",
+            "index": 3
+        },
+    "BlackСaviarCount":
+        {
+            "price": 1000,
+            "ylt_%": 35,
+            "xp": 60,
+            "mood": 700,
+            "name": "Чёрная Икра",
+            "index": 4
+        },
+    "SlicedMeatCount":
+        {
+            "price": 350,
+            "ylt_%": 25,
+            "xp": 200,
+            "mood": 100,
+            "name": "Мясная Нарезка",
+            "index": 5
+        },
+    "DucksCount":
+        {
+            "price": 500,
+            "ylt_%": 30,
+            "xp": 60,
+            "mood": 200,
+            "name": "Утка",
+            "index": 6
+        },
+    "SaltedRedFishsCount":
+        {
+            "price": 550,
+            "ylt_%": 35,
+            "xp": 80,
+            "mood": 250,
+            "name": "Красная Рыба(Солёная)",
+            "index": 7
+        },
+    "DobryJuiceCount":
+        {
+            "price": 350,
+            "ylt_%": 15,
+            "xp": 20,
+            "mood": 150,
+            "name": "Сок \"Добрый\"",
+            "index": 8
+        },
+    "BabyChampagneCount":
+        {
+            "price": 1000,
+            "ylt_%": 20,
+            "xp": 50,
+            "mood": 400,
+            "name": "Детское Шампанское",
+            "index": 9
+        }
+
+}
+
+casino_numbers_color: dict = {
+    0: "green", 1: "red", 2: "black", 3: "red", 4: "black", 5: "red", 6: "black",
+    7: "red",  8: "black", 9: "red", 10: "black", 11: "red", 12: "black", 13: "red",
+    14: "black", 15: "red", 16: "black", 17: "red", 18: "black", 19: "red", 20: "black",
+    21: "red", 22: "black", 23: "red", 24: "black", 25: "red", 26: "black", 27: "red", 28: "black",
+    29: "red", 30: "black", 31: "red", 32: "black", 33: "red", 34: "black", 35: "red", 36: "black"
+}
+roll_types: list = [
+    "1st12", "2nd12", "3rd12", '1to18',
+    "19to36", "2to1", "2to2", "2to3", "b",
+    "r", "ch", "nch"
+]
+row1 = [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36]
+row2 = [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35]
+row3 = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34]
