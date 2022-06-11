@@ -10,7 +10,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from sqlite3 import Cursor
-from typing import Tuple, Any
+from typing import Tuple
 
 from ..templates.helperfunction import *
 
@@ -166,6 +166,12 @@ class Database:
            Developer                    BOOLEAN DEFAULT false NOT NULL,
            Coder                        BOOLEAN DEFAULT false NOT NULL
            )""")
+        # self.cursor.execute("""CREATE TABLE IF NOT EXISTS Card (
+        #    ID                           INT NOT NULL,
+        #    Verification                 INT DEFAULT 0 NOT NULL,
+        #    Developer                    BOOLEAN DEFAULT false NOT NULL,
+        #    Coder                        BOOLEAN DEFAULT false NOT NULL
+        #    )""")
         self.connection.commit()
 
     @ignore_exceptions
@@ -349,6 +355,13 @@ class Database:
             f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Server` WHERE `GuildID` = ?",
             (guild_id,)
         ).fetchall()
+
+    @ignore_exceptions
+    def get_from_card(self, ID: int, *args: Tuple[str]) -> Any:
+        return self.cursor.execute(
+            f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Server` WHERE `ID` = ?",
+            (ID,)
+        ).fetchone()
 
     @ignore_exceptions
     def get_users_count(self, unique: bool = False) -> int:

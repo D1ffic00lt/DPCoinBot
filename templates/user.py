@@ -8,7 +8,11 @@ import requests
 from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 
-from .helperfunction import divide_the_number, create_emb, get_color, ignore_exceptions
+from .helperfunction import (
+    divide_the_number, create_emb,
+    get_color, ignore_exceptions,
+    prepare_mask, crop
+)
 from ..database.db import Database
 from .json_ import Json
 from .texts import *
@@ -537,7 +541,7 @@ class User(commands.Cog, name='user module', Database):
 
     @commands.command(aliases=["card"])
     async def __Card(self, ctx):
-        img = Image.new("RGBA", (500, 300), "#323642")
+        self.img = Image.new("RGBA", (500, 300), "#323642")
         Image.open(
             io.BytesIO(
                 requests.get(
@@ -558,7 +562,7 @@ class User(commands.Cog, name='user module', Database):
             )
         ).save(f'prom_files/out_avatar{ctx.author.id}.png')
 
-        img.alpha_composite(
+        self.img.alpha_composite(
             Image.open(
                 f'prom_files/out_avatar{ctx.author.id}.png',
             ).convert("RGBA").resize(
@@ -566,84 +570,113 @@ class User(commands.Cog, name='user module', Database):
             ), (15, 15)
         )
 
-        imagedraw = ImageDraw.Draw(img)
-        wins = 0
-        loses = 0
-        vm = 0
-        messages = 0
+        self.image_draw = ImageDraw.Draw(self.img)
+        self.wins = 0
+        self.loses = 0
+        self.vm = 0  # честно, не помню, что это такое
+        self.messages = 0
 
         for i in self.get_from_user(
                 ctx.author.id, ctx.guild.id,
                 "AllWins", "AllLoses", "MinutesInVoiceChannels", "MessagesCount",
                 order_by="AllWins"
         ):
-            wins += i[0]
-            loses += i[1]
-            vm += i[2]
-            messages += i[3]
+            self.wins += i[0]
+            self.loses += i[1]
+            self.vm += i[2]
+            self.messages += i[3]
 
-        imagedraw.text(
+        self.image_draw.text(
             (130, 15),
             f"{ctx.author.name}#{ctx.author.discriminator}",
             font=ImageFont.truetype('calibri.ttf', size=30)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (130, 45),
             f"ID: {ctx.author.id}",
             font=ImageFont.truetype("calibri.ttf", size=20)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (15, 125),
-            f"Wins: {wins}",
+            f"Wins: {self.wins}",
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (15, 160),
-            f"Loses: {divide_the_number(loses)}",
+            f"Loses: {divide_the_number(self.loses)}",
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (15, 195),
-            f"Minutes in voice: {divide_the_number(vm)}",
+            f"Minutes in voice: {divide_the_number(self.vm)}",
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (15, 230),
-            f"Messages: {divide_the_number(messages)}",
+            f"Messages: {divide_the_number(self.messages)}",
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
-        images = []
-        ver, dev, cod = cursor.execute("SELECT verification, developer, coder FROM card WHERE id = ?",
-                                       [ctx.author.id]).fetchone()
-        if int(ver) == 1:
-            image = Image.open("progfiles/images/green_galka.png")
-            image = image.convert("RGBA")
-            image = image.resize((30, 30), Image.ANTIALIAS)
-            images.append(image)
-        elif int(ver) == 2:
-            image = Image.open("progfiles/images/galka.png")
-            image = image.convert("RGBA")
-            image = image.resize((30, 30), Image.ANTIALIAS)
-            images.append(image)
-        if int(dev) == 1:
-            image = Image.open("progfiles/images/developer.png")
-            image = image.convert("RGBA")
-            image = image.resize((30, 30), Image.ANTIALIAS)
-            images.append(image)
-        if int(cod) == 1:
-            image = Image.open("progfiles/images/cmd.png")
-            image = image.convert("RGBA")
-            image = image.resize((30, 30), Image.ANTIALIAS)
-            images.append(image)
-        if len(images) != 0:
-            x = 128
-            for i in range(len(images)):
-                img.alpha_composite(images[i], (x, 70))
-                x += 35
+        self.images = []
+        self.verification,  self.developer, self.coder = \
+            self.get_from_card(ctx.author.id, "Verification", "Developer", "Coder")
+        if int(self.verification) == 1:
+            self.image = Image.open("progfiles/images/green_galka.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        elif int(self.verification) == 2:
+            self.image = Image.open("progfiles/images/galka.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        if int(self.developer) == 1:
+            self.image = Image.open("progfiles/images/developer.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        if int(self.coder) == 1:
+            self.image = Image.open("progfiles/images/cmd.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        if len(self.images) != 0:
+            self.x = 128
+            for i in range(len(self.images)):
+                self.img.alpha_composite(self.images[i], (self.x, 70))
+                self.x += 35
 
-        img.save(f'prom_files/user_card{ctx.author.id}.png')
+        self.img.save(f'prom_files/user_card{ctx.author.id}.png')
 
         await ctx.send(file=discord.File(fp=f'prom_files/user_card{ctx.author.id}.png'))
         os.remove(f"prom_files/user_card{ctx.author.id}.png")
         os.remove(f"prom_files/avatar{ctx.author.id}.png")
         os.remove(f"prom_files/out_avatar{ctx.author.id}.png")
+
+
+    @commands.command(aliases=["promo"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __promo_active(self, ctx, promo: str = None):
+        if promo is None:
+            await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
+        elif cursor.execute("SELECT global FROM promo_codes WHERE code = '?'", [str(promo)]).fetchone() is None:
+            await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
+        elif str(cursor.execute("SELECT global FROM promo_codes WHERE code = '?'", [str(promo)]).fetchone()[0]) == "0" \
+                and ctx.guild.id != \
+                cursor.execute("SELECT server_id FROM promo_codes WHERE code = '?'", [str(promo)]).fetchone()[0]:
+            await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
+        else:
+            cash = cursor.execute("SELECT cash FROM promo_codes WHERE code = '?'", [str(promo)]).fetchone()[0]
+            MainFuncs.add_coins_ctx(ctx, cash)
+            cursor.execute("DELETE FROM promo_codes WHERE code = '?'", [str(promo)])
+            connection.commit()
+
+            color = [role for role in ctx.author.roles][-1].color
+            if str([role for role in ctx.author.roles][-1]) == "@everyone":
+                color = discord.Color.from_rgb(32, 34, 37)
+            emb = discord.Embed(title="Промокод", colour=color)
+            emb.add_field(
+                name=f'Промокод активирован!',
+                value=f'Вам начислено **{razr(cash)}** коинов!',
+                inline=False
+            )
+            await ctx.send(embed=emb)
