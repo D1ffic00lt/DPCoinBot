@@ -166,24 +166,38 @@ class Database:
            Developer                    BOOLEAN DEFAULT false NOT NULL,
            Coder                        BOOLEAN DEFAULT false NOT NULL
            )""")
-        # self.cursor.execute("""CREATE TABLE IF NOT EXISTS Card (
-        #    ID                           INT NOT NULL,
-        #    Verification                 INT DEFAULT 0 NOT NULL,
-        #    Developer                    BOOLEAN DEFAULT false NOT NULL,
-        #    Coder                        BOOLEAN DEFAULT false NOT NULL
-        #    )""")
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS PromoCodes (
+           Code                         VARCHAR (255) NOT NULL NOT NULL,
+           Global                       INT DEFAULT 0 NOT NULL,
+           GuildID                      INT NOT NULL,
+           Cash                         BIGINT NOT NULL
+           )""")
         self.connection.commit()
 
     @ignore_exceptions
     def checking_for_user_existence_in_table(self, ID: int, guild_id: int = 0) -> bool:
-        if self.cursor.execute("SELECT `Name` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
-                               (ID, guild_id)).fetchone() is None:
+        if self.cursor.execute(
+                "SELECT `Name` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+        ).fetchone() is None:
+            return False
+        return True
+
+    @ignore_exceptions
+    def checking_for_promo_code_existence_in_table(self, Code: str) -> bool:
+        if self.cursor.execute(
+                "SELECT `*` FROM `PromoCodes` WHERE `Code` = ?",
+                (Code, )
+        ).fetchone() is None:
             return False
         return True
 
     @ignore_exceptions
     def checking_for_guild_existence_in_table(self, guild_id: int) -> bool:
-        if self.cursor.execute("SELECT * FROM `Server` WHERE `GuildID` = ?", (guild_id,)).fetchone() is None:
+        if self.cursor.execute(
+                "SELECT * FROM `Server` WHERE `GuildID` = ?",
+                (guild_id,)
+        ).fetchone() is None:
             return False
         return True
 
@@ -264,6 +278,13 @@ class Database:
         return self.cursor.execute(
             "SELECT `?` FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
             (item, ID, guild_id)
+        ).fetchone()[0]
+
+    @ignore_exceptions
+    def get_from_promo_codes(self, code: str, item: str) -> int | str:
+        return self.cursor.execute(
+            "SELECT `?` FROM `PromoCodes` WHERE `Code` = ?",
+            (item, code)
         ).fetchone()[0]
 
     @ignore_exceptions
@@ -651,6 +672,21 @@ class Database:
     def delete_from_online_stats(self, ID: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("DELETE FROM `OnlineStats` WHERE `ID` = ?", (ID,))
+
+    @ignore_exceptions
+    def delete_from_promo_codes(self, code: str) -> Cursor:
+        with self.connection:
+            return self.cursor.execute("DELETE FROM `PromoCodes` WHERE `Code` = `?`", (code, ))
+
+    @ignore_exceptions
+    def delete_from_coinflip(self, ID1: int, ID2: int, guild_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "DELETE FROM `CoinFlip` WHERE "
+                "(`FirstPlayerID` = ? OR `SecondPlayerID` = ?) AND "
+                "(`FirstPlayerID` = ? OR `SecondPlayerID` = ?) AND `GuildID` = ?",
+                (ID1, ID1, ID2, ID2, guild_id)
+            )
 
     @ignore_exceptions
     def delete_from_online(self, ID: int) -> Cursor:

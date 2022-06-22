@@ -652,31 +652,48 @@ class User(commands.Cog, name='user module', Database):
         os.remove(f"prom_files/avatar{ctx.author.id}.png")
         os.remove(f"prom_files/out_avatar{ctx.author.id}.png")
 
-
     @commands.command(aliases=["promo"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __promo_active(self, ctx, promo: str = None):
         if promo is None:
             await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
-        elif cursor.execute("SELECT global FROM promo_codes WHERE code = '?'", [str(promo)]).fetchone() is None:
+        elif not self.checking_for_promo_code_existence_in_table(promo):
             await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
-        elif str(cursor.execute("SELECT global FROM promo_codes WHERE code = '?'", [str(promo)]).fetchone()[0]) == "0" \
-                and ctx.guild.id != \
-                cursor.execute("SELECT server_id FROM promo_codes WHERE code = '?'", [str(promo)]).fetchone()[0]:
+        elif self.get_from_promo_codes(promo, "Global") == 0 and \
+                ctx.guild.id != self.get_from_promo_codes(promo, "GuildID"):
             await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
         else:
-            cash = cursor.execute("SELECT cash FROM promo_codes WHERE code = '?'", [str(promo)]).fetchone()[0]
-            MainFuncs.add_coins_ctx(ctx, cash)
-            cursor.execute("DELETE FROM promo_codes WHERE code = '?'", [str(promo)])
-            connection.commit()
-
-            color = [role for role in ctx.author.roles][-1].color
-            if str([role for role in ctx.author.roles][-1]) == "@everyone":
-                color = discord.Color.from_rgb(32, 34, 37)
-            emb = discord.Embed(title="Промокод", colour=color)
-            emb.add_field(
+            self.cash = self.get_from_promo_codes(promo, "Cash")
+            self.add_coins(ctx.author.id, ctx.guild.id, self.cash)
+            self.delete_from_promo_codes(promo)
+            self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
+            self.emb.add_field(
                 name=f'Промокод активирован!',
-                value=f'Вам начислено **{razr(cash)}** коинов!',
+                value=f'Вам начислено **{divide_the_number(self.cash)}** коинов!',
                 inline=False
             )
-            await ctx.send(embed=emb)
+            await ctx.send(embed=self.emb)
+
+    @commands.command(aliases=['gift'])
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def __gift(self, ctx, member: discord.Member = None, role: discord.Role = None):
+        if role is None:
+            await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
+        elif member is None:
+            await ctx.send(f"""{ctx.author}, укажите человека, которому Вы хотите подарить роль""")
+        else:
+            if role in member.roles:
+                await ctx.send(f"""{ctx.author}, у Вас уже есть эта роль!""")
+
+            elif self.get_from_shop(ctx.guild.id, "RoleCost", order_by="price", role_id=role.id).fetchone()[0] > \
+                    self.get_cash(ctx.author.id, ctx.guild.id):
+                await ctx.send(f"""{ctx.author}, у Вас недостаточно денег для покупки этой роли!""")
+            else:
+                await member.add_roles(role)
+                self.take_coins(
+                    ctx.author.id,
+                    ctx.guild.id,
+                    self.get_from_shop(ctx.guild.id, "RoleCost", order_by="price", role_id=role.id
+                                       ).fetchone()[0]
+                )
+                await ctx.message.add_reaction('✅')

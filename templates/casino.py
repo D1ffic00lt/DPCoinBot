@@ -592,3 +592,127 @@ class Casino(commands.Cog, name='Casino module', Database):
                         await ctx.send(f"{ctx.author.mention}, Такого атрибута не существует! ")
         else:
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
+
+    @commands.command(aliases=['del_games'])
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def __del_games(self, ctx, member: discord.Member = None):
+        if member is None:
+            self.delete_from_coinflip(ctx.author.id, ctx.guild.id)
+            await ctx.message.add_reaction('✅')
+        else:
+            if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
+                self.delete_from_coinflip(member.id, ctx.guild.id)
+                await ctx.message.add_reaction('✅')
+            else:
+                await ctx.send("Ты чё ку-ку? Тебе так нельзя.")
+
+    @commands.command(aliases=['reject'])
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def __reject(self, ctx, member: discord.Member = None):
+        if member is None:
+            await ctx.send("Вы не ввели человека")
+        elif member.id == ctx.author.id:
+            await ctx.send("Вы не можете ввести себя")
+            self.get_active_coinflip()
+        elif not self.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
+            await ctx.send(f"Такой игры не существует, посмотреть все ваши активные игры - "
+                           f"{settings['prefix']}games")
+        else:
+            self.delete_from_coinflip(ctx.author.id, member.id, ctx.guild.id)
+            await ctx.message.add_reaction('✅')
+
+    # @commands.command(aliases=['accept'])
+    # @commands.cooldown(1, 4, commands.BucketType.user)
+    # async def __c_accept(self, ctx, member: discord.Member = None):
+    #     if member is None:
+    #         await ctx.send("Вы не ввели человека")
+    #     elif cursor.execute("SELECT player2_id FROM coinflip WHERE player1_id = ? AND guild_id = ?",
+    #                         [member.id, ctx.guild.id]).fetchone() is None:
+    #         await ctx.send(f"Такой игры не существует, посмотреть все ваши активные игры - "
+    #                        f"{settings['prefix']}games")
+    #     elif reladdons.long.minutes(cursor.execute("SELECT date FROM coinflip WHERE guild_id = ? AND player1_id = ? AND "
+    #                                                "player2_id = ?", [ctx.guild.id, member.id, ctx.author.id]).fetchone()[
+    #                                     0]) > 5:
+    #         await ctx.send(f"Время истекло:(")
+    #         cursor.execute(
+    #             'DELETE FROM coinflip WHERE player1_id = ? AND player2_id = ? AND guild_id = ?',
+    #             [member.id, ctx.author.id, ctx.guild.id])
+    #         connection.commit()
+    #     elif cursor.execute("SELECT cash FROM users WHERE id = ? AND server_id = ?",
+    #                         [ctx.author.id, ctx.guild.id]).fetchone()[0] < \
+    #             cursor.execute("SELECT num FROM coinflip WHERE player1_id = ? AND guild_id = ? AND player2_id = ?",
+    #                            [member.id, ctx.guild.id, ctx.author.id]).fetchone()[0]:
+    #         await ctx.send(f"{ctx.author.mention}, У Вас недостаточно средств")
+    #     elif cursor.execute("SELECT cash FROM users WHERE id = ? AND server_id = ?",
+    #                         [member.id, ctx.guild.id]).fetchone()[
+    #         0] < cursor.execute("SELECT num FROM coinflip WHERE player1_id = ? AND guild_id = ? AND player2_id = ?",
+    #                             [member.id, ctx.guild.id, ctx.author.id]).fetchone()[0]:
+    #         await ctx.send(f"{ctx.author.mention}, У Вашего оппонента недостаточно средств")
+    #     else:
+    #         num = cursor.execute(
+    #             "SELECT num FROM coinflip WHERE player1_id = ? AND guild_id = ? AND player2_id = ?",
+    #             [member.id, ctx.guild.id, ctx.author.id]).fetchone()[0]
+    #         MainFuncs.take_coins_ctx(ctx, num)
+    #         MainFuncs.take_coins_member(member, num)
+    #         connection.commit()
+    #         ch = random.randint(1, 2)
+    #         # if member.id == 401555829620211723:
+    #         #       ch = 2
+    #         if ch == 1:
+    #             color = [role for role in ctx.author.roles][-1].color
+    #             if str([role for role in ctx.author.roles][-1]) == "@everyone":
+    #                 color = discord.Color.from_rgb(32, 34, 37)
+    #             emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=color)
+    #             emb.add_field(
+    #                 name=f'Поздравляем!',
+    #                 value=f'{ctx.author.mention}, Вы выиграли **{razr(num * 2)}** DP коинов!',
+    #                 inline=False
+    #             )
+    #             await ctx.send(embed=emb)
+    #             MainFuncs.add_coins_ctx(ctx, num * 2)
+    #             await stats_update(ctx, "coinflips", "cf", "wins", num * 2)
+    #             stats_update_member(member.id, member.guild.id, "coinflips", "cf", "loses", num * 2)
+    #
+    #             cursor.execute("UPDATE achievements SET loses = loses + 1 WHERE id = ? AND server_id = ?",
+    #                            [member.id, member.guild.id])
+    #             cursor.execute("UPDATE achievements SET wins = 0 WHERE id = ? AND server_id = ?",
+    #                            [member.id, member.guild.id])
+    #
+    #             cursor.execute("UPDATE achievements SET wins = wins + 1 WHERE id = ? AND server_id = ?",
+    #                            [ctx.author.id, ctx.guild.id])
+    #             cursor.execute("UPDATE achievements SET loses = 0 WHERE id = ? AND server_id = ?",
+    #                            [member.id, member.guild.id])
+    #             connection.commit()
+    #             await aciv_member(member.id, member.guild.id, member, member.guild)
+    #             await aciv(ctx)
+    #         else:
+    #             stats_update_member(member.id, member.guild.id, "coinflips", "cf", "wins", num * 2)
+    #             await stats_update(ctx, "coinflips", "cf", "loses", num * 2)
+    #             cursor.execute("UPDATE achievements SET loses = loses + 1 WHERE id = ? AND server_id = ?",
+    #                            [ctx.author.id, ctx.guild.id])
+    #             cursor.execute("UPDATE achievements SET wins = 0 WHERE id = ? AND server_id = ?",
+    #                            [ctx.author.id, ctx.guild.id])
+    #
+    #             cursor.execute("UPDATE achievements SET wins = wins + 1 WHERE id = ? AND server_id = ?",
+    #                            [member.id, member.guild.id])
+    #             cursor.execute("UPDATE achievements SET loses = 0 WHERE id = ? AND server_id = ?",
+    #                            [member.id, member.guild.id])
+    #             connection.commit()
+    #             await aciv_member(member.id, member.guild.id, member, member.guild)
+    #             await aciv(ctx)
+    #             color = [role for role in ctx.author.roles][-1].color
+    #             if str([role for role in ctx.author.roles][-1]) == "@everyone":
+    #                 color = discord.Color.from_rgb(32, 34, 37)
+    #             emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=color)
+    #             emb.add_field(
+    #                 name=f'Поздравляем!',
+    #                 value=f'{member.mention}, Вы выиграли **{razr(num * 2)}** DP коинов!',
+    #                 inline=False
+    #             )
+    #             await ctx.send(embed=emb)
+    #             MainFuncs.add_coins_member(member, num * 2)
+    #
+    #         cursor.execute(
+    #             'DELETE FROM coinflip WHERE player1_id = ? AND player2_id = ? AND guild_id = ?',
+    #             [member.id, ctx.author.id, ctx.guild.id])
+    #         connection.commit()
