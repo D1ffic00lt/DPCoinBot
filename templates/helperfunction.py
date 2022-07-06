@@ -1,12 +1,11 @@
+""" не смотрите сюда """
 # -*- coding: utf-8 -*-
 import random
-from typing import Callable, List, Any
-
 import discord
 import emoji
 
 from datetime import datetime
-
+from typing import Callable, List, Any
 from discord.embeds import EmptyEmbed
 from discord.ext import commands
 from PIL import Image, ImageDraw
@@ -15,7 +14,6 @@ from vk_api import VkApi
 from ..config import settings
 
 bot = commands.Bot(command_prefix=settings["prefix"], intents=discord.Intents.all())
-
 casino2 = {}
 
 

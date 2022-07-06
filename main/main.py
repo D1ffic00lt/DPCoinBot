@@ -29,7 +29,7 @@ def main() -> None:
     BOT.add_cog(Debug(BOT))
     BOT.add_cog(User(BOT))
     BOT.add_cog(Events(BOT))
-
+    BOT.add_cog(Guild(BOT))
     BOT.run(settings["token"])
 
 

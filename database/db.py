@@ -76,8 +76,8 @@ class Database:
             CasinoChannelID              INT NOT NULL,
             CategoryID                   INT NOT NULL,
             Auto                         BOOLEAN NOT NULL,
+            BankInterest                 INT DEFAULT 0 NOT NULL,
             StartingBalance              BIGINT DEFAULT 0 NOT NULL,
-            BankInterest                 INT DEFAULT 0 NOT NULL
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS ItemsShop (
             ItemID                       INT NOT NULL,
@@ -187,7 +187,7 @@ class Database:
     def checking_for_promo_code_existence_in_table(self, Code: str) -> bool:
         if self.cursor.execute(
                 "SELECT `*` FROM `PromoCodes` WHERE `Code` = ?",
-                (Code, )
+                (Code,)
         ).fetchone() is None:
             return False
         return True
@@ -235,6 +235,26 @@ class Database:
             )
 
     @ignore_exceptions
+    def insert_into_server(
+            self, guild_id: int,
+            role_id: int,
+            admin_id: int,
+            casino_channel_id: int,
+            category_id: int
+    ) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "INSERT INTO `Server` VALUES (?, ?, ?, ?, ?, true)",
+                (
+                    guild_id,
+                    role_id,
+                    admin_id,
+                    casino_channel_id,
+                    category_id
+                )
+            )
+
+    @ignore_exceptions
     def insert_into_card(self, ID: int) -> Cursor:
         if self.cursor.execute("SELECT * FROM `Card` WHERE `ID` = ?", (ID,)).fetchone() is None:
             with self.connection:
@@ -272,6 +292,14 @@ class Database:
             "SELECT `StartingBalance` FROM `Server` WHERE `GuildID` = ?",
             (guild_id,)
         ).fetchone()[0]
+
+    @ignore_exceptions
+    def get_guild_settings(self, guild_id: int) -> Cursor:
+        return self.cursor.execute(
+            "SELECT `ChannelID`, `CasinoChannelID`, `AdministratorRoleID`, `Auto`, `CategoryID` "
+            "FROM `Server` WHERE `GuildID` = ?",
+            (guild_id,)
+        )
 
     @ignore_exceptions
     def get_from_inventory(self, ID: int, guild_id: int, item: str) -> int:
@@ -432,6 +460,11 @@ class Database:
             return self.cursor.execute('DELETE FROM `CoinFlip`')
 
     @ignore_exceptions
+    def delete_from_server(self, guild_id) -> Cursor:
+        with self.connection:
+            return self.cursor.execute('DELETE FROM `Server` WHERE `GuildID` = ?', (guild_id,))
+
+    @ignore_exceptions
     def add_present(self, prises: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -479,8 +512,17 @@ class Database:
     @ignore_exceptions
     def add_coins(self, ID: int, guild_id: int, cash: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Users` SET `Cash` + ? WHERE `ID` = ? AND `GuildID` = ?",
-                                       (cash, ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Users` SET `Cash` + ? WHERE `ID` = ? AND `GuildID` = ?",
+                (cash, ID, guild_id)
+            )
+
+    @ignore_exceptions
+    def set_start_cash(self, guild_id: int, cash: int) -> Cursor:
+        return self.cursor.execute(
+            "UPDATE `Server` SET `StartingBalance` = ? WHERE `GuildID` = ?",
+            (cash, guild_id)
+        )
 
     @ignore_exceptions
     def take_coins(self, ID: int, guild_id: int, cash: int) -> Cursor:
@@ -664,9 +706,9 @@ class Database:
         ).fetchone() is None \
                or \
                self.cursor.execute(
-            "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
-            (second_player_id, guild_id, first_player_id)
-        ).fetchone() is None
+                   "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
+                   (second_player_id, guild_id, first_player_id)
+               ).fetchone() is None
 
     @ignore_exceptions
     def delete_from_online_stats(self, ID: int) -> Cursor:
@@ -676,7 +718,7 @@ class Database:
     @ignore_exceptions
     def delete_from_promo_codes(self, code: str) -> Cursor:
         with self.connection:
-            return self.cursor.execute("DELETE FROM `PromoCodes` WHERE `Code` = `?`", (code, ))
+            return self.cursor.execute("DELETE FROM `PromoCodes` WHERE `Code` = `?`", (code,))
 
     @ignore_exceptions
     def delete_from_coinflip(self, ID1: int, ID2: int, guild_id: int) -> Cursor:
