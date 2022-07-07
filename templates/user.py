@@ -11,7 +11,7 @@ from PIL import Image, ImageFont, ImageDraw
 from .helperfunction import (
     divide_the_number, create_emb,
     get_color, ignore_exceptions,
-    prepare_mask, crop, logging
+    prepare_mask, crop, logging, get_promo_code
 )
 from ..database.db import Database
 from .json_ import Json
@@ -697,3 +697,95 @@ class User(commands.Cog, name='user module', Database):
                                        ).fetchone()[0]
                 )
                 await ctx.message.add_reaction('✅')
+
+    @commands.command(aliases=["promo"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __promo_active(self, ctx, promo: str = None):
+        if promo is None:
+            await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
+        elif not self.checking_for_promo_code_existence_in_table(str(promo)):
+            await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
+        elif self.get_from_promo_codes(promo, "global") == "0" and \
+                ctx.guild.id != self.get_from_promo_codes(promo, "GuildID"):
+            await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
+        else:
+            self.cash = self.get_from_promo_codes(promo, "Cash")
+            self.add_coins(ctx.author.id, ctx.guild.id, self.cash)
+            self.delete_from_promo_codes(str(promo))
+            self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
+            self.emb.add_field(
+                name=f'Промокод активирован!',
+                value=f'Вам начислено **{divide_the_number(self.cash)}** коинов!',
+                inline=False
+            )
+            await ctx.send(embed=self.emb)
+
+    @commands.command(aliases=["promos"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __promo_codes(self, ctx):
+        if ctx.guild is None:
+            if not self.checking_for_promo_code_existence_in_table_by_id(ctx.author.id):
+                await ctx.author.send(f"{ctx.author.mention}, у Вас нет промокодов!")
+            else:
+                emb = discord.Embed(title="Промокоды")
+                for codes in self.get_from_promo_codes("", ["Code", "GuildID", "Cash"], ID=ctx.author.id):
+                    server = None
+                    for guild in self.bot.guilds:
+                        if guild.id == codes[1]:
+                            server = guild
+                            break
+                    if server is not None:
+                        emb.add_field(
+                            name=f"{server} - {divide_the_number(codes[2])}",
+                            value=f"{codes[0]}",
+                            inline=False
+                        )
+                await ctx.author.send(embed=emb)
+        else:
+            await ctx.send(f"{ctx.author.mention}, эту команду можно использовать только в личных сообщениях бота")
+
+    @commands.command(aliases=["promo_create"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __promo_create(self, ctx, cash: int = None, index2: str = None):
+        if cash is None:
+            await ctx.send(f'{ctx.author.mention}, Вы не ввели сумму!')
+        elif cash > self.get_cash(ctx.author.id, ctx.guild.id):
+            await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно денег для создания промокода!""")
+        elif cash < 1:
+            await ctx.send(f"""{ctx.author.mention}, не-не-не:)""")
+        elif ctx.guild is None:
+            pass
+        else:
+            self.code = get_promo_code(10)
+            if index2 == "global" and ctx.author.id == 401555829620211723:
+                self.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 1)
+            else:
+                self.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 0)
+                self.take_coins(ctx.author.id, ctx.guild.id, cash)
+            try:
+                await ctx.author.send(self.code)
+                self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
+                self.emb.add_field(
+                    name=f'Ваш промокод на **{divide_the_number(cash)}**',
+                    value=f'Промокод отправлен Вам в личные сообщения!',
+                    inline=False
+                )
+                await ctx.send(embed=self.emb)
+            except discord.Forbidden:
+                code2 = self.code
+                self.code = ""
+                for i in range(len(code2)):
+                    if i > len(code2) - 4:
+                        self.code += "*"
+                    else:
+                        self.code += code2[i]
+                self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
+                self.emb.add_field(
+                    name=f'Ваш промокод на **{divide_the_number(cash)}**',
+                    value=f'{divide_the_number(self.code)}\nЧтобы получить все Ваши промокоды, '
+                          f'Вы можете написать //promos в личные сообщения бота\nЕсли у Вас возникнет ошибка отправки, '
+                          f'Вам необходимо включить личные сообщения от участников сервера, после отправки сообщения '
+                          f'эту функцию можно выключить.',
+                    inline=False
+                )
+                await ctx.send(embed=self.emb)

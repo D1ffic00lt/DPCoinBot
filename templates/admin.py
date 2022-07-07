@@ -147,3 +147,69 @@ class Admin(commands.Cog, name='admin module', Database):
             else:
                 self.delete_from_shop(role.id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
+
+    @commands.command(aliases=['add-shop'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __add_shop(self, ctx, role: discord.Role = None, cost: int = None):
+        if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
+            if role is None:
+                await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите добавить в магазин""")
+            else:
+                if cost is None:
+                    await ctx.send(f"""{ctx.author}, введите цену роли""")
+                elif cost < 1:
+                    await ctx.send(f"""{ctx.author}, ах ты проказник! Введите цену дольше 1""")
+                elif cost > 100000:
+                    await ctx.send(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
+                else:
+
+                    self.insert_into_shop(role.id, ctx.guild.id, cost)
+
+                    await ctx.message.add_reaction('✅')
+
+    @commands.command(aliases=['add-else'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __add_item_shop(self, ctx, cost: int = None, *, message):
+        if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
+
+            msg = message
+            if msg is None:
+                await ctx.send(f"""{ctx.author}, укажите то, что Вы хотите добавить в магазин""")
+            else:
+                if self.get_from_item_shop(ctx.guild.id, "ItemID", order_by="ItemID").fetchone() is None:
+                    if cost is None:
+                        await ctx.send(f"""{ctx.author}, введите цену""")
+                    elif cost < 1:
+                        await ctx.send(f"""{ctx.author}, ах ты проказник! Введите цену дольше 1""")
+                    elif cost > 1000000:
+                        await ctx.send(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
+                    else:
+                        self.insert_into_item_shop(1, str(msg), ctx.guild.id, cost)
+                        await ctx.message.add_reaction('✅')
+                else:
+                    if cost is None:
+                        await ctx.send(f"""{ctx.author}, введите цену""")
+                    elif cost < 1:
+                        await ctx.send(f"""{ctx.author}, ах ты проказник! Введите цену дольше 1""")
+                    elif cost > 1000000:
+                        await ctx.send(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
+                    else:
+                        ind = max(
+                            [
+                                i[0] for i in self.get_from_item_shop(
+                                    ctx.guild.id, "ItemID", order_by="ItemID"
+                                ).fetchall()
+                            ]
+                        )
+                        self.insert_into_item_shop(ind + 1, str(msg), ctx.guild.id, cost)
+                        await ctx.message.add_reaction('✅')
+
+    @commands.command(aliases=['remove-else'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __remove_item_shop(self, ctx, item_id: int = None):
+        if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
+            if item_id is None:
+                await ctx.send(f"""{ctx.author}, укажите номер того, что Вы хотите удалить из магазина""")
+            else:
+                self.delete_from_item_shop(item_id, ctx.guild.id)
+                await ctx.message.add_reaction('✅')

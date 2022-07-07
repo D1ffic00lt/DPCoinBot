@@ -6,6 +6,7 @@ from templates.debug import Debug
 from templates.events import Events
 from templates.guild import Guild
 from templates.json_ import Json
+from templates.public import Public
 from templates.user import User
 from templates.helperfunction import *
 from version import __version__
@@ -32,8 +33,10 @@ def main() -> None:
     BOT.add_cog(Events(BOT))
     BOT.add_cog(Guild(BOT))
     BOT.add_cog(Admin(BOT))
+    BOT.add_cog(Public(BOT))
 
     BOT.run(settings["token"])
+
     print("Bot connected")
     print("version: {}\n".format(__version__))
 

@@ -168,10 +168,12 @@ class Database:
            Coder                        BOOLEAN DEFAULT false NOT NULL
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS PromoCodes (
-           Code                         VARCHAR (255) NOT NULL NOT NULL,
-           Global                       INT DEFAULT 0 NOT NULL,
+           ID                           INT NOT NULL,
            GuildID                      INT NOT NULL,
-           Cash                         BIGINT NOT NULL
+           Code                         VARCHAR (255) NOT NULL NOT NULL,
+           Cash                         BIGINT NOT NULL,
+           Global                       INT DEFAULT 0 NOT NULL
+
            )""")
         self.connection.commit()
         print("Database connected")
@@ -188,6 +190,14 @@ class Database:
         if self.cursor.execute(
                 "SELECT `*` FROM `PromoCodes` WHERE `Code` = ?",
                 (Code,)
+        ).fetchone() is None:
+            return False
+        return True
+
+    def checking_for_promo_code_existence_in_table_by_id(self, ID: int) -> bool:
+        if self.cursor.execute(
+                "SELECT `*` FROM `PromoCodes` WHERE `ID` = ?",
+                (ID,)
         ).fetchone() is None:
             return False
         return True
@@ -253,6 +263,24 @@ class Database:
             with self.connection:
                 return self.cursor.execute("INSERT INTO `Card` VALUES (?)", (ID,))
 
+    def insert_into_promo_codes(self, ID: int, guild_id: int, code: str, cash: int, global_: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "INSERT INTO `PromoCodes` VALUES (?, ?, ?, ?, ?)",
+                (ID, guild_id, code, cash, global_)
+            )
+
+    def insert_into_item_shop(self, ID: int, name: str, guild_id: int, price: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "INSERT INTO `ItemShop` VALUES (?, ?, ?, ?)",
+                (ID, name, guild_id, price)
+            )
+
+    def insert_into_shop(self, ID: int, guild_id: int, price: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute("INSERT INTO shop VALUES (?, ?, ?)", (ID, guild_id, price))
+
     def insert_into_achievements(self, name: str, ID: int, guild_id: int) -> Cursor:
         if self.cursor.execute("SELECT * FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                (ID, guild_id)).fetchone() is None:
@@ -303,11 +331,24 @@ class Database:
             (item, ID, guild_id)
         ).fetchone()[0]
 
-    def get_from_promo_codes(self, code: str, item: str) -> int | str:
+    def get_from_coinflip(self, ID1: int, ID2: int, guild_id: int, item: str) -> int:
         return self.cursor.execute(
-            "SELECT `?` FROM `PromoCodes` WHERE `Code` = ?",
-            (item, code)
+            f"SELECT `{item}` FROM `Coinflip` WHERE `GuildID` = ? AND "
+            f"`FirstPlayerID` = ? AND `SecondPlayerID` = ?",
+            (item, guild_id, ID1, ID2)
         ).fetchone()[0]
+
+    def get_from_promo_codes(self, code: str, item: str | List[str], ID: int = None) -> int | str | Cursor:
+        if isinstance(item, str):
+            return self.cursor.execute(
+                "SELECT `?` FROM `PromoCodes` WHERE `Code` = ?",
+                (item, code)
+            ).fetchone()[0]
+        else:
+            return self.cursor.execute(
+                f"SELECT {', '.join([f'`{i}`' for i in item])} FROM `PromoCodes` WHERE `ID` = ?",
+                (ID,)
+            )
 
     def get_from_new_year_event(self, ID: int, guild_id: int, item: str) -> int:
         return self.cursor.execute(
@@ -360,7 +401,7 @@ class Database:
             ).fetchone()[0]
 
     @ignore_exceptions
-    def get_from_item_shop(self, guild_id: int, *args: Tuple[str], order_by: str) -> Any:
+    def get_from_item_shop(self, guild_id: int, *args: str, order_by: str) -> Any:
         return self.cursor.execute(
             f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `ItemShop` "
             f"WHERE `GuildID` = ? ORDER BY `{order_by}` ASC",
@@ -429,8 +470,17 @@ class Database:
         with self.connection:
             return self.cursor.execute('UPDATE `Card` SET `?` = ? WHERE `ID` =?', (type_of_card, mode, ID))
 
-    def check_user(self, ID) -> bool:
+    def check_user(self, ID: int) -> bool:
         if self.cursor.execute("SELECT * FROM `Users` WHERE `ID` = ?", (ID,)).fetchone() is None:
+            return False
+        return True
+
+    def check_coinflip_games(self, ID: int, guild_id: int) -> bool:
+        if self.cursor.execute(
+                "SELECT * FROM `Coinflip` WHERE `GuildID` = ? "
+                "AND (`FirstPlayerID` = ? OR `SecondPlayerID` = ?)",
+                (guild_id, ID, ID)
+        ).fetchone() is None:
             return False
         return True
 
@@ -447,6 +497,13 @@ class Database:
             return self.cursor.execute(
                 'DELETE FROM `Shop` WHERE `RoleID` = ? AND `GuildID` = ?',
                 (role_id, guild_id)
+            )
+
+    def delete_from_item_shop(self, ID: int, guild_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                'DELETE FROM `ItemShop` WHERE `ItemID` = ? AND `GuildID` = ?',
+                (ID, guild_id)
             )
 
     def add_present(self, prises: int, ID: int, guild_id: int) -> Cursor:
@@ -648,6 +705,14 @@ class Database:
     def get_time_from_online_stats(self, ID: int, guild_id: int) -> str:
         return datetime_to_str(self.cursor.execute("SELECT `Time` FROM `OnlineStats` WHERE `ID` = ? AND `GuildID` = ?",
                                                    (ID, guild_id)).fetchone()[0])
+
+    def get_player_active_coinflip(self, ID: int, guild_id: int, player: bool = False) -> Cursor:
+        return self.cursor.execute(
+            f"SELECT `{'FirstPlayerName' if player else 'SecondPlayerName'}`, "
+            f"`Cash` FROM `CoinFlip` WHERE `GuildID` = ? AND "
+            f"`{'FirstPlayerID' if player else 'SecondPlayerID'}` = ?",
+            (guild_id, ID)
+        )
 
     @ignore_exceptions
     def get_active_coinflip(
