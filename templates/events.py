@@ -16,6 +16,7 @@ from ..database.db import Database
 
 
 class Events(commands.Cog, name='events module', Database):
+    @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.level: int = 0
@@ -33,6 +34,7 @@ class Events(commands.Cog, name='events module', Database):
         self.last_message: dict = {}
         self.text: str = ""
         self.time: datetime
+        print("Events connected")
 
     @commands.Cog.listener()
     async def on_voice_state_update(
@@ -160,7 +162,7 @@ class Events(commands.Cog, name='events module', Database):
     @logging
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
-        self.server_add()
+        self.server_add(self.bot)
         print(f"{member.id} add")
 
     @commands.Cog.listener()

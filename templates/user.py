@@ -11,7 +11,7 @@ from PIL import Image, ImageFont, ImageDraw
 from .helperfunction import (
     divide_the_number, create_emb,
     get_color, ignore_exceptions,
-    prepare_mask, crop
+    prepare_mask, crop, logging
 )
 from ..database.db import Database
 from .json_ import Json
@@ -19,6 +19,7 @@ from .texts import *
 
 
 class User(commands.Cog, name='user module', Database):
+    @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.bot: commands.Bot = bot
@@ -30,6 +31,7 @@ class User(commands.Cog, name='user module', Database):
         self.index: int = 0
         self.ID: int = 0
         self.guild_id: int = 0
+        print("User connected")
 
     @commands.command(aliases=['slb'])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -545,8 +547,7 @@ class User(commands.Cog, name='user module', Database):
         Image.open(
             io.BytesIO(
                 requests.get(
-                    str(ctx.author.avatar_url)[:-10],
-                    stream=True
+                    str(ctx.author.avatar_url)[:-10], stream=True
                 ).content
             )
         ).convert("RGBA").resize(
@@ -557,8 +558,7 @@ class User(commands.Cog, name='user module', Database):
             (100, 100)
         ).putalpha(
             prepare_mask(
-                (100, 100),
-                4
+                (100, 100), 4
             )
         ).save(f'prom_files/out_avatar{ctx.author.id}.png')
 
@@ -573,7 +573,7 @@ class User(commands.Cog, name='user module', Database):
         self.image_draw = ImageDraw.Draw(self.img)
         self.wins = 0
         self.loses = 0
-        self.vm = 0  # честно, не помню, что это такое
+        self.vm = 0  # честно, не помню, что это такое, так что просто vm
         self.messages = 0
 
         for i in self.get_from_user(

@@ -11,13 +11,14 @@ from discord.ext import commands
 
 from ..database.db import Database
 from .helperfunction import (
-    create_emb, fail_rand,
+    create_emb, fail_rand, logging,
     get_color, divide_the_number, casino2ch, get_time
 )
 from .texts import *
 
 
 class Casino(commands.Cog, name='Casino module', Database):
+    @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.bot: commands.Bot = bot
@@ -29,6 +30,8 @@ class Casino(commands.Cog, name='Casino module', Database):
         self.line2: List[int]
         self.line3: List[int]
         self.texts: dict = {}
+
+        print("Casino connected")
 
     @commands.command(aliases=['rust_casino'])
     @commands.cooldown(1, 2, commands.BucketType.user)
@@ -597,11 +600,11 @@ class Casino(commands.Cog, name='Casino module', Database):
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __del_games(self, ctx, member: discord.Member = None):
         if member is None:
-            self.delete_from_coinflip(ctx.author.id, ctx.guild.id)
+            self.delete_from_coinflip(ctx.author.id, ctx.guild.id, ctx.guild.id)
             await ctx.message.add_reaction('✅')
         else:
             if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
-                self.delete_from_coinflip(member.id, ctx.guild.id)
+                self.delete_from_coinflip(member.id, member.id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
             else:
                 await ctx.send("Ты чё ку-ку? Тебе так нельзя.")

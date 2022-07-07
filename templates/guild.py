@@ -1,17 +1,28 @@
+from __future__ import annotations
+
 import discord
+
 from discord.ext import commands
 from discord.utils import get
 
 from .texts import need_settings
 from ..database.db import Database
-from .helperfunction import divide_the_number
+from .helperfunction import divide_the_number, logging
 
 
 class Guild(commands.Cog, name='guild module', Database):
+    @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.bot = bot
         self.found: bool
+        self.admin: discord.TextChannel | int
+        self.casino_channel: discord.TextChannel | int
+        self.role: discord.Role | int
+        self.auto: int
+        self.category: discord.CategoryChannel | int
+        self.emb: discord.Embed
+        print("Guild connected")
 
     @commands.command(aliases=["auto_setup"])
     @commands.cooldown(1, 4, commands.BucketType.user)
