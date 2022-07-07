@@ -8,13 +8,18 @@ import requests
 from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 
-from .helperfunction import divide_the_number, create_emb, get_color, ignore_exceptions
+from .helperfunction import (
+    divide_the_number, create_emb,
+    get_color, ignore_exceptions,
+    prepare_mask, crop, logging, get_promo_code
+)
 from ..database.db import Database
 from .json_ import Json
 from .texts import *
 
 
 class User(commands.Cog, name='user module', Database):
+    @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.bot: commands.Bot = bot
@@ -26,6 +31,7 @@ class User(commands.Cog, name='user module', Database):
         self.index: int = 0
         self.ID: int = 0
         self.guild_id: int = 0
+        print("User connected")
 
     @commands.command(aliases=['slb'])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -537,12 +543,11 @@ class User(commands.Cog, name='user module', Database):
 
     @commands.command(aliases=["card"])
     async def __Card(self, ctx):
-        img = Image.new("RGBA", (500, 300), "#323642")
+        self.img = Image.new("RGBA", (500, 300), "#323642")
         Image.open(
             io.BytesIO(
                 requests.get(
-                    str(ctx.author.avatar_url)[:-10],
-                    stream=True
+                    str(ctx.author.avatar_url)[:-10], stream=True
                 ).content
             )
         ).convert("RGBA").resize(
@@ -553,12 +558,11 @@ class User(commands.Cog, name='user module', Database):
             (100, 100)
         ).putalpha(
             prepare_mask(
-                (100, 100),
-                4
+                (100, 100), 4
             )
         ).save(f'prom_files/out_avatar{ctx.author.id}.png')
 
-        img.alpha_composite(
+        self.img.alpha_composite(
             Image.open(
                 f'prom_files/out_avatar{ctx.author.id}.png',
             ).convert("RGBA").resize(
@@ -566,84 +570,222 @@ class User(commands.Cog, name='user module', Database):
             ), (15, 15)
         )
 
-        imagedraw = ImageDraw.Draw(img)
-        wins = 0
-        loses = 0
-        vm = 0
-        messages = 0
+        self.image_draw = ImageDraw.Draw(self.img)
+        self.wins = 0
+        self.loses = 0
+        self.vm = 0  # честно, не помню, что это такое, так что просто vm
+        self.messages = 0
 
         for i in self.get_from_user(
                 ctx.author.id, ctx.guild.id,
                 "AllWins", "AllLoses", "MinutesInVoiceChannels", "MessagesCount",
                 order_by="AllWins"
         ):
-            wins += i[0]
-            loses += i[1]
-            vm += i[2]
-            messages += i[3]
+            self.wins += i[0]
+            self.loses += i[1]
+            self.vm += i[2]
+            self.messages += i[3]
 
-        imagedraw.text(
+        self.image_draw.text(
             (130, 15),
             f"{ctx.author.name}#{ctx.author.discriminator}",
             font=ImageFont.truetype('calibri.ttf', size=30)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (130, 45),
             f"ID: {ctx.author.id}",
             font=ImageFont.truetype("calibri.ttf", size=20)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (15, 125),
-            f"Wins: {wins}",
+            f"Wins: {self.wins}",
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (15, 160),
-            f"Loses: {divide_the_number(loses)}",
+            f"Loses: {divide_the_number(self.loses)}",
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (15, 195),
-            f"Minutes in voice: {divide_the_number(vm)}",
+            f"Minutes in voice: {divide_the_number(self.vm)}",
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
-        imagedraw.text(
+        self.image_draw.text(
             (15, 230),
-            f"Messages: {divide_the_number(messages)}",
+            f"Messages: {divide_the_number(self.messages)}",
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
-        images = []
-        ver, dev, cod = cursor.execute("SELECT verification, developer, coder FROM card WHERE id = ?",
-                                       [ctx.author.id]).fetchone()
-        if int(ver) == 1:
-            image = Image.open("progfiles/images/green_galka.png")
-            image = image.convert("RGBA")
-            image = image.resize((30, 30), Image.ANTIALIAS)
-            images.append(image)
-        elif int(ver) == 2:
-            image = Image.open("progfiles/images/galka.png")
-            image = image.convert("RGBA")
-            image = image.resize((30, 30), Image.ANTIALIAS)
-            images.append(image)
-        if int(dev) == 1:
-            image = Image.open("progfiles/images/developer.png")
-            image = image.convert("RGBA")
-            image = image.resize((30, 30), Image.ANTIALIAS)
-            images.append(image)
-        if int(cod) == 1:
-            image = Image.open("progfiles/images/cmd.png")
-            image = image.convert("RGBA")
-            image = image.resize((30, 30), Image.ANTIALIAS)
-            images.append(image)
-        if len(images) != 0:
-            x = 128
-            for i in range(len(images)):
-                img.alpha_composite(images[i], (x, 70))
-                x += 35
+        self.images = []
+        self.verification,  self.developer, self.coder = \
+            self.get_from_card(ctx.author.id, "Verification", "Developer", "Coder")
+        if int(self.verification) == 1:
+            self.image = Image.open("progfiles/images/green_galka.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        elif int(self.verification) == 2:
+            self.image = Image.open("progfiles/images/galka.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        if int(self.developer) == 1:
+            self.image = Image.open("progfiles/images/developer.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        if int(self.coder) == 1:
+            self.image = Image.open("progfiles/images/cmd.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        if len(self.images) != 0:
+            self.x = 128
+            for i in range(len(self.images)):
+                self.img.alpha_composite(self.images[i], (self.x, 70))
+                self.x += 35
 
-        img.save(f'prom_files/user_card{ctx.author.id}.png')
+        self.img.save(f'prom_files/user_card{ctx.author.id}.png')
 
         await ctx.send(file=discord.File(fp=f'prom_files/user_card{ctx.author.id}.png'))
         os.remove(f"prom_files/user_card{ctx.author.id}.png")
         os.remove(f"prom_files/avatar{ctx.author.id}.png")
         os.remove(f"prom_files/out_avatar{ctx.author.id}.png")
+
+    @commands.command(aliases=["promo"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __promo_active(self, ctx, promo: str = None):
+        if promo is None:
+            await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
+        elif not self.checking_for_promo_code_existence_in_table(promo):
+            await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
+        elif self.get_from_promo_codes(promo, "Global") == 0 and \
+                ctx.guild.id != self.get_from_promo_codes(promo, "GuildID"):
+            await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
+        else:
+            self.cash = self.get_from_promo_codes(promo, "Cash")
+            self.add_coins(ctx.author.id, ctx.guild.id, self.cash)
+            self.delete_from_promo_codes(promo)
+            self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
+            self.emb.add_field(
+                name=f'Промокод активирован!',
+                value=f'Вам начислено **{divide_the_number(self.cash)}** коинов!',
+                inline=False
+            )
+            await ctx.send(embed=self.emb)
+
+    @commands.command(aliases=['gift'])
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def __gift(self, ctx, member: discord.Member = None, role: discord.Role = None):
+        if role is None:
+            await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
+        elif member is None:
+            await ctx.send(f"""{ctx.author}, укажите человека, которому Вы хотите подарить роль""")
+        else:
+            if role in member.roles:
+                await ctx.send(f"""{ctx.author}, у Вас уже есть эта роль!""")
+
+            elif self.get_from_shop(ctx.guild.id, "RoleCost", order_by="price", role_id=role.id).fetchone()[0] > \
+                    self.get_cash(ctx.author.id, ctx.guild.id):
+                await ctx.send(f"""{ctx.author}, у Вас недостаточно денег для покупки этой роли!""")
+            else:
+                await member.add_roles(role)
+                self.take_coins(
+                    ctx.author.id,
+                    ctx.guild.id,
+                    self.get_from_shop(ctx.guild.id, "RoleCost", order_by="price", role_id=role.id
+                                       ).fetchone()[0]
+                )
+                await ctx.message.add_reaction('✅')
+
+    @commands.command(aliases=["promo"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __promo_active(self, ctx, promo: str = None):
+        if promo is None:
+            await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
+        elif not self.checking_for_promo_code_existence_in_table(str(promo)):
+            await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
+        elif self.get_from_promo_codes(promo, "global") == "0" and \
+                ctx.guild.id != self.get_from_promo_codes(promo, "GuildID"):
+            await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
+        else:
+            self.cash = self.get_from_promo_codes(promo, "Cash")
+            self.add_coins(ctx.author.id, ctx.guild.id, self.cash)
+            self.delete_from_promo_codes(str(promo))
+            self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
+            self.emb.add_field(
+                name=f'Промокод активирован!',
+                value=f'Вам начислено **{divide_the_number(self.cash)}** коинов!',
+                inline=False
+            )
+            await ctx.send(embed=self.emb)
+
+    @commands.command(aliases=["promos"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __promo_codes(self, ctx):
+        if ctx.guild is None:
+            if not self.checking_for_promo_code_existence_in_table_by_id(ctx.author.id):
+                await ctx.author.send(f"{ctx.author.mention}, у Вас нет промокодов!")
+            else:
+                emb = discord.Embed(title="Промокоды")
+                for codes in self.get_from_promo_codes("", ["Code", "GuildID", "Cash"], ID=ctx.author.id):
+                    server = None
+                    for guild in self.bot.guilds:
+                        if guild.id == codes[1]:
+                            server = guild
+                            break
+                    if server is not None:
+                        emb.add_field(
+                            name=f"{server} - {divide_the_number(codes[2])}",
+                            value=f"{codes[0]}",
+                            inline=False
+                        )
+                await ctx.author.send(embed=emb)
+        else:
+            await ctx.send(f"{ctx.author.mention}, эту команду можно использовать только в личных сообщениях бота")
+
+    @commands.command(aliases=["promo_create"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __promo_create(self, ctx, cash: int = None, index2: str = None):
+        if cash is None:
+            await ctx.send(f'{ctx.author.mention}, Вы не ввели сумму!')
+        elif cash > self.get_cash(ctx.author.id, ctx.guild.id):
+            await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно денег для создания промокода!""")
+        elif cash < 1:
+            await ctx.send(f"""{ctx.author.mention}, не-не-не:)""")
+        elif ctx.guild is None:
+            pass
+        else:
+            self.code = get_promo_code(10)
+            if index2 == "global" and ctx.author.id == 401555829620211723:
+                self.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 1)
+            else:
+                self.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 0)
+                self.take_coins(ctx.author.id, ctx.guild.id, cash)
+            try:
+                await ctx.author.send(self.code)
+                self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
+                self.emb.add_field(
+                    name=f'Ваш промокод на **{divide_the_number(cash)}**',
+                    value=f'Промокод отправлен Вам в личные сообщения!',
+                    inline=False
+                )
+                await ctx.send(embed=self.emb)
+            except discord.Forbidden:
+                code2 = self.code
+                self.code = ""
+                for i in range(len(code2)):
+                    if i > len(code2) - 4:
+                        self.code += "*"
+                    else:
+                        self.code += code2[i]
+                self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
+                self.emb.add_field(
+                    name=f'Ваш промокод на **{divide_the_number(cash)}**',
+                    value=f'{divide_the_number(self.code)}\nЧтобы получить все Ваши промокоды, '
+                          f'Вы можете написать //promos в личные сообщения бота\nЕсли у Вас возникнет ошибка отправки, '
+                          f'Вам необходимо включить личные сообщения от участников сервера, после отправки сообщения '
+                          f'эту функцию можно выключить.',
+                    inline=False
+                )
+                await ctx.send(embed=self.emb)

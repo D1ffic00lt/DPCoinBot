@@ -10,12 +10,13 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from sqlite3 import Cursor
-from typing import Tuple, Any
+from typing import Tuple
 
 from ..templates.helperfunction import *
 
 
 class Database:
+    @logging
     def __init__(self, filename: str) -> None:
         self.server: smtplib.SMTP = smtplib.SMTP('smtp.gmail.com: 587')
         self.msg: MIMEMultipart = MIMEMultipart()
@@ -76,8 +77,8 @@ class Database:
             CasinoChannelID              INT NOT NULL,
             CategoryID                   INT NOT NULL,
             Auto                         BOOLEAN NOT NULL,
+            BankInterest                 INT DEFAULT 0 NOT NULL,
             StartingBalance              BIGINT DEFAULT 0 NOT NULL,
-            BankInterest                 INT DEFAULT 0 NOT NULL
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS ItemsShop (
             ItemID                       INT NOT NULL,
@@ -166,28 +167,54 @@ class Database:
            Developer                    BOOLEAN DEFAULT false NOT NULL,
            Coder                        BOOLEAN DEFAULT false NOT NULL
            )""")
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS PromoCodes (
+           ID                           INT NOT NULL,
+           GuildID                      INT NOT NULL,
+           Code                         VARCHAR (255) NOT NULL NOT NULL,
+           Cash                         BIGINT NOT NULL,
+           Global                       INT DEFAULT 0 NOT NULL
+
+           )""")
         self.connection.commit()
+        print("Database connected")
 
-    @ignore_exceptions
     def checking_for_user_existence_in_table(self, ID: int, guild_id: int = 0) -> bool:
-        if self.cursor.execute("SELECT `Name` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
-                               (ID, guild_id)).fetchone() is None:
+        if self.cursor.execute(
+                "SELECT `Name` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+        ).fetchone() is None:
             return False
         return True
 
-    @ignore_exceptions
+    def checking_for_promo_code_existence_in_table(self, Code: str) -> bool:
+        if self.cursor.execute(
+                "SELECT `*` FROM `PromoCodes` WHERE `Code` = ?",
+                (Code,)
+        ).fetchone() is None:
+            return False
+        return True
+
+    def checking_for_promo_code_existence_in_table_by_id(self, ID: int) -> bool:
+        if self.cursor.execute(
+                "SELECT `*` FROM `PromoCodes` WHERE `ID` = ?",
+                (ID,)
+        ).fetchone() is None:
+            return False
+        return True
+
     def checking_for_guild_existence_in_table(self, guild_id: int) -> bool:
-        if self.cursor.execute("SELECT * FROM `Server` WHERE `GuildID` = ?", (guild_id,)).fetchone() is None:
+        if self.cursor.execute(
+                "SELECT * FROM `Server` WHERE `GuildID` = ?",
+                (guild_id,)
+        ).fetchone() is None:
             return False
         return True
 
-    @ignore_exceptions
     def checking_for_levels_existence_in_table(self) -> bool:
         if self.cursor.execute("SELECT * FROM `Levels` WHERE `Level` = 1").fetchone() is None:
             return False
         return True
 
-    @ignore_exceptions
     def insert_into_users(
             self,
             name: str,
@@ -199,14 +226,12 @@ class Database:
             return self.cursor.execute("INSERT INTO `Users` VALUES (?, ?, ?, 0, 1, ?)",
                                        (name, ID, starting_balance, guild_id))
 
-    @ignore_exceptions
     def check_completion_dropping_zero_in_fail_achievement(self, ID: int, guild_id: int) -> bool:
         if self.cursor.execute("SELECT DroppingZeroInFail FROM Achievements WHERE ID = ? AND GuildID = ?",
                                (ID, guild_id)).fetchone()[0] == 0:
             return False
         return True
 
-    @ignore_exceptions
     def complete_dropping_zero_in_fail_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -214,76 +239,137 @@ class Database:
                 (ID, guild_id)
             )
 
-    @ignore_exceptions
+    def insert_into_server(
+            self, guild_id: int,
+            role_id: int,
+            admin_id: int,
+            casino_channel_id: int,
+            category_id: int
+    ) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "INSERT INTO `Server` VALUES (?, ?, ?, ?, ?, true)",
+                (
+                    guild_id,
+                    role_id,
+                    admin_id,
+                    casino_channel_id,
+                    category_id
+                )
+            )
+
     def insert_into_card(self, ID: int) -> Cursor:
         if self.cursor.execute("SELECT * FROM `Card` WHERE `ID` = ?", (ID,)).fetchone() is None:
             with self.connection:
                 return self.cursor.execute("INSERT INTO `Card` VALUES (?)", (ID,))
 
-    @ignore_exceptions
+    def insert_into_promo_codes(self, ID: int, guild_id: int, code: str, cash: int, global_: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "INSERT INTO `PromoCodes` VALUES (?, ?, ?, ?, ?)",
+                (ID, guild_id, code, cash, global_)
+            )
+
+    def insert_into_item_shop(self, ID: int, name: str, guild_id: int, price: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "INSERT INTO `ItemShop` VALUES (?, ?, ?, ?)",
+                (ID, name, guild_id, price)
+            )
+
+    def insert_into_shop(self, ID: int, guild_id: int, price: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute("INSERT INTO shop VALUES (?, ?, ?)", (ID, guild_id, price))
+
     def insert_into_achievements(self, name: str, ID: int, guild_id: int) -> Cursor:
         if self.cursor.execute("SELECT * FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                (ID, guild_id)).fetchone() is None:
             with self.connection:
                 return self.cursor.execute(f"INSERT INTO `Achievements` VALUES (?, ?, ?)", (name, ID, guild_id))
 
-    @ignore_exceptions
     def insert_into_inventory(self, name: str, ID: int, guild_id: int) -> Cursor:
         if self.cursor.execute("SELECT * FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
                                (ID, guild_id)).fetchone() is None:
             with self.connection:
                 return self.cursor.execute(f"INSERT INTO `Inventory` VALUES (?, ?, ?)", (name, ID, guild_id))
 
-    @ignore_exceptions
     def insert_into_new_year_event(self, name: str, ID: int, guild_id: int) -> Cursor:
         if self.cursor.execute("SELECT * FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
                                (ID, guild_id)).fetchone() is None:
             with self.connection:
                 return self.cursor.execute(f"INSERT INTO `NewYearEvent` VALUES (?, ?, ?)", (name, ID, guild_id))
 
-    @ignore_exceptions
     def insert_into_levels(self, Level: int, xp: int, award: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("INSERT INTO `Levels` VALUES (?, ?, ?)", (Level, xp, award))
 
-    @ignore_exceptions
     def get_start_cash(self, guild_id: int) -> int:
         return self.cursor.execute(
             "SELECT `StartingBalance` FROM `Server` WHERE `GuildID` = ?",
             (guild_id,)
         ).fetchone()[0]
 
-    @ignore_exceptions
+    def get_guild_settings(self, guild_id: int) -> Cursor:
+        return self.cursor.execute(
+            "SELECT `ChannelID`, `CasinoChannelID`, `AdministratorRoleID`, `Auto`, `CategoryID` "
+            "FROM `Server` WHERE `GuildID` = ?",
+            (guild_id,)
+        )
+
+    def get_administrator_role_id(self, guild_id: int) -> int | bool:
+        try:
+            return self.cursor.execute(
+                "SELECT `AdministratorRoleID` FROM `Server` WHERE `GuildID` = ?",
+                (guild_id,)
+            ).fetchone()[0]
+        except TypeError:
+            return False
+
     def get_from_inventory(self, ID: int, guild_id: int, item: str) -> int:
         return self.cursor.execute(
             "SELECT `?` FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
             (item, ID, guild_id)
         ).fetchone()[0]
 
-    @ignore_exceptions
+    def get_from_coinflip(self, ID1: int, ID2: int, guild_id: int, item: str) -> int:
+        return self.cursor.execute(
+            f"SELECT `{item}` FROM `Coinflip` WHERE `GuildID` = ? AND "
+            f"`FirstPlayerID` = ? AND `SecondPlayerID` = ?",
+            (item, guild_id, ID1, ID2)
+        ).fetchone()[0]
+
+    def get_from_promo_codes(self, code: str, item: str | List[str], ID: int = None) -> int | str | Cursor:
+        if isinstance(item, str):
+            return self.cursor.execute(
+                "SELECT `?` FROM `PromoCodes` WHERE `Code` = ?",
+                (item, code)
+            ).fetchone()[0]
+        else:
+            return self.cursor.execute(
+                f"SELECT {', '.join([f'`{i}`' for i in item])} FROM `PromoCodes` WHERE `ID` = ?",
+                (ID,)
+            )
+
     def get_from_new_year_event(self, ID: int, guild_id: int, item: str) -> int:
         return self.cursor.execute(
             "SELECT `?` FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
             (item, ID, guild_id)
         ).fetchone()[0]
 
-    @ignore_exceptions
     def get_user_name(self, ID: int) -> str:
         return self.cursor.execute(f"SELECT `Name` FROM `Users` WHERE `ID` = ?", (ID,)).fetchone()[0]
 
-    @ignore_exceptions
     def get_xp(self, level: int) -> int:
         return self.cursor.execute("SELECT XP FROM Levels WHERE Level = ?", (level,)).fetchone()[0]
 
-    @ignore_exceptions
-    def get_from_levels(self, *args: Tuple[str]) -> Any:
+    def get_from_levels(self, *args: str) -> Any:
         return self.cursor.execute(f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Levels`")
 
     @ignore_exceptions
     def get_from_user(
             self,
             guild_id: int,
-            *args: Tuple[str],
+            *args: str,
             order_by: str,
             limit: int = None
     ) -> Any:
@@ -315,7 +401,7 @@ class Database:
             ).fetchone()[0]
 
     @ignore_exceptions
-    def get_from_item_shop(self, guild_id: int, *args: Tuple[str], order_by: str) -> Any:
+    def get_from_item_shop(self, guild_id: int, *args: str, order_by: str) -> Any:
         return self.cursor.execute(
             f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `ItemShop` "
             f"WHERE `GuildID` = ? ORDER BY `{order_by}` ASC",
@@ -336,31 +422,32 @@ class Database:
             (guild_id, item_id)
         )
 
-    @ignore_exceptions
     def get_level(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute(
             "SELECT `Lvl` FROM `Users` WHERE ID = ? AND GuildID = ?",
             (ID, guild_id)
         ).fetchone()[0]
 
-    @ignore_exceptions
-    def get_from_server(self, guild_id: int, *args: Tuple[str]) -> Any:
+    def get_from_server(self, guild_id: int, *args: str) -> Any:
         return self.cursor.execute(
             f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Server` WHERE `GuildID` = ?",
             (guild_id,)
         ).fetchall()
 
-    @ignore_exceptions
+    def get_from_card(self, ID: int, *args: str) -> Any:
+        return self.cursor.execute(
+            f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Server` WHERE `ID` = ?",
+            (ID,)
+        ).fetchone()
+
     def get_users_count(self, unique: bool = False) -> int:
         return self.cursor.execute('SELECT COUNT(1) FROM `Users`').fetchone()[0] \
             if not unique else self.cursor.execute('SELECT COUNT(1) FROM `Card`').fetchone()[0]
 
-    @ignore_exceptions
     def get_cash(self, ID: int, guild_id: int, bank: bool = False) -> int:
         return self.cursor.execute(f"SELECT `{'Cash' if not bank else 'CashInBank'}` FROM `Users` "
                                    f"WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def update_new_year_event(self, ID: int, guild_id: int, item: str, value: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -368,7 +455,6 @@ class Database:
                 (item, item, value, ID, guild_id)
             )
 
-    @ignore_exceptions
     def update_inventory(self, ID: int, guild_id: int, item: str, value: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -376,28 +462,50 @@ class Database:
                 (item, item, value, ID, guild_id)
             )
 
-    @ignore_exceptions
     def update_name(self, name: str, ID: int) -> Cursor:
         with self.connection:
             return self.cursor.execute('UPDATE `Users` SET `Name` = ? WHERE `ID` = ?', (name, ID))
 
-    @ignore_exceptions
     def update_card(self, ID: int, type_of_card: str, mode: int) -> Cursor:
         with self.connection:
             return self.cursor.execute('UPDATE `Card` SET `?` = ? WHERE `ID` =?', (type_of_card, mode, ID))
 
-    @ignore_exceptions
-    def check_user(self, ID) -> bool:
+    def check_user(self, ID: int) -> bool:
         if self.cursor.execute("SELECT * FROM `Users` WHERE `ID` = ?", (ID,)).fetchone() is None:
             return False
         return True
 
-    @ignore_exceptions
+    def check_coinflip_games(self, ID: int, guild_id: int) -> bool:
+        if self.cursor.execute(
+                "SELECT * FROM `Coinflip` WHERE `GuildID` = ? "
+                "AND (`FirstPlayerID` = ? OR `SecondPlayerID` = ?)",
+                (guild_id, ID, ID)
+        ).fetchone() is None:
+            return False
+        return True
+
     def clear_coinflip(self) -> Cursor:
         with self.connection:
             return self.cursor.execute('DELETE FROM `CoinFlip`')
 
-    @ignore_exceptions
+    def delete_from_server(self, guild_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute('DELETE FROM `Server` WHERE `GuildID` = ?', (guild_id,))
+
+    def delete_from_shop(self, guild_id: int, role_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                'DELETE FROM `Shop` WHERE `RoleID` = ? AND `GuildID` = ?',
+                (role_id, guild_id)
+            )
+
+    def delete_from_item_shop(self, ID: int, guild_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                'DELETE FROM `ItemShop` WHERE `ItemID` = ? AND `GuildID` = ?',
+                (ID, guild_id)
+            )
+
     def add_present(self, prises: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -405,7 +513,6 @@ class Database:
                 (prises, ID, guild_id)
             )
 
-    @ignore_exceptions
     def add_valentines(self, valentines: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -413,7 +520,6 @@ class Database:
                 (valentines, ID, guild_id)
             )
 
-    @ignore_exceptions
     def server_add(self, Bot: commands.Bot) -> None:
         for guild in Bot.guilds:
             for member in guild.members:
@@ -430,36 +536,38 @@ class Database:
                 if self.get_user_name(member.id) != member:
                     self.update_name(str(member), member.id)
 
-    @ignore_exceptions
     def voice_create_stats(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("INSERT INTO `OnlineStats` VALUES (?, ?, ?)", (ID, guild_id, get_time()))
 
-    @ignore_exceptions
     def voice_create(self, ID: int, guild_id: int, voice_create_stats: bool = False) -> Cursor:
         if voice_create_stats:
             self.voice_create_stats(ID, guild_id)
         with self.connection:
             return self.cursor.execute("INSERT INTO `Online` VALUES (?, ?, ?)", (ID, guild_id, get_time()))
 
-    @ignore_exceptions
     def add_coins(self, ID: int, guild_id: int, cash: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Users` SET `Cash` + ? WHERE `ID` = ? AND `GuildID` = ?",
-                                       (cash, ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Users` SET `Cash` + ? WHERE `ID` = ? AND `GuildID` = ?",
+                (cash, ID, guild_id)
+            )
 
-    @ignore_exceptions
+    def set_start_cash(self, guild_id: int, cash: int) -> Cursor:
+        return self.cursor.execute(
+            "UPDATE `Server` SET `StartingBalance` = ? WHERE `GuildID` = ?",
+            (cash, guild_id)
+        )
+
     def take_coins(self, ID: int, guild_id: int, cash: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET `Cash` - ? WHERE `ID` = ? AND `GuildID` = ?",
                                        (cash, ID, guild_id))
 
-    @ignore_exceptions
     def create_voice_stats(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("INSERT INTO `OnlineStats` VALUES (?, ?, ?)", (ID, guild_id, get_time()))
 
-    @ignore_exceptions
     def add_coins_to_the_bank(
             self,
             ID: int,
@@ -471,7 +579,6 @@ class Database:
             return self.cursor.execute("UPDATE  `Users` SET `CashInBank` = `CashInBank` + ? "
                                        "WHERE `ID` = ? AND `GuildID` = ?", (cash, ID, guild_id))
 
-    @ignore_exceptions
     def add_reputation(self, ID: int, GuildID: int, reputation: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -498,101 +605,83 @@ class Database:
                 return self.cursor.execute("UPDATE `Users` SET `CashInBank` = `CashInBank` - ? "
                                            "WHERE `ID` = ? AND `GuildID` = ?", (cash, ID, guild_id))
 
-    @ignore_exceptions
     def get_loses_count(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Loses` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def get_wins_count(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Wins` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def get_three_losses_in_row_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Lose_3` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_three_losses_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Lose_3` = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def get_ten_losses_in_row_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Lose_10` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_ten_losses_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Lose_10` = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def get_twenty_losses_in_row_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Lose_20` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_twenty_losses_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Lose_20` = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def get_three_wins_in_row_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Wins_3` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_three_wins_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Wins_3` = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def get_ten_wins_in_row_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Wins_10` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_ten_wins_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Wins_10` = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def get_twenty_wins_in_row_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Wins_20` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_twenty_wins_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Wins_20` = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def update_user_stats_1(self, arg: str, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET ? = ?+ 1 WHERE `ID` = ? AND `GuildID` = ?",
                                        (arg, arg, ID, guild_id))
 
-    @ignore_exceptions
     def update_user_stats_2(self, first_arg: str, second_arg: str, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET ?? = ?? + 1 WHERE `ID` = ? AND `GuildID` = ?",
                                        (first_arg, second_arg, first_arg, second_arg, ID, guild_id))
 
-    @ignore_exceptions
     def update_user_stats_3(self, arg: str, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET All? = All? + 1 WHERE `ID` = ? AND `GuildID` = ?",
                                        (arg, arg, ID, guild_id))
 
-    @ignore_exceptions
     def update_user_stats_4(self, count: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET Count = Count + ? WHERE `ID` = ? AND `GuildID` = ?",
@@ -613,10 +702,17 @@ class Database:
         self.update_user_stats_3(third_arg, ID, guild_id)
         self.update_user_stats_4(count, ID, guild_id)
 
-    @ignore_exceptions
     def get_time_from_online_stats(self, ID: int, guild_id: int) -> str:
         return datetime_to_str(self.cursor.execute("SELECT `Time` FROM `OnlineStats` WHERE `ID` = ? AND `GuildID` = ?",
                                                    (ID, guild_id)).fetchone()[0])
+
+    def get_player_active_coinflip(self, ID: int, guild_id: int, player: bool = False) -> Cursor:
+        return self.cursor.execute(
+            f"SELECT `{'FirstPlayerName' if player else 'SecondPlayerName'}`, "
+            f"`Cash` FROM `CoinFlip` WHERE `GuildID` = ? AND "
+            f"`{'FirstPlayerID' if player else 'SecondPlayerID'}` = ?",
+            (guild_id, ID)
+        )
 
     @ignore_exceptions
     def get_active_coinflip(
@@ -630,21 +726,31 @@ class Database:
         ).fetchone() is None \
                or \
                self.cursor.execute(
-            "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
-            (second_player_id, guild_id, first_player_id)
-        ).fetchone() is None
+                   "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
+                   (second_player_id, guild_id, first_player_id)
+               ).fetchone() is None
 
-    @ignore_exceptions
     def delete_from_online_stats(self, ID: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("DELETE FROM `OnlineStats` WHERE `ID` = ?", (ID,))
 
-    @ignore_exceptions
+    def delete_from_promo_codes(self, code: str) -> Cursor:
+        with self.connection:
+            return self.cursor.execute("DELETE FROM `PromoCodes` WHERE `Code` = `?`", (code,))
+
+    def delete_from_coinflip(self, ID1: int, ID2: int, guild_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "DELETE FROM `CoinFlip` WHERE "
+                "(`FirstPlayerID` = ? OR `SecondPlayerID` = ?) AND "
+                "(`FirstPlayerID` = ? OR `SecondPlayerID` = ?) AND `GuildID` = ?",
+                (ID1, ID1, ID2, ID2, guild_id)
+            )
+
     def delete_from_online(self, ID: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("DELETE FROM `Online` WHERE `ID` = ?", (ID,))
 
-    @ignore_exceptions
     def update_minutes_in_voice_channels(self, count: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -652,7 +758,6 @@ class Database:
                 "WHERE `ID` = ? AND `GuildID` = ?", (count, ID, guild_id)
             )
 
-    @ignore_exceptions
     def insert_into_online_stats(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -660,7 +765,6 @@ class Database:
                 (ID, guild_id, get_time())
             )
 
-    @ignore_exceptions
     def insert_into_coinflip(
             self, first_player_id: int, second_player_id: int,
             first_player_name: str, second_player_name: str,
@@ -677,23 +781,19 @@ class Database:
                 )
             )
 
-    @ignore_exceptions
     def insert_into_stats(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("INSERT INTO `Online` VALUES (?, ?, ?)",
                                        (ID, guild_id, get_time()))
 
-    @ignore_exceptions
     def get_minutes(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `MinutesInVoiceChannels` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def get_voice_1_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Voice_1` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def add_level(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -701,90 +801,74 @@ class Database:
                 (ID, guild_id)
             )
 
-    @ignore_exceptions
     def set_voice_1_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET Voice_1 = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def get_voice_10_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Voice_10` FROM Achievements WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_voice_10_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Voice_10` = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def get_voice_100_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Voice_100` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_voice_100_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET Voice_100 = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def get_voice_1000_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Voice_1000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_voice_1000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Voice_1000` = true WHERE `ID` = ? AND `GuildID` = ?",
                                        (ID, guild_id))
 
-    @ignore_exceptions
     def get_voice_10000_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Voice_10000` FROM `Achievements` WHERE id = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_voice_10000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Voice_10000` = true "
                                        "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
 
-    @ignore_exceptions
     def get_voice_100000_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Voice_100000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_voice_100000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Voice_100000` = true "
                                        "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
 
-    @ignore_exceptions
     def get_voice_1000000_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Voice_1000000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_voice_1000000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Voice_1000000` = true "
                                        "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
 
-    @ignore_exceptions
     def get_voice_10000000_achievement(self, ID: int, guild_id: int) -> int:
         return self.cursor.execute("SELECT `Voice_1000000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                                    (ID, guild_id)).fetchone()[0]
 
-    @ignore_exceptions
     def set_voice_10000000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute("UPDATE `Achievements` SET `Voice_1000000` = true "
                                        "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
 
-    @ignore_exceptions
     def add_win(self, ID: int, guild_id: int, null: bool = False) -> Cursor:
         with self.connection:
             if null:
@@ -798,7 +882,6 @@ class Database:
                     (ID, guild_id)
                 )
 
-    @ignore_exceptions
     def add_lose(self, ID: int, guild_id: int, null: bool = False) -> Cursor:
         with self.connection:
             if null:
@@ -812,19 +895,12 @@ class Database:
                     (ID, guild_id)
                 )
 
-    @ignore_exceptions
-    def get_level(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT Lvl FROM `Users` WHERE `GuildID` = ? AND `ID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
-
-    @ignore_exceptions
     def get_stat(self, ID: int, guild_id: int, stat: str) -> int | float:
         return self.cursor.execute(
             f"SELECT `?` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
             (stat, ID, guild_id)
         ).fetchone()[0]
 
-    @ignore_exceptions
     async def voice_delete_stats(self, member: discord.Member, arg: bool = True) -> None:
         try:
             self.now2 = self.get_time_from_online_stats(member.id, member.guild.id)
@@ -998,7 +1074,7 @@ class Database:
             count: int
     ) -> None:
         self.update_user_stats_1(first_arg, ctx.author.id, ctx.author.id)
-        self.update_user_stats_2(second_arg, ctx.author.id, ctx.author.id)
+        self.update_user_stats_2(second_arg, ctx.author.id, ctx.author.id, ctx.guild.id)
         self.update_user_stats_3(third_arg, ctx.author.id, ctx.guild.id)
         self.update_user_stats_4(count, ctx.author.id, ctx.guild.id)
 
@@ -1082,7 +1158,6 @@ class Database:
             return True
         return False
 
-    @ignore_exceptions
     def update_stat(self, ID: int, GuildID: int, stat: str, value: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -1090,7 +1165,6 @@ class Database:
                 (stat, stat, value, ID, GuildID)
             )
 
-    @ignore_exceptions
     def send_files(self):
         self.server = smtplib.SMTP('smtp.gmail.com: 587')
         self.msg = MIMEMultipart()

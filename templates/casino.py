@@ -11,13 +11,14 @@ from discord.ext import commands
 
 from ..database.db import Database
 from .helperfunction import (
-    create_emb, fail_rand,
+    create_emb, fail_rand, logging,
     get_color, divide_the_number, casino2ch, get_time
 )
 from .texts import *
 
 
 class Casino(commands.Cog, name='Casino module', Database):
+    @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.bot: commands.Bot = bot
@@ -29,6 +30,8 @@ class Casino(commands.Cog, name='Casino module', Database):
         self.line2: List[int]
         self.line3: List[int]
         self.texts: dict = {}
+
+        print("Casino connected")
 
     @commands.command(aliases=['rust_casino'])
     @commands.cooldown(1, 2, commands.BucketType.user)
@@ -592,3 +595,112 @@ class Casino(commands.Cog, name='Casino module', Database):
                         await ctx.send(f"{ctx.author.mention}, Такого атрибута не существует! ")
         else:
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
+
+    @commands.command(aliases=['del_games'])
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def __del_games(self, ctx, member: discord.Member = None):
+        if member is None:
+            self.delete_from_coinflip(ctx.author.id, ctx.guild.id, ctx.guild.id)
+            await ctx.message.add_reaction('✅')
+        else:
+            if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
+                self.delete_from_coinflip(member.id, member.id, ctx.guild.id)
+                await ctx.message.add_reaction('✅')
+            else:
+                await ctx.send("Ты чё ку-ку? Тебе так нельзя.")
+
+    @commands.command(aliases=['reject'])
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def __reject(self, ctx, member: discord.Member = None):
+        if member is None:
+            await ctx.send("Вы не ввели человека")
+        elif member.id == ctx.author.id:
+            await ctx.send("Вы не можете ввести себя")
+            self.get_active_coinflip()
+        elif not self.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
+            await ctx.send(f"Такой игры не существует, посмотреть все ваши активные игры - "
+                           f"{settings['prefix']}games")
+        else:
+            self.delete_from_coinflip(ctx.author.id, member.id, ctx.guild.id)
+            await ctx.message.add_reaction('✅')
+
+    @commands.command(aliases=['games'])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def __games(self, ctx):
+        if not self.check_coinflip_games(ctx.author.id, ctx.guild.id):
+            self.emb = discord.Embed(title="Активные коинфлипы")
+            for row in self.get_player_active_coinflip(ctx.author.id, ctx.guild.id):
+                self.emb.add_field(
+                    name=f'{ctx.author} и {row[0]}',
+                    value=f'Сумма: {row[1]}',
+                    inline=False
+                )
+            for row in self.get_player_active_coinflip(ctx.author.id, ctx.guild.id, True):
+                self.emb.add_field(
+                    name=f'**{row[0]}** и **{ctx.author}**',
+                    value=f'Сумма: **{row[1]}**',
+                    inline=False
+                )
+            await ctx.send(embed=self.emb)
+        else:
+            await ctx.send("У Вас нет активных игр")
+
+    @commands.command(aliases=['accept'])
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def __c_accept(self, ctx, member: discord.Member = None):
+        if member is None:
+            await ctx.send("Вы не ввели человека")
+        elif not self.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
+            await ctx.send(f"Такой игры не существует, посмотреть все ваши активные игры - "
+                           f"{settings['prefix']}games")
+        elif reladdons.long.minutes(self.get_from_coinflip(ctx.author.id, member.id, ctx.guild.id, "date")) > 5:
+            await ctx.send(f"Время истекло:(")
+            self.delete_from_coinflip(ctx.author.id, member.id, ctx.guild.id)
+        elif self.get_cash(ctx.author.id, ctx.guild.id) < \
+                self.get_from_coinflip(ctx.author.id, member.id, ctx.guild.id, "Cash"):
+            await ctx.send(f"{ctx.author.mention}, У Вас недостаточно средств")
+        elif self.get_cash(member.id, ctx.guild.id) < \
+                self.get_from_coinflip(ctx.author.id, member.id, ctx.guild.id, "Cash"):
+            await ctx.send(f"{ctx.author.mention}, У Вашего оппонента недостаточно средств")
+        else:
+            self.num = self.get_from_coinflip(ctx.author.id, member.id, ctx.guild.id, "Cash")
+            self.take_coins(ctx.author.id, ctx.guild.id, self.num)
+            self.take_coins(member.id, ctx.guild.id, self.num)
+            ch = random.randint(1, 2)
+            # if member.id == 401555829620211723:
+            #       ch = 2
+            if ch == 1:
+                self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=get_color(ctx.author.roles))
+                self.emb.add_field(
+                    name=f'Поздравляем!',
+                    value=f'{ctx.author.mention}, Вы выиграли **{divide_the_number(self.num * 2)}** DP коинов!',
+                    inline=False
+                )
+                await ctx.send(embed=self.emb)
+                self.add_coins(ctx.author.id, ctx.guild.id, self.num * 2)
+                await self.stats_update(ctx, "coinflips", "cf", "wins", self.num * 2)
+                self.stats_update_member(member.id, member.guild.id, "coinflips", "cf", "loses", self.num * 2)
+                self.add_lose(member.id, ctx.guild.id)
+                self.add_win(member.id, ctx.guild.id, null=True)
+                self.add_win(ctx.author.id, ctx.guild.id)
+                self.add_lose(ctx.author.id, ctx.guild.id, null=True)
+                await self.achievement_member(member)
+                await self.achievement(ctx)
+            else:
+                self.stats_update_member(member.id, member.guild.id, "coinflips", "cf", "wins", self.num * 2)
+                await self.stats_update(ctx, "coinflips", "cf", "loses", self.num * 2)
+                self.add_lose(ctx.author.id, ctx.guild.id)
+                self.add_win(ctx.author.id, ctx.guild.id, null=True)
+                self.add_win(member.id, ctx.guild.id)
+                self.add_lose(member.id, ctx.guild.id, null=True)
+                await self.achievement_member(member)
+                await self.achievement(ctx)
+                self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=get_color(ctx.author.roles))
+                self.emb.add_field(
+                    name=f'Поздравляем!',
+                    value=f'{member.mention}, Вы выиграли **{divide_the_number(self.num * 2)}** DP коинов!',
+                    inline=False
+                )
+                await ctx.send(embed=self.emb)
+                self.add_coins(member.id, member.guild.id, self.num * 2)
+            self.delete_from_coinflip(ctx.author.id, member.id, ctx.guild.id)

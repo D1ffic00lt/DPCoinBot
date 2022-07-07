@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import smtplib
-
 import discord
 import vk_api
 import requests
@@ -18,7 +17,7 @@ from vk_api import VkApi
 
 from .helperfunction import (
     get_time, write_msg, get_color,
-    create_emb, write_log
+    create_emb, write_log, logging
 )
 from .texts import *
 from .json_ import Json
@@ -28,6 +27,7 @@ from ..version import __version__
 
 
 class Debug(commands.Cog, name='debug module', Database):
+    @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.bot: commands.Bot = bot
@@ -38,6 +38,7 @@ class Debug(commands.Cog, name='debug module', Database):
         self.server: smtplib.SMTP
         self.arg: bool
         self.color: discord.Color
+        print("Debug connected")
 
     @commands.command(aliases=["debug"])
     async def __debug_logs(

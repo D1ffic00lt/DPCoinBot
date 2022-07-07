@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
-from DPcoinBOT.templates.helperfunction import *
-from DPcoinBOT.config import *
-from DPcoinBOT.version import __version__
-from DPcoinBOT.main.bot import DPcoinBOT
-from DPcoinBOT.templates.casino import Casino
-from DPcoinBOT.templates.debug import Debug
-from DPcoinBOT.templates.user import User
-from DPcoinBOT.templates.json_ import Json
-from DPcoinBOT.templates.events import Events
+from bot import DPcoinBOT
+from templates.admin import Admin
+from templates.casino import Casino
+from templates.debug import Debug
+from templates.events import Events
+from templates.guild import Guild
+from templates.json_ import Json
+from templates.public import Public
+from templates.user import User
+from templates.helperfunction import *
+from version import __version__
+
+print("\n" + "Program started" + "\n")
 
 
+@logging
 def main() -> None:
     BOT: DPcoinBOT = DPcoinBOT(
         command_prefix=settings["prefix"],
@@ -22,15 +27,18 @@ def main() -> None:
     if not Json.check_file_exists("ban_list.json"):
         Json("../.json/ban_list.json").json_dump([])
 
-    print("Bot connected")
-    print("version: {}\n".format(__version__))
-
     BOT.add_cog(Casino(BOT))
     BOT.add_cog(Debug(BOT))
     BOT.add_cog(User(BOT))
     BOT.add_cog(Events(BOT))
+    BOT.add_cog(Guild(BOT))
+    BOT.add_cog(Admin(BOT))
+    BOT.add_cog(Public(BOT))
 
     BOT.run(settings["token"])
+
+    print("Bot connected")
+    print("version: {}\n".format(__version__))
 
 
 if __name__ == '__main__':
