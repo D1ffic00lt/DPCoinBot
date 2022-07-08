@@ -78,11 +78,11 @@ class Database:
             ChannelID                    INT NOT NULL,
             CasinoChannelID              INT NOT NULL,
             CategoryID                   INT NOT NULL,
-            Auto                         BOOLEAN NOT NULL,
+            Auto                         BOOLEAN DEFAULT 1 NOT NULL,
             BankInterest                 INT DEFAULT 0 NOT NULL,
             StartingBalance              BIGINT DEFAULT 0 NOT NULL
            )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS ItemsShop (
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS ItemShop (
             ItemID                       INT NOT NULL,
             ItemName                     VARCHAR (255) NOT NULL,
             GuildID                      INT NOT NULL,
@@ -175,7 +175,6 @@ class Database:
            Code                         VARCHAR (255) NOT NULL NOT NULL,
            Cash                         BIGINT NOT NULL,
            Global                       INT DEFAULT 0 NOT NULL
-
            )""")
         self.connection.commit()
 
@@ -225,7 +224,7 @@ class Database:
     ) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `Users` (field1, field2, field3, field6) VALUES (?, ?, ?, ?)",
+                "INSERT INTO `Users` (Name, ID, Cash, GuildID) VALUES (?, ?, ?, ?)",
                 (name, ID, starting_balance, guild_id)
             )
 
@@ -253,7 +252,8 @@ class Database:
     ) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `Server` (field1, field2, field3, field4, field5) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO `Server` (GuildID, AdministratorRoleID, ChannelID, CasinoChannelID, CategoryID) "
+                "VALUES (?, ?, ?, ?, ?)",
                 (
                     guild_id,
                     role_id,
@@ -266,26 +266,26 @@ class Database:
     def insert_into_card(self, ID: int) -> Cursor:
         if self.cursor.execute("SELECT * FROM `Card` WHERE `ID` = ?", (ID,)).fetchone() is None:
             with self.connection:
-                return self.cursor.execute("INSERT INTO `Card` (field1) VALUES (?)", (ID,))
+                return self.cursor.execute("INSERT INTO `Card` (ID) VALUES (?)", (ID,))
 
     def insert_into_promo_codes(self, ID: int, guild_id: int, code: str, cash: int, global_: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `PromoCodes` (field1, field2, field3, field4, field5) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO `PromoCodes` (ID, GuildID, Code, Cash, Global) VALUES (?, ?, ?, ?, ?)",
                 (ID, guild_id, code, cash, global_)
             )
 
     def insert_into_item_shop(self, ID: int, name: str, guild_id: int, price: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `ItemShop` (field1, field2, field3, field4) VALUES (?, ?, ?, ?)",
+                "INSERT INTO `ItemShop` (ItemID, ItemName, GuildID, ItemCost) VALUES (?, ?, ?, ?)",
                 (ID, name, guild_id, price)
             )
 
     def insert_into_shop(self, ID: int, guild_id: int, price: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `Shop` (field1, field2, field3) VALUES (?, ?, ?)",
+                "INSERT INTO `Shop` (RoleId, GuildID, RoleCost) VALUES (?, ?, ?)",
                 (ID, guild_id, price)
             )
 
@@ -294,7 +294,7 @@ class Database:
                                (ID, guild_id)).fetchone() is None:
             with self.connection:
                 return self.cursor.execute(
-                    f"INSERT INTO `Achievements` (field1, field2, field3) VALUES (?, ?, ?)",
+                    f"INSERT INTO `Achievements` (Name, ID, GuildID) VALUES (?, ?, ?)",
                     (name, ID, guild_id)
                 )
 
@@ -303,7 +303,7 @@ class Database:
                                (ID, guild_id)).fetchone() is None:
             with self.connection:
                 return self.cursor.execute(
-                    f"INSERT INTO `Inventory` (field1, field2, field3) VALUES (?, ?, ?)",
+                    f"INSERT INTO `Inventory` (Name, ID, GuildID) VALUES (?, ?, ?)",
                     (name, ID, guild_id)
                 )
 
@@ -312,14 +312,14 @@ class Database:
                                (ID, guild_id)).fetchone() is None:
             with self.connection:
                 return self.cursor.execute(
-                    f"INSERT INTO `NewYearEvent` (field1, field2, field3) VALUES (?, ?, ?)",
+                    f"INSERT INTO `NewYearEvent` (Name, ID, GuildID) VALUES (?, ?, ?)",
                     (name, ID, guild_id)
                 )
 
     def insert_into_levels(self, Level: int, xp: int, award: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `Levels` (field1, field2, field3) VALUES (?, ?, ?)",
+                "INSERT INTO `Levels` (Level, XP, Award) VALUES (?, ?, ?)",
                 (Level, xp, award)
             )
 
@@ -556,19 +556,12 @@ class Database:
                 if self.get_user_name(member.id) != member:
                     self.update_name(str(member), member.id)
 
-    def voice_create_stats(self, ID: int, guild_id: int) -> Cursor:
-        with self.connection:
-            return self.cursor.execute(
-                "INSERT INTO `OnlineStats` (field1, field2, field3) VALUES (?, ?, ?)",
-                (ID, guild_id, get_time())
-            )
-
     def voice_create(self, ID: int, guild_id: int, voice_create_stats: bool = False) -> Cursor:
         if voice_create_stats:
-            self.voice_create_stats(ID, guild_id)
+            self.insert_into_online_stats(ID, guild_id)
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `Online` (field1, field2, field3) VALUES (?, ?, ?)",
+                "INSERT INTO `Online` (ID, GuildID, Time) VALUES (?, ?, ?)",
                 (ID, guild_id, get_time())
             )
 
@@ -589,13 +582,6 @@ class Database:
         with self.connection:
             return self.cursor.execute("UPDATE `Users` SET `Cash` - ? WHERE `ID` = ? AND `GuildID` = ?",
                                        (cash, ID, guild_id))
-
-    def create_voice_stats(self, ID: int, guild_id: int) -> Cursor:
-        with self.connection:
-            return self.cursor.execute(
-                "INSERT INTO `OnlineStats` (field1, field2, field3) VALUES (?, ?, ?)",
-                (ID, guild_id, get_time())
-            )
 
     def add_coins_to_the_bank(
             self,
@@ -790,7 +776,7 @@ class Database:
     def insert_into_online_stats(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `OnlineStats` (field1, field2, field3) VALUES (?, ?, ?)",
+                "INSERT INTO `OnlineStats` (ID, GuildID, Time) VALUES (?, ?, ?)",
                 (ID, guild_id, get_time())
             )
 
@@ -802,7 +788,10 @@ class Database:
     ) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `Coinflip` (field1, field2, field3) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO `Coinflip` ("
+                "FirstPlayerID, SecondPlayerID, FirstPlayerName, "
+                "SecondPlayerName, GuildID, GuildName, Cash, Date) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     first_player_id, second_player_id,
                     first_player_name, second_player_name,
@@ -813,7 +802,7 @@ class Database:
     def insert_into_stats(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "INSERT INTO `Online` (field1, field2, field3) VALUES (?, ?, ?)",
+                "INSERT INTO `Online` (ID, GuildID, Time) VALUES (?, ?, ?)",
                 (ID, guild_id, get_time())
             )
 

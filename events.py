@@ -49,7 +49,7 @@ class Events(commands.Cog, Database, name='events module'):
             if not before.channel and after.channel and \
                     self.member_guild_afk_channel_id != self.channel_into_which_the_member_entered:
                 self.voice_create(member.id, member.guild.id)
-                self.voice_create_stats(member.id, member.guild.id)
+                self.insert_into_online_stats(member.id, member.guild.id)
             elif before.channel and after.channel:
                 if self.member_guild_afk_channel_id == self.channel_into_which_the_member_entered:
                     await self.voice_delete(member, False)
