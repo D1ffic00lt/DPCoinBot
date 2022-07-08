@@ -6,6 +6,7 @@ from discord.ext import commands
 
 from config import settings
 from database.db import Database
+from helperfunction import logging
 
 
 class DPcoinBOT(commands.Bot):
@@ -14,6 +15,7 @@ class DPcoinBOT(commands.Bot):
         self.db: Database = Database("server.db")
         self.remove_command('help')
 
+    @logging
     async def on_ready(self):
         await self.change_presence(
             status=discord.Status.online,
@@ -29,3 +31,4 @@ class DPcoinBOT(commands.Bot):
             self.db.connection.commit()
 
         self.db.clear_coinflip()
+        print("Bot connected")

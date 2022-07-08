@@ -9,10 +9,10 @@ from json_ import Json
 from public import Public
 from user import User
 from helperfunction import *
-from version import __version__
 from config import settings
+from version import __version__
 
-print("\n" + "Program started" + "\n")
+print("Program started")
 
 
 @logging
@@ -21,7 +21,7 @@ def main() -> None:
         command_prefix=settings["prefix"],
         intents=discord.Intents.all()
     )
-
+    print("version: {}".format(__version__))
     if not Json.check_file_exists("ban_list.json"):
         Json("../.json/ban_list.json").json_dump([])
 
@@ -34,9 +34,6 @@ def main() -> None:
     BOT.add_cog(Public(BOT))
 
     BOT.run(settings["token"])
-
-    print("Bot connected")
-    print("version: {}\n".format(__version__))
 
 
 if __name__ == '__main__':

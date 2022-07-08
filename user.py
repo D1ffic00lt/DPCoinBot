@@ -11,7 +11,7 @@ from typing import Union
 
 from helperfunction import (
     divide_the_number, create_emb,
-    get_color, ignore_exceptions,
+    get_color,
     prepare_mask, crop, logging, get_promo_code
 )
 from database.db import Database
@@ -167,7 +167,6 @@ class User(commands.Cog, Database, name='user module'):
 
             await ctx.send(embed=self.emb)
 
-    @ignore_exceptions  # т.к member может не быть на сервере, но упомянут через <@id>
     @commands.command(aliases=["balance", "cash"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __balance(
