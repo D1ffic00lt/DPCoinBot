@@ -7,18 +7,19 @@ import requests
 
 from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
+from typing import Union
 
-from .helperfunction import (
+from helperfunction import (
     divide_the_number, create_emb,
     get_color, ignore_exceptions,
     prepare_mask, crop, logging, get_promo_code
 )
-from ..database.db import Database
-from .json_ import Json
-from .texts import *
+from database.db import Database
+from json_ import Json
+from texts import *
 
 
-class User(commands.Cog, name='user module', Database):
+class User(commands.Cog, Database, name='user module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
@@ -197,7 +198,7 @@ class User(commands.Cog, name='user module', Database):
             self,
             ctx: commands.context.Context,
             action: str = None,
-            cash: int | str = None
+            cash: Union[int, str] = None
     ) -> None:
         if action is None:
             await ctx.send(

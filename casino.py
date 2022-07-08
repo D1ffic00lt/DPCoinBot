@@ -2,28 +2,28 @@
 from __future__ import annotations
 
 import random
-from typing import List
 
 import discord
 import reladdons
 
 from discord.ext import commands
+from typing import List, Union
 
-from ..database.db import Database
-from .helperfunction import (
+from database.db import Database
+from helperfunction import (
     create_emb, fail_rand, logging,
     get_color, divide_the_number, casino2ch, get_time
 )
-from .texts import *
+from texts import *
 
 
-class Casino(commands.Cog, name='Casino module', Database):
+class Casino(commands.Cog, Database, name='Casino module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.bot: commands.Bot = bot
         self.result_bid: int
-        self.casino: List[int | dict] = settings["casino"]
+        self.casino: List[Union[list | dict]] = casino
         self.color: discord.Color
         self.dropped_coefficient: float
         self.line1: List[int]

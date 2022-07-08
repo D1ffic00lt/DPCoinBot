@@ -3,12 +3,12 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from .helperfunction import logging
-from .texts import *
-from ..database.db import Database
+from helperfunction import logging
+from texts import *
+from database.db import Database
 
 
-class Public(commands.Cog, name='public module', Database):
+class Public(commands.Cog, Database, name='public module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")

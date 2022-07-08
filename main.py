@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 from bot import DPcoinBOT
-from templates.admin import Admin
-from templates.casino import Casino
-from templates.debug import Debug
-from templates.events import Events
-from templates.guild import Guild
-from templates.json_ import Json
-from templates.public import Public
-from templates.user import User
-from templates.helperfunction import *
+from admin import Admin
+from casino import Casino
+from debug import Debug
+from events import Events
+from guild import Guild
+from json_ import Json
+from public import Public
+from user import User
+from helperfunction import *
 from version import __version__
+from config import settings
 
 print("\n" + "Program started" + "\n")
 
@@ -20,9 +21,6 @@ def main() -> None:
         command_prefix=settings["prefix"],
         intents=discord.Intents.all()
     )
-
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game(
-        f"{settings['prefix']}help"))
 
     if not Json.check_file_exists("ban_list.json"):
         Json("../.json/ban_list.json").json_dump([])

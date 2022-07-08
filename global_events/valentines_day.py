@@ -5,7 +5,7 @@ import random
 
 from discord.ext import commands
 
-from ...database.db import Database
+from database.db import Database
 
 
 class Casino(commands.Cog, name='Casino module', Database):

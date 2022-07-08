@@ -12,11 +12,12 @@ from email.mime.text import MIMEText
 from sqlite3 import Cursor
 from typing import Tuple
 
-from ..templates.helperfunction import *
+from discord.ext import commands
+
+from helperfunction import *
 
 
 class Database:
-    @logging
     def __init__(self, filename: str) -> None:
         self.server: smtplib.SMTP = smtplib.SMTP('smtp.gmail.com: 587')
         self.msg: MIMEMultipart = MIMEMultipart()
@@ -78,7 +79,7 @@ class Database:
             CategoryID                   INT NOT NULL,
             Auto                         BOOLEAN NOT NULL,
             BankInterest                 INT DEFAULT 0 NOT NULL,
-            StartingBalance              BIGINT DEFAULT 0 NOT NULL,
+            StartingBalance              BIGINT DEFAULT 0 NOT NULL
            )""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS ItemsShop (
             ItemID                       INT NOT NULL,
@@ -176,7 +177,6 @@ class Database:
 
            )""")
         self.connection.commit()
-        print("Database connected")
 
     def checking_for_user_existence_in_table(self, ID: int, guild_id: int = 0) -> bool:
         if self.cursor.execute(

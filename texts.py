@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from ..version import __version__
-from ..config import settings
+from version import __version__
+from config import settings
 
 foo: str = f'Обновление!\nВерсия {__version__}\n\nДобавлено:\n\n- Выдача и снятие коинов по роли(give-role, ' \
            f'take-role)\nТеперь можно снимать и начислять коины ' \
@@ -171,3 +171,5 @@ auto_setup = {
         f'<Упоминание канал для казино>'
     ]
 }
+
+casino: list = [20, 3, 5, 1, 3, 1, 10, 1, 3, 5, 1, 5, 3, 10, 1, 3, 5, 1, 3, 1, 1]

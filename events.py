@@ -6,16 +6,16 @@ import random
 from datetime import datetime
 from discord.ext import commands
 
-from .helperfunction import (
+from helperfunction import (
     write_log,
     get_time,
     logging
 )
-from .json_ import Json
-from ..database.db import Database
+from json_ import Json
+from database.db import Database
 
 
-class Events(commands.Cog, name='events module', Database):
+class Events(commands.Cog, Database, name='events module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")

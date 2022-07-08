@@ -5,12 +5,12 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
-from .texts import need_settings
-from ..database.db import Database
-from .helperfunction import divide_the_number, logging
+from texts import need_settings
+from database.db import Database
+from helperfunction import divide_the_number, logging
 
 
-class Guild(commands.Cog, name='guild module', Database):
+class Guild(commands.Cog, Database, name='guild module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")

@@ -3,11 +3,11 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
-from .helperfunction import logging
-from ..database.db import Database
+from helperfunction import logging
+from database.db import Database
 
 
-class Admin(commands.Cog, name='admin module', Database):
+class Admin(commands.Cog, Database, name='admin module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")

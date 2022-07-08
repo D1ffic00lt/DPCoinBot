@@ -5,5 +5,6 @@ settings = {
     'webhook': 'webhook',
     'test_webhook': 'test_webhook',
     'owner_id_group': "owner_id: int",
-    'bot': 'DPcoin BOT'
+    'bot': 'DPcoin BOT',
+    'prefix': "//"
 }
