@@ -6,16 +6,16 @@ import random
 from datetime import datetime
 from discord.ext import commands
 
-from .helperfunction import (
+from helperfunction import (
     write_log,
     get_time,
     logging
 )
-from .json_ import Json
-from ..database.db import Database
+from json_ import Json
+from database.db import Database
 
 
-class Events(commands.Cog, name='events module', Database):
+class Events(commands.Cog, Database, name='events module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
@@ -49,7 +49,7 @@ class Events(commands.Cog, name='events module', Database):
             if not before.channel and after.channel and \
                     self.member_guild_afk_channel_id != self.channel_into_which_the_member_entered:
                 self.voice_create(member.id, member.guild.id)
-                self.voice_create_stats(member.id, member.guild.id)
+                self.insert_into_online_stats(member.id, member.guild.id)
             elif before.channel and after.channel:
                 if self.member_guild_afk_channel_id == self.channel_into_which_the_member_entered:
                     await self.voice_delete(member, False)

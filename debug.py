@@ -15,18 +15,18 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from vk_api import VkApi
 
-from .helperfunction import (
+from helperfunction import (
     get_time, write_msg, get_color,
     create_emb, write_log, logging
 )
-from .texts import *
-from .json_ import Json
-from ..database.db import Database
-from ..config import settings
-from ..version import __version__
+from texts import *
+from json_ import Json
+from database.db import Database
+from config import settings
+from version import __version__
 
 
-class Debug(commands.Cog, name='debug module', Database):
+class Debug(commands.Cog, Database, name='debug module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
@@ -73,7 +73,7 @@ class Debug(commands.Cog, name='debug module', Database):
 
             self.part.add_header(
                 'Content-Disposition',
-                "attachment; filename= %s" % os.path.basename('../database/server.db')
+                "attachment; filename= %s" % os.path.basename('database/server.db')
             )
             self.msg = MIMEMultipart()
             self.msg['From'] = settings["sender_email"]

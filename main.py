@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 from bot import DPcoinBOT
-from templates.admin import Admin
-from templates.casino import Casino
-from templates.debug import Debug
-from templates.events import Events
-from templates.guild import Guild
-from templates.json_ import Json
-from templates.public import Public
-from templates.user import User
-from templates.helperfunction import *
+from admin import Admin
+from casino import Casino
+from debug import Debug
+from events import Events
+from guild import Guild
+from json_ import Json
+from public import Public
+from user import User
+from helperfunction import *
+from config import settings
 from version import __version__
 
-print("\n" + "Program started" + "\n")
+print("Program started")
 
 
 @logging
@@ -20,10 +21,7 @@ def main() -> None:
         command_prefix=settings["prefix"],
         intents=discord.Intents.all()
     )
-
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game(
-        f"{settings['prefix']}help"))
-
+    print("version: {}".format(__version__))
     if not Json.check_file_exists("ban_list.json"):
         Json("../.json/ban_list.json").json_dump([])
 
@@ -36,9 +34,6 @@ def main() -> None:
     BOT.add_cog(Public(BOT))
 
     BOT.run(settings["token"])
-
-    print("Bot connected")
-    print("version: {}\n".format(__version__))
 
 
 if __name__ == '__main__':
