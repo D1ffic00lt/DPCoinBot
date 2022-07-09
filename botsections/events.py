@@ -6,19 +6,19 @@ import random
 from datetime import datetime
 from discord.ext import commands
 
-from helperfunction import (
+from botsections.helperfunction import (
     write_log,
     get_time,
     logging
 )
-from json_ import Json
-from database.db import Database
+from botsections.json_ import Json
+from botsections.database.db import Database
 
 
 class Events(commands.Cog, Database, name='events module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+        super().__init__("../server.db")
         self.level: int = 0
         self.index: int = 0
         self.data: dict = {}
@@ -71,7 +71,7 @@ class Events(commands.Cog, Database, name='events module'):
                 await self.voice_delete_stats(member, False)
 
     @commands.Cog.listener()
-    async def on_message(self, message) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         if message.guild is not None:
             if not Json.check_file_exists("ban_list.json"):
                 Json("ban_list.json").json_dump([])
@@ -176,7 +176,7 @@ class Events(commands.Cog, Database, name='events module'):
         elif isinstance(error, commands.CommandNotFound):
             pass
         else:
-            print(error)
+            print("[ERROR]:" + str(error))
             try:
                 write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
                           f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")

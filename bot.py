@@ -4,9 +4,9 @@ import discord
 
 from discord.ext import commands
 
-from config import settings
-from database.db import Database
-from helperfunction import logging
+from botsections.config import settings
+from botsections.database.db import Database
+from botsections.helperfunction import logging
 
 
 class DPcoinBOT(commands.Bot):

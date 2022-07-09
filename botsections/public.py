@@ -3,22 +3,22 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from helperfunction import logging
-from texts import *
-from database.db import Database
+from botsections.helperfunction import logging
+from botsections.texts import *
+from botsections.database.db import Database
 
 
 class Public(commands.Cog, Database, name='public module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+        super().__init__("../server.db")
         self.bot: commands.Bot = bot
 
         print("Public connected")
 
     @commands.command(aliases=["info"])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __info(self, ctx):
+    async def __info(self, ctx: commands.context.Context):
         self.emb = discord.Embed(title="За что выдают коины?")
         self.emb.add_field(
             name='Общение в голосовых каналах',
@@ -38,7 +38,7 @@ class Public(commands.Cog, Database, name='public module'):
 
     @commands.command(aliases=["help"])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __help(self, ctx, message=None):
+    async def __help(self, ctx: commands.context.Context, message: str = None):
         if message == "admin":
             if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
                 self.emb = discord.Embed(title="Команды бота:")

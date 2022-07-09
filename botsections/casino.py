@@ -9,21 +9,22 @@ import reladdons
 from discord.ext import commands
 from typing import List, Union
 
-from database.db import Database
-from helperfunction import (
+from botsections.database.db import Database
+from botsections.helperfunction import (
     create_emb, fail_rand, logging,
     get_color, divide_the_number, casino2ch, get_time
 )
-from texts import *
+from botsections.texts import *
 
 
 class Casino(commands.Cog, Database, name='Casino module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+        super().__init__("../server.db")
         self.bot: commands.Bot = bot
         self.result_bid: int
-        self.casino: List[Union[list | dict]] = casino
+        self.casino: List[Union[list, dict]] = []
+        self.rust_casino: List[int] = casino
         self.color: discord.Color
         self.dropped_coefficient: float
         self.line1: List[int]
@@ -57,7 +58,7 @@ class Casino(commands.Cog, Database, name='Casino module'):
                         self.color = get_color(ctx.author.roles)
                         random.shuffle(self.casino)
                         if self.casino[0] == number:
-                            self.add_coins(ctx.author.id, ctx.guild.id, self.casino[0] * bid)
+                            self.add_coins(ctx.author.id, ctx.guild.id, (self.rust_casino[0] * bid))
                             await ctx.send(
                                 embed=create_emb(
                                     title="🎰Вы выиграли!🎰",
@@ -281,7 +282,7 @@ class Casino(commands.Cog, Database, name='Casino module'):
 
     @commands.command(aliases=['coinflip'])
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def __casino_2(self, ctx, count: int = None, member: discord.Member = None):
+    async def __casino_2(self, ctx: commands.context.Context, count: int = None, member: discord.Member = None):
         self.date_now = get_time()
         self.color = get_color(ctx.author.roles)
         if self.is_the_casino_allowed(ctx.message.channel.id):
@@ -350,7 +351,7 @@ class Casino(commands.Cog, Database, name='Casino module'):
 
     @commands.command(aliases=["roll"])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __roll(self, ctx, count: int = None, *args):
+    async def __roll(self, ctx: commands.context.Context, count: int = None, *args):
         self.color = get_color(ctx.author.roles)
         if self.is_the_casino_allowed(ctx.message.channel.id):
             if await self.cash_check(ctx, count, min_cash=10, check=True):
@@ -598,7 +599,7 @@ class Casino(commands.Cog, Database, name='Casino module'):
 
     @commands.command(aliases=['del_games'])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __del_games(self, ctx, member: discord.Member = None):
+    async def __del_games(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
             self.delete_from_coinflip(ctx.author.id, ctx.guild.id, ctx.guild.id)
             await ctx.message.add_reaction('✅')
@@ -611,7 +612,7 @@ class Casino(commands.Cog, Database, name='Casino module'):
 
     @commands.command(aliases=['reject'])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __reject(self, ctx, member: discord.Member = None):
+    async def __reject(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
             await ctx.send("Вы не ввели человека")
         elif member.id == ctx.author.id:
@@ -626,7 +627,7 @@ class Casino(commands.Cog, Database, name='Casino module'):
 
     @commands.command(aliases=['games'])
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def __games(self, ctx):
+    async def __games(self, ctx: commands.context.Context):
         if not self.check_coinflip_games(ctx.author.id, ctx.guild.id):
             self.emb = discord.Embed(title="Активные коинфлипы")
             for row in self.get_player_active_coinflip(ctx.author.id, ctx.guild.id):
@@ -647,7 +648,7 @@ class Casino(commands.Cog, Database, name='Casino module'):
 
     @commands.command(aliases=['accept'])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __c_accept(self, ctx, member: discord.Member = None):
+    async def __c_accept(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
             await ctx.send("Вы не ввели человека")
         elif not self.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):

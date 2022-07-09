@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from bot import DPcoinBOT
-from admin import Admin
-from casino import Casino
-from debug import Debug
-from events import Events
-from guild import Guild
-from json_ import Json
-from public import Public
-from user import User
-from helperfunction import *
-from config import settings
-from version import __version__
+from botsections.admin import Admin
+from botsections.casino import Casino
+from botsections.debug import Debug
+from botsections.events import Events
+from botsections.guild import Guild
+from botsections.json_ import Json
+from botsections.public import Public
+from botsections.user import User
+from botsections.helperfunction import *
+from botsections.config import settings
+from botsections.version import __version__
 
 print("Program started")
 
