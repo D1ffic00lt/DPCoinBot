@@ -6,8 +6,8 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from database.db import Database
-from ..texts import *
+from botsections.database.db import Database
+from botsections.texts import *
 
 
 class NewYear(commands.Cog, name='NewYear module', Database):

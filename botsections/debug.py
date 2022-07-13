@@ -6,7 +6,7 @@ import discord
 import vk_api
 import requests
 
-from typing import Any
+from typing import Any, Union
 from discord import File, Webhook, RequestsWebhookAdapter
 from discord.ext import commands
 from email import encoders
@@ -15,24 +15,24 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from vk_api import VkApi
 
-from helperfunction import (
+from botsections.helperfunction import (
     get_time, write_msg, get_color,
     create_emb, write_log, logging
 )
-from texts import *
-from json_ import Json
-from database.db import Database
-from config import settings
-from version import __version__
+from botsections.texts import *
+from botsections.json_ import Json
+from botsections.database.db import Database
+from botsections.config import settings
+from botsections.version import __version__
 
 
 class Debug(commands.Cog, Database, name='debug module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+        super().__init__("../server.db")
         self.bot: commands.Bot = bot
         self.js: dict[Any]
-        self.data: list[int | dict]
+        self.data: list[Union[dict, int]]
         self.part: MIMEBase
         self.msg: MIMEMultipart
         self.server: smtplib.SMTP
@@ -68,12 +68,12 @@ class Debug(commands.Cog, Database, name='debug module'):
     async def __bd_send(self, ctx: commands.context.Context) -> None:
         if ctx.author.id == 401555829620211723:
             self.part = MIMEBase('application', "octet-stream")
-            self.part.set_payload(open('server.db', "rb").read())
+            self.part.set_payload(open('../server.db', "rb").read())
             encoders.encode_base64(self.part)
 
             self.part.add_header(
                 'Content-Disposition',
-                "attachment; filename= %s" % os.path.basename('database/server.db')
+                "attachment; filename= %s" % os.path.basename('botsections/database/server.db')
             )
             self.msg = MIMEMultipart()
             self.msg['From'] = settings["sender_email"]
@@ -151,7 +151,7 @@ class Debug(commands.Cog, Database, name='debug module'):
         if ctx.author.id == 401555829620211723:
             if place is not None and arg is not None:
                 if place in ["lb", "slb"] and arg in ["on", "off"]:
-                    if not os.path.exists(".json/develop_get.json"):
+                    if not os.path.exists("botsections/.json/develop_get.json"):
                         Json("develop_get.json").json_dump({"lb": True, "slb": True})
                         self.js = {"lb": True, "slb": True}
                     else:

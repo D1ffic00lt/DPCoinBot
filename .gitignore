@@ -1,6 +1,6 @@
 .DS_Store
-database/server.db
+botsections/database/server.db
 .idea/
 __pycache__/
-config.py
+botsections/config.py
 config_

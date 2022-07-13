@@ -3,45 +3,48 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
-from helperfunction import logging
-from database.db import Database
+from botsections.helperfunction import logging
+from botsections.database.db import Database
 
 
 class Admin(commands.Cog, Database, name='admin module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+        super().__init__("../server.db")
         self.bot = bot
+        self.role: discord.Role
+        self.msg: str
+        self.ind: int
         print("Admin connected")
 
     @commands.command(aliases=['give', 'award'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __give(self, ctx, member: discord.Member = None, amount: int = None):
+    async def __give(self, ctx: commands.context.Context, member: discord.Member = None, amount: int = None):
         if isinstance(self.get_administrator_role_id(ctx.guild.id), bool):
             if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
                 if member is None:
                     await ctx.send(f'{ctx.author}, укажите пользователя!')
                 else:
                     if await self.cash_check(ctx, amount, max_cash=1000000):
-                        self.add_coins(ctx.member.id, ctx.guild.id, amount)
+                        self.add_coins(member.id, ctx.guild.id, amount)
                         await ctx.message.add_reaction('✅')
             else:
                 await ctx.send("У Вас нет прав для использования этой команды")
         else:
-            role = discord.utils.get(ctx.guild.roles, id=self.get_administrator_role_id(ctx.guild.id))
-            if role in ctx.author.roles or ctx.author.id == 401555829620211723:
+            self.role = discord.utils.get(ctx.guild.roles, id=self.get_administrator_role_id(ctx.guild.id))
+            if self.role in ctx.author.roles or ctx.author.id == 401555829620211723:
                 if member is None:
                     await ctx.send(f'{ctx.author}, укажите пользователя!')
                 else:
                     if await self.cash_check(ctx, amount, max_cash=1000000):
-                        self.add_coins(ctx.member.id, ctx.guild.id, amount)
+                        self.add_coins(member.id, ctx.guild.id, amount)
                         await ctx.message.add_reaction('✅')
             else:
                 await ctx.send("У Вас недостаточно прав для использования данной команды!")
 
     @commands.command(aliases=['take'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __take(self, ctx, member: discord.Member = None, amount=None):
+    async def __take(self, ctx: commands.context.Context, member: discord.Member = None, amount=None):
         if isinstance(self.get_administrator_role_id(ctx.guild.id), bool):
             if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
                 if member is None:
@@ -56,8 +59,8 @@ class Admin(commands.Cog, Database, name='admin module'):
             else:
                 await ctx.send("У Вас нет прав для использования этой команды")
         else:
-            role = discord.utils.get(ctx.guild.roles, id=self.get_administrator_role_id(ctx.guild.id))
-            if role in ctx.author.roles or ctx.author.id == 401555829620211723:
+            self.role = discord.utils.get(ctx.guild.roles, id=self.get_administrator_role_id(ctx.guild.id))
+            if self.role in ctx.author.roles or ctx.author.id == 401555829620211723:
                 if member is None:
                     await ctx.send(f'{ctx.author}, укажите пользователя!')
                 else:
@@ -72,7 +75,7 @@ class Admin(commands.Cog, Database, name='admin module'):
 
     @commands.command(aliases=['give-role', 'award-role'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __give_role(self, ctx, role_: discord.Role = None, amount: int = None):
+    async def __give_role(self, ctx: commands.context.Context, role_: discord.Role = None, amount: int = None):
         if isinstance(self.get_administrator_role_id(ctx.guild.id), bool):
             if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
                 if role_ is None:
@@ -87,8 +90,8 @@ class Admin(commands.Cog, Database, name='admin module'):
             else:
                 await ctx.send("У Вас нет прав для использования этой команды")
         else:
-            role = discord.utils.get(ctx.guild.roles, id=self.get_administrator_role_id(ctx.guild.id))
-            if role in ctx.author.roles or ctx.author.id == 401555829620211723:
+            self.role = discord.utils.get(ctx.guild.roles, id=self.get_administrator_role_id(ctx.guild.id))
+            if self.role in ctx.author.roles or ctx.author.id == 401555829620211723:
                 if role_ is None:
                     await ctx.send(f'{ctx.author}, укажите роль!')
                 else:
@@ -102,7 +105,7 @@ class Admin(commands.Cog, Database, name='admin module'):
 
     @commands.command(aliases=['take-role'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __take_role(self, ctx, role_: discord.Role = None, amount=None):
+    async def __take_role(self, ctx: commands.context.Context, role_: discord.Role = None, amount=None):
         if isinstance(self.get_administrator_role_id(ctx.guild.id), bool):
             if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
                 if role_ is None:
@@ -122,8 +125,8 @@ class Admin(commands.Cog, Database, name='admin module'):
             else:
                 await ctx.send("У Вас нет прав для использования этой команды")
         else:
-            role = discord.utils.get(ctx.guild.roles, id=self.get_administrator_role_id(ctx.guild.id))
-            if role in ctx.author.roles or ctx.author.id == 401555829620211723:
+            self.role = discord.utils.get(ctx.guild.roles, id=self.get_administrator_role_id(ctx.guild.id))
+            if self.role in ctx.author.roles or ctx.author.id == 401555829620211723:
                 if await self.cash_check(ctx, amount, max_cash=1000000):
                     if amount == "all":
                         for member in ctx.guild.members:
@@ -140,7 +143,7 @@ class Admin(commands.Cog, Database, name='admin module'):
 
     @commands.command(aliases=['remove-shop'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __remove_shop(self, ctx, role: discord.Role = None):
+    async def __remove_shop(self, ctx: commands.context.Context, role: discord.Role = None):
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             if role is None:
                 await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите удалить из магазина""")
@@ -150,7 +153,7 @@ class Admin(commands.Cog, Database, name='admin module'):
 
     @commands.command(aliases=['add-shop'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __add_shop(self, ctx, role: discord.Role = None, cost: int = None):
+    async def __add_shop(self, ctx: commands.context.Context, role: discord.Role = None, cost: int = None):
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             if role is None:
                 await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите добавить в магазин""")
@@ -169,11 +172,10 @@ class Admin(commands.Cog, Database, name='admin module'):
 
     @commands.command(aliases=['add-else'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __add_item_shop(self, ctx, cost: int = None, *, message):
+    async def __add_item_shop(self, ctx: commands.context.Context, cost: int = None, *, message):
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
-
-            msg = message
-            if msg is None:
+            self.msg = message
+            if self.msg is None:
                 await ctx.send(f"""{ctx.author}, укажите то, что Вы хотите добавить в магазин""")
             else:
                 if self.get_from_item_shop(ctx.guild.id, "ItemID", order_by="ItemID").fetchone() is None:
@@ -184,7 +186,7 @@ class Admin(commands.Cog, Database, name='admin module'):
                     elif cost > 1000000:
                         await ctx.send(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
                     else:
-                        self.insert_into_item_shop(1, str(msg), ctx.guild.id, cost)
+                        self.insert_into_item_shop(1, str(self.msg), ctx.guild.id, cost)
                         await ctx.message.add_reaction('✅')
                 else:
                     if cost is None:
@@ -194,19 +196,19 @@ class Admin(commands.Cog, Database, name='admin module'):
                     elif cost > 1000000:
                         await ctx.send(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
                     else:
-                        ind = max(
+                        self.ind = max(
                             [
                                 i[0] for i in self.get_from_item_shop(
                                     ctx.guild.id, "ItemID", order_by="ItemID"
                                 ).fetchall()
                             ]
                         )
-                        self.insert_into_item_shop(ind + 1, str(msg), ctx.guild.id, cost)
+                        self.insert_into_item_shop(self.ind + 1, str(self.msg), ctx.guild.id, cost)
                         await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['remove-else'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __remove_item_shop(self, ctx, item_id: int = None):
+    async def __remove_item_shop(self, ctx: commands.context.Context, item_id: int = None):
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             if item_id is None:
                 await ctx.send(f"""{ctx.author}, укажите номер того, что Вы хотите удалить из магазина""")

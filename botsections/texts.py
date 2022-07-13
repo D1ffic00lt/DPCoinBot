@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from version import __version__
-from config import settings
+from botsections.version import __version__
+from botsections.config import settings
 
 foo: str = f'Обновление!\nВерсия {__version__}\n\nДобавлено:\n\n- Выдача и снятие коинов по роли(give-role, ' \
            f'take-role)\nТеперь можно снимать и начислять коины ' \

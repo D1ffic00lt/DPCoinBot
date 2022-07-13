@@ -1,32 +1,31 @@
-from __future__ import annotations
-
 import discord
 
 from discord.ext import commands
 from discord.utils import get
+from typing import Union
 
-from texts import need_settings
-from database.db import Database
-from helperfunction import divide_the_number, logging
+from botsections.texts import need_settings
+from botsections.database.db import Database
+from botsections.helperfunction import divide_the_number, logging
 
 
 class Guild(commands.Cog, Database, name='guild module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+        super().__init__("../server.db")
         self.bot = bot
         self.found: bool
-        self.admin: discord.TextChannel | int
-        self.casino_channel: discord.TextChannel | int
-        self.role: discord.Role | int
+        self.admin: Union[discord.TextChannel, int]
+        self.casino_channel: Union[discord.TextChannel, int]
+        self.role: Union[discord.Role, int]
         self.auto: int
-        self.category: discord.CategoryChannel | int
+        self.category: Union[discord.CategoryChannel, int]
         self.emb: discord.Embed
         print("Guild connected")
 
     @commands.command(aliases=["auto_setup"])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __cat_create(self, ctx):
+    async def __cat_create(self, ctx: commands.context.Context):
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             guild = ctx.message.guild
             if self.checking_for_guild_existence_in_table(ctx.guild.id):
@@ -80,13 +79,13 @@ class Guild(commands.Cog, Database, name='guild module'):
 
     @commands.command(aliases=["start_money"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __start_money(self, ctx, arg: str = None, cash: int = None):
+    async def __start_money(self, ctx: commands.context.Context, arg: str = None, cash: int = None):
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             if arg == "set":
                 if await self.cash_check(ctx, cash, max_cash=1000000) or cash == 0:
                     if not self.checking_for_guild_existence_in_table(ctx.guild.id):
                         await ctx.send(
-                            f"{ctx.autho.mention}, сервер ещё не настроен! "
+                            f"{ctx.author.mention}, сервер ещё не настроен! "
                             f"Сперва проведите настройку сервера!(auto_setup)"
                         )
                     else:
@@ -95,7 +94,7 @@ class Guild(commands.Cog, Database, name='guild module'):
             elif arg is None:
                 if not self.checking_for_guild_existence_in_table(ctx.guild.id):
                     await ctx.send(
-                        f"{ctx.autho.mention}, сервер ещё не настроен! "
+                        f"{ctx.author.mention}, сервер ещё не настроен! "
                         f"Сперва проведите настройку сервера!(auto_setup)"
                     )
                 else:

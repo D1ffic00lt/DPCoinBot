@@ -9,20 +9,20 @@ from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
 
-from helperfunction import (
+from botsections.helperfunction import (
     divide_the_number, create_emb,
     get_color,
     prepare_mask, crop, logging, get_promo_code
 )
-from database.db import Database
-from json_ import Json
-from texts import *
+from botsections.database.db import Database
+from botsections.json_ import Json
+from botsections.texts import *
 
 
 class User(commands.Cog, Database, name='user module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+        super().__init__("../server.db")
         self.bot: commands.Bot = bot
         self.name: discord.Member
         self.color: discord.Color
@@ -39,7 +39,7 @@ class User(commands.Cog, Database, name='user module'):
     async def __slb(self, ctx: commands.context.Context):
         self.all_cash = 0
         self.color = get_color(ctx.author.roles)
-        if not os.path.exists(".json/develop_get.json"):
+        if not os.path.exists("botsections/.json/develop_get.json"):
             Json("develop_get.json").json_dump({"lb": True, "slb": True})
             self.js = {"lb": True, "slb": True}
         else:
@@ -80,7 +80,7 @@ class User(commands.Cog, Database, name='user module'):
         self.counter = 0
         self.name: discord.Member
         self.index = 0
-        if not os.path.exists(".json/develop_get.json"):
+        if not os.path.exists("botsections/.json/develop_get.json"):
             Json("develop_get.json").json_dump({"lb": True, "slb": True})
             self.js = {"lb": True, "slb": True}
         else:
@@ -454,7 +454,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["rep"])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __rep(self, ctx):
+    async def __rep(self, ctx: commands.context.Context):
         self.emb = discord.Embed(title="Топ 10 сервера")
         self.counter = 0
         for row in self.get_from_user(ctx.guild.id, "Name", "Reputation", order_by="Reputation", limit=10):
@@ -468,7 +468,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["stats"])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __stats(self, ctx, member: discord.Member = None):
+    async def __stats(self, ctx: commands.context.Context, member: discord.Member = None):
         self.ID = ctx.author.id if member is None else member.id
         self.guild_id = ctx.guild.id if member is None else member.guild.id
         await ctx.send(
@@ -542,7 +542,7 @@ class User(commands.Cog, Database, name='user module'):
         )
 
     @commands.command(aliases=["card"])
-    async def __Card(self, ctx):
+    async def __Card(self, ctx: commands.context.Context):
         self.img = Image.new("RGBA", (500, 300), "#323642")
         Image.open(
             io.BytesIO(
@@ -654,7 +654,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["promo"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_active(self, ctx, promo: str = None):
+    async def __promo_active(self, ctx: commands.context.Context, promo: str = None):
         if promo is None:
             await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
         elif not self.checking_for_promo_code_existence_in_table(promo):
@@ -676,7 +676,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=['gift'])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __gift(self, ctx, member: discord.Member = None, role: discord.Role = None):
+    async def __gift(self, ctx: commands.context.Context, member: discord.Member = None, role: discord.Role = None):
         if role is None:
             await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
         elif member is None:
@@ -700,12 +700,12 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["promo"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_active(self, ctx, promo: str = None):
+    async def __promo_active(self, ctx: commands.context.Context, promo: str = None):
         if promo is None:
             await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
         elif not self.checking_for_promo_code_existence_in_table(str(promo)):
             await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
-        elif self.get_from_promo_codes(promo, "global") == "0" and \
+        elif self.get_from_promo_codes(promo, "Global") == "0" and \
                 ctx.guild.id != self.get_from_promo_codes(promo, "GuildID"):
             await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
         else:
@@ -722,7 +722,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["promos"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_codes(self, ctx):
+    async def __promo_codes(self, ctx: commands.context.Context):
         if ctx.guild is None:
             if not self.checking_for_promo_code_existence_in_table_by_id(ctx.author.id):
                 await ctx.author.send(f"{ctx.author.mention}, у Вас нет промокодов!")
@@ -746,7 +746,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["promo_create"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_create(self, ctx, cash: int = None, index2: str = None):
+    async def __promo_create(self, ctx: commands.context.Context, cash: int = None, index2: str = None):
         if cash is None:
             await ctx.send(f'{ctx.author.mention}, Вы не ввели сумму!')
         elif cash > self.get_cash(ctx.author.id, ctx.guild.id):
