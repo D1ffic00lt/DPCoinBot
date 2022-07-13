@@ -27,7 +27,7 @@ class DPcoinBOT(commands.Bot):
             for i in range(1, 405):
                 self.db.insert_into_levels(i, int(math.pow((lvl * 32), 1.4)), i * int(math.pow(lvl, 1.2)))
                 lvl += 1
-            self.db.cursor.execute("UPDATE levels SET award = 1500000 WHERE level = 404")
+            self.db.cursor.execute("UPDATE `Levels` SET `Award` = 1500000 WHERE `Level` = 404")
             self.db.connection.commit()
 
         self.db.clear_coinflip()

@@ -23,7 +23,7 @@ def main() -> None:
     )
     print("version: {}".format(__version__))
     if not Json.check_file_exists("ban_list.json"):
-        Json("../.json/ban_list.json").json_dump([])
+        Json("ban_list.json").json_dump([])
 
     BOT.add_cog(Casino(BOT))
     BOT.add_cog(Debug(BOT))

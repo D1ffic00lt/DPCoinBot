@@ -9,7 +9,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from sqlite3 import Cursor
 from typing import Tuple, Union
-
 from discord.ext import commands
 
 from botsections.config import settings
@@ -34,7 +33,8 @@ class Database:
         self.connection: sqlite3.Connection = sqlite3.connect(self.filename, check_same_thread=False)
         self.cursor: sqlite3.Cursor = self.connection.cursor()
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Users (
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Users (
             Name                         VARCHAR (255) NOT NULL,
             ID                           INT NOT NULL,
             Cash                         BIGINT DEFAULT 0 NOT NULL,
@@ -60,17 +60,21 @@ class Database:
             AllLoses                     INT DEFAULT 0 NOT NULL,
             EntireAmountOfWinnings       BIGINT DEFAULT 0 NOT NULL,
             MinutesInVoiceChannels       INT DEFAULT 0 NOT NULL,
-            Xp BIGINT                    DEFAULT 0 NOT NULL,
+            Xp                           BIGINT DEFAULT 0 NOT NULL,
             ChatLevel                    INT DEFAULT 0 NOT NULL,
             MessagesCount                INT DEFAULT 0 NOT NULL,
             CashInBank BIGINT            DEFAULT 0 NOT NULL 
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Shop (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Shop (
             RoleId                       INT NOT NULL,
             GuildID                      INT NOT NULL,
             RoleCost                     BIGINT DEFAULT 0 NOT NULL
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Server (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Server (
             GuildID                      INT NOT NULL,
             AdministratorRoleID          INT NOT NULL,
             ChannelID                    INT NOT NULL,
@@ -79,24 +83,32 @@ class Database:
             Auto                         BOOLEAN DEFAULT 1 NOT NULL,
             BankInterest                 INT DEFAULT 0 NOT NULL,
             StartingBalance              BIGINT DEFAULT 0 NOT NULL
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS ItemShop (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS ItemShop (
             ItemID                       INT NOT NULL,
             ItemName                     VARCHAR (255) NOT NULL,
             GuildID                      INT NOT NULL,
             ItemCost                     BIGINT NOT NULL
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Online (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Online (
             ID                           INT NOT NULL,
             GuildID                      INT NOT NULL,
             Time                         VARCHAR (255) NOT NULL
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS OnlineStats (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS OnlineStats (
             ID                           INT NOT NULL,
             GuildID                      INT NOT NULL,
             Time                         TIME NOT NULL
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS CoinFlip (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS CoinFlip (
             FirstPlayerID                INT NOT NULL,
             SecondPlayerID               INT NOT NULL,
             FirstPlayerName              VARCHAR (255) NOT NULL,
@@ -105,18 +117,24 @@ class Database:
             GuildName                    VARCHAR (255) NOT NULL,
             Cash                         INT NOT NULL,
             Date                         VARCHAR (255) NOT NULL
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Guilds (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Guilds (
             ID                           INT NOT NULL,
             Name                         VARCHAR (255) NOT NULL,
             Members                      INT NOT NULL
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Levels (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Levels (
            Level                         INT NOT NULL,
            XP                            BIGINT NOT NULL,
            Award                         INT NOT NULL
-          )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Achievements (
+          )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Achievements (
            Name                         VARCHAR (255) NOT NULL,
            ID                           INT NOT NULL,
            GuildID                      INT NOT NULL,
@@ -137,8 +155,10 @@ class Database:
            Wins_20                      BOOLEAN DEFAULT false NOT NULL,
            Wins                         INT DEFAULT 0 NOT NULL,
            DroppingZeroInFail           BOOLEAN DEFAULT false NOT NULL
-          )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS NewYearEvent (
+          )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS NewYearEvent (
            Name                         VARCHAR (255) NOT NULL,
            ID                           INT NOT NULL,
            GuildID                      INT NOT NULL,
@@ -153,27 +173,34 @@ class Database:
            DobryJuiceCount              INT DEFAULT 0 NOT NULL,
            BabyChampagneCount           INT DEFAULT 0 NOT NULL,
            MoodCount                    INT DEFAULT 0 NOT NULL
-          )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Inventory (
+          )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Inventory (
            Name                         VARCHAR (255) NOT NULL,
            ID                           INT NOT NULL,
            GuildID                      INT NOT NULL,
            NewYearPrises                INT DEFAULT 0 NOT NULL,
            Valentines                   INT DEFAULT 0 NOT NULL
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Card (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS Card (
            ID                           INT NOT NULL,
            Verification                 INT DEFAULT 0 NOT NULL,
            Developer                    BOOLEAN DEFAULT false NOT NULL,
            Coder                        BOOLEAN DEFAULT false NOT NULL
-           )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS PromoCodes (
+           )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS PromoCodes (
            ID                           INT NOT NULL,
            GuildID                      INT NOT NULL,
            Code                         VARCHAR (255) NOT NULL NOT NULL,
            Cash                         BIGINT NOT NULL,
            Global                       INT DEFAULT 0 NOT NULL
-           )""")
+           )"""
+        )
         self.connection.commit()
 
     def checking_for_user_existence_in_table(self, ID: int, guild_id: int = 0) -> bool:
@@ -288,8 +315,10 @@ class Database:
             )
 
     def insert_into_achievements(self, name: str, ID: int, guild_id: int) -> Cursor:
-        if self.cursor.execute("SELECT `*` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                               (ID, guild_id)).fetchone() is None:
+        if self.cursor.execute(
+                "SELECT `*` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+        ).fetchone() is None:
             with self.connection:
                 return self.cursor.execute(
                     f"INSERT INTO `Achievements` (Name, ID, GuildID) VALUES (?, ?, ?)",
@@ -297,8 +326,10 @@ class Database:
                 )
 
     def insert_into_inventory(self, name: str, ID: int, guild_id: int) -> Cursor:
-        if self.cursor.execute("SELECT `*` FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
-                               (ID, guild_id)).fetchone() is None:
+        if self.cursor.execute(
+                "SELECT `*` FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+        ).fetchone() is None:
             with self.connection:
                 return self.cursor.execute(
                     f"INSERT INTO `Inventory` (Name, ID, GuildID) VALUES (?, ?, ?)",
@@ -306,8 +337,10 @@ class Database:
                 )
 
     def insert_into_new_year_event(self, name: str, ID: int, guild_id: int) -> Cursor:
-        if self.cursor.execute("SELECT `*` FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
-                               (ID, guild_id)).fetchone() is None:
+        if self.cursor.execute(
+                "SELECT `*` FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+        ).fetchone() is None:
             with self.connection:
                 return self.cursor.execute(
                     f"INSERT INTO `NewYearEvent` (Name, ID, GuildID) VALUES (?, ?, ?)",
@@ -578,8 +611,10 @@ class Database:
 
     def take_coins(self, ID: int, guild_id: int, cash: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Users` SET `Cash` - ? WHERE `ID` = ? AND `GuildID` = ?",
-                                       (cash, ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Users` SET `Cash` - ? WHERE `ID` = ? AND `GuildID` = ?",
+                (cash, ID, guild_id)
+            )
 
     def add_coins_to_the_bank(
             self,
@@ -612,93 +647,133 @@ class Database:
                 guild_id,
                 self.get_cash(ID, guild_id, bank=True) if isinstance(cash, str) else cash)
             if isinstance(cash, str):
-                return self.cursor.execute("UPDATE `Users` SET `CashInBank` = 0 "
-                                           "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
+                return self.cursor.execute(
+                    "UPDATE `Users` SET `CashInBank` = 0 WHERE `ID` = ? AND `GuildID` = ?",
+                    (ID, guild_id)
+                )
             else:
-                return self.cursor.execute("UPDATE `Users` SET `CashInBank` = `CashInBank` - ? "
-                                           "WHERE `ID` = ? AND `GuildID` = ?", (cash, ID, guild_id))
+                return self.cursor.execute(
+                    "UPDATE `Users` SET `CashInBank` = `CashInBank` - ? WHERE `ID` = ? AND `GuildID` = ?",
+                    (cash, ID, guild_id)
+                )
 
     def get_loses_count(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Loses` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Loses` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def get_wins_count(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Wins` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Wins` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def get_three_losses_in_row_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Lose_3` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Lose_3` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_three_losses_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Lose_3` = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Lose_3` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_ten_losses_in_row_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Lose_10` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Lose_10` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_ten_losses_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Lose_10` = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Lose_10` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_twenty_losses_in_row_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Lose_20` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Lose_20` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_twenty_losses_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Lose_20` = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Lose_20` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_three_wins_in_row_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Wins_3` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Wins_3` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_three_wins_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Wins_3` = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Wins_3` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_ten_wins_in_row_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Wins_10` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Wins_10` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_ten_wins_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Wins_10` = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Wins_10` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_twenty_wins_in_row_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Wins_20` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Wins_20` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_twenty_wins_in_row_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Wins_20` = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Wins_20` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def update_user_stats_1(self, arg: str, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Users` SET ? = ?+ 1 WHERE `ID` = ? AND `GuildID` = ?",
-                                       (arg, arg, ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Users` SET ? = ? + 1 WHERE `ID` = ? AND `GuildID` = ?",
+                (arg, arg, ID, guild_id)
+            )
 
     def update_user_stats_2(self, first_arg: str, second_arg: str, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Users` SET ?? = ?? + 1 WHERE `ID` = ? AND `GuildID` = ?",
-                                       (first_arg, second_arg, first_arg, second_arg, ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Users` SET ?? = ?? + 1 WHERE `ID` = ? AND `GuildID` = ?",
+                (first_arg, second_arg, first_arg, second_arg, ID, guild_id)
+            )
 
     def update_user_stats_3(self, arg: str, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Users` SET All? = All? + 1 WHERE `ID` = ? AND `GuildID` = ?",
-                                       (arg, arg, ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Users` SET All? = All? + 1 WHERE `ID` = ? AND `GuildID` = ?",
+                (arg, arg, ID, guild_id)
+            )
 
     def update_user_stats_4(self, count: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Users` SET Count = Count + ? WHERE `ID` = ? AND `GuildID` = ?",
-                                       (count, ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Users` SET Count = Count + ? WHERE `ID` = ? AND `GuildID` = ?",
+                (count, ID, guild_id)
+            )
 
     @ignore_exceptions
     def stats_update_member(
@@ -716,8 +791,12 @@ class Database:
         self.update_user_stats_4(count, ID, guild_id)
 
     def get_time_from_online_stats(self, ID: int, guild_id: int) -> str:
-        return datetime_to_str(self.cursor.execute("SELECT `Time` FROM `OnlineStats` WHERE `ID` = ? AND `GuildID` = ?",
-                                                   (ID, guild_id)).fetchone()[0])
+        return datetime_to_str(
+            self.cursor.execute(
+                "SELECT `Time` FROM `OnlineStats` WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            ).fetchone()[0]
+        )
 
     def get_player_active_coinflip(self, ID: int, guild_id: int, player: bool = False) -> Cursor:
         return self.cursor.execute(
@@ -805,87 +884,121 @@ class Database:
             )
 
     def get_minutes(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `MinutesInVoiceChannels` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `MinutesInVoiceChannels` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def get_voice_1_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Voice_1` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Voice_1` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def add_level(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "UPDATE `Users` SET Lvl = Lvl + 1 WHERE ID = ? AND GuildID = ?",
+                "UPDATE `Users` SET `Lvl` = `Lvl` + 1 WHERE ID = ? AND GuildID = ?",
                 (ID, guild_id)
             )
 
     def set_voice_1_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET Voice_1 = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Voice_1` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_voice_10_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Voice_10` FROM Achievements WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Voice_10` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_voice_10_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Voice_10` = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Voice_10` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_voice_100_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Voice_100` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Voice_100` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_voice_100_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET Voice_100 = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Voice_100` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_voice_1000_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Voice_1000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Voice_1000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_voice_1000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Voice_1000` = true WHERE `ID` = ? AND `GuildID` = ?",
-                                       (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Voice_1000` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_voice_10000_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Voice_10000` FROM `Achievements` WHERE id = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Voice_10000` FROM `Achievements` WHERE id = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_voice_10000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Voice_10000` = true "
-                                       "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Voice_10000` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_voice_100000_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Voice_100000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Voice_100000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_voice_100000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Voice_100000` = true "
-                                       "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Voice_100000` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_voice_1000000_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Voice_1000000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Voice_1000000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_voice_1000000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Voice_1000000` = true "
-                                       "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Voice_1000000` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def get_voice_10000000_achievement(self, ID: int, guild_id: int) -> int:
-        return self.cursor.execute("SELECT `Voice_1000000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
-                                   (ID, guild_id)).fetchone()[0]
+        return self.cursor.execute(
+            "SELECT `Voice_1000000` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
 
     def set_voice_10000000_achievement(self, ID: int, guild_id: int) -> Cursor:
         with self.connection:
-            return self.cursor.execute("UPDATE `Achievements` SET `Voice_1000000` = true "
-                                       "WHERE `ID` = ? AND `GuildID` = ?", (ID, guild_id))
+            return self.cursor.execute(
+                "UPDATE `Achievements` SET `Voice_1000000` = true WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            )
 
     def add_win(self, ID: int, guild_id: int, null: bool = False) -> Cursor:
         with self.connection:
@@ -935,43 +1048,59 @@ class Database:
             if minutes >= 1 and str(self.get_voice_1_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 500)
                 self.set_voice_1_achievement(member.id, member.guild.id)
-                await member.send(f"На сервере {member.guild} "
-                                  f"получено достижение «Вроде они добрые...»!\nВам начислено 500 коинов!")
+                await member.send(
+                    f"На сервере {member.guild} "
+                    f"получено достижение «Вроде они добрые...»!\nВам начислено 500 коинов!"
+                )
             elif minutes >= 10 and str(self.get_voice_10_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 700)
                 self.set_voice_10_achievement(member.id, member.guild.id)
-                await member.send(f"На сервере {member.guild} "
-                                  f"получено достижение «Они добрые!»!\nВам начислено 700 коинов!")
+                await member.send(
+                    f"На сервере {member.guild} "
+                    f"получено достижение «Они добрые!»!\nВам начислено 700 коинов!"
+                )
             elif minutes >= 100 and str(self.get_voice_100_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 1500)
                 self.set_voice_100_achievement(member.id, member.guild.id)
-                await member.send(f"На сервере {member.guild} "
-                                  f"получено достижение «Отличная компания»!\nВам начислено 1500 коинов!")
+                await member.send(
+                    f"На сервере {member.guild} "
+                    f"получено достижение «Отличная компания»!\nВам начислено 1500 коинов!"
+                )
             elif minutes >= 1000 and str(self.get_voice_1000_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 3000)
                 self.set_voice_1000_achievement(member.id, member.guild.id)
-                await member.send(f"На сервере {member.guild} "
-                                  f"получено достижение «А они точно добрые?»!\nВам начислено 3000 коинов!")
+                await member.send(
+                    f"На сервере {member.guild} "
+                    f"получено достижение «А они точно добрые?»!\nВам начислено 3000 коинов!"
+                )
             elif minutes >= 10000 and str(self.get_voice_10000_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 7000)
                 self.set_voice_10000_achievement(member.id, member.guild.id)
-                await member.send(f"На сервере {member.guild} "
-                                  f"получено достижение «СПАСИТЕ»!\nВам начислено 7000 коинов!")
+                await member.send(
+                    f"На сервере {member.guild} "
+                    f"получено достижение «СПАСИТЕ»!\nВам начислено 7000 коинов!"
+                )
             elif minutes >= 100000 and str(self.get_voice_100000_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 14000)
                 self.set_voice_100000_achievement(member.id, member.guild.id)
-                await member.send(f"На сервере {member.guild} "
-                                  f"получено достижение «А может и не надо...»!\nВам начислено 14000 коинов!")
+                await member.send(
+                    f"На сервере {member.guild} "
+                    f"получено достижение «А может и не надо...»!\nВам начислено 14000 коинов!"
+                )
             elif minutes >= 1000000 and str(self.get_voice_1000000_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 28000)
                 self.set_voice_1000000_achievement(member.id, member.guild.id)
-                await member.send(f"На сервере {member.guild} "
-                                  f"получено достижение «Всё-таки они хорошие:)»!\nВам начислено 28000 коинов!")
+                await member.send(
+                    f"На сервере {member.guild} "
+                    f"получено достижение «Всё-таки они хорошие:)»!\nВам начислено 28000 коинов!"
+                )
             elif minutes >= 10000000 and str(self.get_voice_10000000_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 56000)
                 self.set_voice_10000000_achievement(member.id, member.guild.id)
-                await member.send(f"На сервере {member.guild} "
-                                  f"получено достижение «А у меня есть личная жизнь?»!\nВам начислено 56000 коинов!")
+                await member.send(
+                    f"На сервере {member.guild} "
+                    f"получено достижение «А у меня есть личная жизнь?»!\nВам начислено 56000 коинов!"
+                )
 
     @ignore_exceptions
     async def achievement(self, ctx: commands.context.Context) -> None:
@@ -980,38 +1109,50 @@ class Database:
         if self.get_three_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and loses >= 3:
             self.add_coins(ctx.author.id, ctx.guild.id, 400)
             self.set_three_losses_in_row_achievement(ctx.author.id, ctx.guild.id)
-            await ctx.author.send(f"На сервере {ctx.author.guild} "
-                                  f"получено достижение «Азартный человек»!\nВам начислено 400 коинов!")
+            await ctx.author.send(
+                f"На сервере {ctx.author.guild} "
+                f"получено достижение «Азартный человек»!\nВам начислено 400 коинов!"
+            )
 
         elif self.get_ten_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and loses >= 10:
             self.add_coins(ctx.author.id, ctx.guild.id, 3000)
             self.set_ten_losses_in_row_achievement(ctx.author.id, ctx.guild.id)
-            await ctx.author.send(f"На сервере {ctx.author.guild} "
-                                  f"получено достижение «Сумасшедший»!\nВам начислено 3000 коинов!")
+            await ctx.author.send(
+                f"На сервере {ctx.author.guild} "
+                f"получено достижение «Сумасшедший»!\nВам начислено 3000 коинов!"
+            )
 
         elif self.get_twenty_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and loses >= 20:
             self.add_coins(ctx.author.id, ctx.guild.id, 10000)
             self.set_twenty_losses_in_row_achievement(ctx.author.id, ctx.guild.id)
-            await ctx.author.send(f"На сервере {ctx.author.guild} "
-                                  f"получено достижение «Бессмертный»!\nВам начислено 10000 коинов!")
+            await ctx.author.send(
+                f"На сервере {ctx.author.guild} "
+                f"получено достижение «Бессмертный»!\nВам начислено 10000 коинов!"
+            )
 
         elif self.get_three_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and wins >= 3:
             self.add_coins(ctx.author.id, ctx.guild.id, 400)
             self.set_three_wins_in_row_achievement(ctx.author.id, ctx.guild.id)
-            await ctx.author.send(f"На сервере {ctx.author.guild} "
-                                  f"получено достижение «Да я богач!»!\nВам начислено 400 коинов!")
+            await ctx.author.send(
+                f"На сервере {ctx.author.guild} "
+                f"получено достижение «Да я богач!»!\nВам начислено 400 коинов!"
+            )
 
         elif self.get_ten_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and wins >= 10:
             self.add_coins(ctx.author.id, ctx.guild.id, 3000)
             self.set_ten_wins_in_row_achievement(ctx.author.id, ctx.guild.id)
-            await ctx.author.send(f"На сервере {ctx.author.guild} "
-                                  f"получено достижение «Это вообще законно?»!\nВам начислено 3000 коинов!")
+            await ctx.author.send(
+                f"На сервере {ctx.author.guild} "
+                f"получено достижение «Это вообще законно?»!\nВам начислено 3000 коинов!"
+            )
 
         elif self.get_twenty_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and wins >= 20:
             self.add_coins(ctx.author.id, ctx.guild.id, 20000)
             self.set_twenty_wins_in_row_achievement(ctx.author.id, ctx.author.id)
-            await ctx.author.send(f"На сервере {ctx.author.guild} "
-                                  f"получено достижение «Кажется меня не любят...»!\nВам начислено 20000 коинов!")
+            await ctx.author.send(
+                f"На сервере {ctx.author.guild} "
+                f"получено достижение «Кажется меня не любят...»!\nВам начислено 20000 коинов!"
+            )
 
     @ignore_exceptions
     async def achievement_member(self, member: discord.Member) -> None:
@@ -1020,38 +1161,50 @@ class Database:
         if self.get_three_losses_in_row_achievement(member.id, member.guild.id) == 0 and loses >= 3:
             self.add_coins(member.id, member.guild.id, 400)
             self.set_three_losses_in_row_achievement(member.id, member.guild.id)
-            await member.send(f"На сервере {member.guild} "
-                              f"получено достижение «Азартный человек»!\nВам начислено 400 коинов!")
+            await member.send(
+                f"На сервере {member.guild} "
+                f"получено достижение «Азартный человек»!\nВам начислено 400 коинов!"
+            )
 
         elif self.get_ten_losses_in_row_achievement(member.id, member.guild.id) == 0 and loses >= 10:
             self.add_coins(member.id, member.guild.id, 3000)
             self.set_ten_losses_in_row_achievement(member.id, member.guild.id)
-            await member.send(f"На сервере {member.guild} "
-                              f"получено достижение «Сумасшедший»!\nВам начислено 3000 коинов!")
+            await member.send(
+                f"На сервере {member.guild} "
+                f"получено достижение «Сумасшедший»!\nВам начислено 3000 коинов!"
+            )
 
         elif self.get_twenty_losses_in_row_achievement(member.id, member.guild.id) == 0 and loses >= 20:
             self.add_coins(member.id, member.guild.id, 10000)
             self.set_twenty_losses_in_row_achievement(member.id, member.guild.id)
-            await member.send(f"На сервере {member.guild} "
-                              f"получено достижение «Бессмертный»!\nВам начислено 10000 коинов!")
+            await member.send(
+                f"На сервере {member.guild} "
+                f"получено достижение «Бессмертный»!\nВам начислено 10000 коинов!"
+            )
 
         elif self.get_three_wins_in_row_achievement(member.id, member.guild.id) == 0 and wins >= 3:
             self.add_coins(member.id, member.guild.id, 400)
             self.set_three_wins_in_row_achievement(member.id, member.guild.id)
-            await member.send(f"На сервере {member.guild} "
-                              f"получено достижение «Да я богач!»!\nВам начислено 400 коинов!")
+            await member.send(
+                f"На сервере {member.guild} "
+                f"получено достижение «Да я богач!»!\nВам начислено 400 коинов!"
+            )
 
         elif self.get_ten_wins_in_row_achievement(member.id, member.guild.id) == 0 and wins >= 10:
             self.add_coins(member.id, member.guild.id, 3000)
             self.set_ten_wins_in_row_achievement(member.id, member.guild.id)
-            await member.send(f"На сервере {member.guild} "
-                              f"получено достижение «Это вообще законно?»!\nВам начислено 3000 коинов!")
+            await member.send(
+                f"На сервере {member.guild} "
+                f"получено достижение «Это вообще законно?»!\nВам начислено 3000 коинов!"
+            )
 
         elif self.get_twenty_wins_in_row_achievement(member.id, member.guild.id) == 0 and wins >= 20:
             self.add_coins(member.id, member.guild.id, 20000)
             self.set_twenty_wins_in_row_achievement(member.id, member.author.id)
-            await member.send(f"На сервере {member.guild} "
-                              f"получено достижение «Кажется меня не любят...»!\nВам начислено 20000 коинов!")
+            await member.send(
+                f"На сервере {member.guild} "
+                f"получено достижение «Кажется меня не любят...»!\nВам начислено 20000 коинов!"
+            )
 
     @ignore_exceptions
     async def cash_check(
@@ -1096,11 +1249,11 @@ class Database:
         self.update_user_stats_3(third_arg, ctx.author.id, ctx.guild.id)
         self.update_user_stats_4(count, ctx.author.id, ctx.guild.id)
 
-        if third_arg == "loses":
+        if third_arg == "LosesCount":
             self.add_lose(ctx.author.id, ctx.guild.id)
             self.add_win(ctx.author.id, ctx.guild.id, True)
 
-        elif third_arg == "wins":
+        elif third_arg == "WinsCount":
             self.add_win(ctx.author.id, ctx.guild.id)
             self.add_lose(ctx.author.id, ctx.guild.id, True)
 
@@ -1168,11 +1321,16 @@ class Database:
 
     @ignore_exceptions
     def is_the_casino_allowed(self, channel_id: int) -> bool:
-        if self.cursor.execute("SELECT CasinoChannelID FROM Server WHERE GuildID = ?",
-                               (channel_id,)).fetchone() is None:
+        if self.cursor.execute(
+                "SELECT `CasinoChannelID` FROM `Server` WHERE `GuildID` = ?",
+                (channel_id,)
+        ).fetchone() is None:
             return True
         if channel_id in [572705890524725248, 573712070864797706] or \
-                self.cursor.execute("SELECT CasinoChannelID FROM Server WHERE GuildID = ?", (channel_id,)).fetchone():
+                self.cursor.execute(
+                    "SELECT `CasinoChannelID` FROM `Server` WHERE `GuildID` = ?",
+                    (channel_id,)
+                ).fetchone():
             return True
         return False
 

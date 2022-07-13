@@ -705,7 +705,7 @@ class User(commands.Cog, Database, name='user module'):
             await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
         elif not self.checking_for_promo_code_existence_in_table(str(promo)):
             await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
-        elif self.get_from_promo_codes(promo, "global") == "0" and \
+        elif self.get_from_promo_codes(promo, "Global") == "0" and \
                 ctx.guild.id != self.get_from_promo_codes(promo, "GuildID"):
             await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
         else:
