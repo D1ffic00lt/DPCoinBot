@@ -10,13 +10,13 @@ from botsections.helperfunction import logging
 
 
 class DPcoinBOT(commands.Bot):
-    def __init__(self, command_prefix: str, **kwargs):
+    def __init__(self, command_prefix: str, **kwargs) -> None:
         super().__init__(command_prefix, **kwargs)
         self.db: Database = Database("server.db")
         self.remove_command('help')
 
     @logging
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         await self.change_presence(
             status=discord.Status.online,
             activity=discord.Game(f"{settings['prefix']}help")

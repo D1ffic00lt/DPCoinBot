@@ -183,7 +183,7 @@ class Debug(commands.Cog, Database, name='debug module'):
                         'v': "5.52"
                     }
                 ).json()
-                if not os.path.exists("../.json/send.json") or os.stat("../.json/send.json").st_size == 0:
+                if not os.path.exists(".json/send.json") or os.stat(".json/send.json").st_size == 0:
                     Json("send.json").json_dump([])
                 else:
                     self.js = Json("send.json").json_load()

@@ -4,6 +4,8 @@ from discord.ext import commands
 from discord.utils import get
 from typing import Union
 
+from dislash import slash_command, Option, OptionType
+
 from botsections.texts import need_settings
 from botsections.database.db import Database
 from botsections.helperfunction import divide_the_number, logging
@@ -25,6 +27,9 @@ class Guild(commands.Cog, Database, name='guild module'):
         print("Guild connected")
 
     @commands.command(aliases=["auto_setup"])
+    @slash_command(
+        name="auto_setup", description="авто-настройка каналов бота на сервере",
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __cat_create(self, ctx: commands.context.Context) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
@@ -79,6 +84,13 @@ class Guild(commands.Cog, Database, name='guild module'):
             await ctx.send(embed=self.emb)
 
     @commands.command(aliases=["start_money"])
+    @slash_command(
+        name="start_money", description="стартовый баланс",
+        options=[
+            Option("arg", "аргумент (set)", OptionType.STRING, required=False),
+            Option("cash", "число, на которое Вы ставите", OptionType.INTEGER, required=False)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __start_money(self, ctx: commands.context.Context, arg: str = None, cash: int = None) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:

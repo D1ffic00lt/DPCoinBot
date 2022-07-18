@@ -3,6 +3,7 @@ import random
 from datetime import datetime
 from discord.ext import commands
 from typing import Union
+from dislash import slash_command, Option, OptionType
 
 from botsections.database.db import Database
 
@@ -13,6 +14,12 @@ class Casino(commands.Cog, name='Casino module', Database):
         self.bot: commands.Bot = bot
 
     @commands.command(aliases=["val_open"])
+    @slash_command(
+        name="val_open", description="открыть валентинку",
+        options=[
+            Option("сount", "количество", Union[OptionType.STRING, OptionType.INTEGER]),
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __val_open(self, ctx, count: Union[int, str] = None) -> None:
         if int(datetime.today().strftime('%m')) == 2 and int(datetime.today().strftime('%d')) == 14:

@@ -12,6 +12,7 @@ from botsections.helperfunction import *
 from botsections.config import settings
 from botsections.version import __version__
 
+from botslashsections.casino import CasinoSlash
 print("Program started")
 
 
@@ -33,6 +34,7 @@ def main() -> None:
     BOT.add_cog(Admin(BOT))
     BOT.add_cog(Public(BOT))
 
+    BOT.add_cog(CasinoSlash(BOT))
     BOT.run(settings["token"])
 
 

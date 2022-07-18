@@ -6,6 +6,8 @@ import reladdons
 from discord.ext import commands
 from typing import List, Union
 
+from dislash import slash_command, Option, OptionType
+
 from botsections.database.db import Database
 from botsections.helperfunction import (
     create_emb, fail_rand, logging,
@@ -33,6 +35,13 @@ class Casino(commands.Cog, Database, name='Casino module'):
         print("Casino connected")
 
     @commands.command(aliases=['rust_casino'])
+    @slash_command(
+        name="rust_casino", description="казино, прямо как в расте",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER),
+            Option("number", "число, на которое Вы ставите", OptionType.INTEGER)
+        ]
+    )
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino_3(
             self, ctx: commands.context.Context,
@@ -96,6 +105,13 @@ class Casino(commands.Cog, Database, name='Casino module'):
                            )
 
     @commands.command(aliases=['fail'])
+    @slash_command(
+        name="fail", description="просто казино, не знаю как написать",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER),
+            Option("coefficient", "число, на которое Вы ставите", OptionType.NUMBER)
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __fail(
             self, ctx: commands.context.Context,
@@ -167,6 +183,12 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=['777'])
+    @slash_command(
+        name="777", description="рулетка",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER)
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __casino777(self, ctx: commands.context.Context, bid: int = None) -> None:
         if self.is_the_casino_allowed(ctx.message.channel.id):
@@ -275,6 +297,13 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=['coinflip'])
+    @slash_command(
+        name="coinflip", description="коинфлип",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER),
+            Option("user", "человек, с которым вы можете сыграть", OptionType.USER, required=False)
+        ]
+    )
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def __casino_2(self, ctx: commands.context.Context, count: int = None, member: discord.Member = None):
         self.date_now = get_time()
@@ -344,6 +373,13 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=["roll"])
+    @slash_command(
+        name="roll", description="классическая рулетка",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER),
+            Option("coefficient", "Число или аргумент", Union[OptionType.INTEGER, OptionType.STRING])
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __roll(self, ctx: commands.context.Context, count: int = None, *args):
         self.color = get_color(ctx.author.roles)
@@ -593,6 +629,12 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=['del_games'])
+    @slash_command(
+        name="del_games", description="удалить активные игры",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.USER, required=False),
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __del_games(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
@@ -606,6 +648,12 @@ class Casino(commands.Cog, Database, name='Casino module'):
                 await ctx.send("Ты чё ку-ку? Тебе так нельзя.")
 
     @commands.command(aliases=['reject'])
+    @slash_command(
+        name="reject", description="отклонить игру",
+        options=[
+            Option("user", "человек, предложение которого Вы хотите отклонить", OptionType.USER),
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __reject(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
@@ -621,6 +669,9 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['games'])
+    @slash_command(
+        name="games", description="посмотреть ваши активные игры",
+    )
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def __games(self, ctx: commands.context.Context):
         if not self.check_coinflip_games(ctx.author.id, ctx.guild.id):
@@ -642,6 +693,12 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send("У Вас нет активных игр")
 
     @commands.command(aliases=['accept'])
+    @slash_command(
+        name="accept", description="принять игру",
+        options=[
+            Option("user", "человек, предложение которого Вы хотите принять", OptionType.USER),
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __c_accept(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:

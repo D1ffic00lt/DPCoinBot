@@ -1,7 +1,10 @@
+from optparse import Option
+
 import discord
 
 from discord.ext import commands
 from datetime import datetime
+from dislash import slash_command, OptionType
 
 from botsections.helperfunction import logging
 from botsections.texts import *
@@ -17,6 +20,9 @@ class Public(commands.Cog, Database, name='public module'):
         print("Public connected")
 
     @commands.command(aliases=["info"])
+    @slash_command(
+        name="info", description="информация о коинах"
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __info(self, ctx: commands.context.Context):
         self.emb = discord.Embed(title="За что выдают коины?")
@@ -37,9 +43,15 @@ class Public(commands.Cog, Database, name='public module'):
         await ctx.send(embed=self.emb)
 
     @commands.command(aliases=["help"])
+    @slash_command(
+        name="start_money", description="стартовый баланс",
+        options=[
+            Option("arg", "аргумент", OptionType.STRING, required=False),
+        ]
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __help(self, ctx: commands.context.Context, message: str = None):
-        if message == "admin":
+    async def __help(self, ctx: commands.context.Context, arg: str = None):
+        if arg == "admin":
             if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
                 self.emb = discord.Embed(title="Команды бота:")
                 self.get_administrator_role_id(ctx.guild.id)
@@ -94,7 +106,7 @@ class Public(commands.Cog, Database, name='public module'):
                 await ctx.send(embed=self.emb)
             else:
                 await ctx.send("У вас нет прав для использования этой команды")
-        elif message == "casino":
+        elif arg == "casino":
             self.row12 = "3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36"
             self.row22 = "2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35"
             self.row32 = "1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34"
@@ -151,7 +163,7 @@ class Public(commands.Cog, Database, name='public module'):
                                      f"Три семёрки - в 5 раз\n"
                                      f"Три единицы - вы ничего не теряете, но и ничего не получаете", inline=False)
             self.emb.add_field(name=f"Как работает roll?",
-                               value="**{}roll <Ставка> <Цифра или аргумент>**\n"
+                               value="**{}roll <Ставка> <Число или аргумент>**\n"
                                      "Вы можете поставить определённую сумму на "
                                      "числа(от 0 до 36), цвета, и наборы чисел.\n"
                                      'Аргументы:\n'
@@ -181,22 +193,22 @@ class Public(commands.Cog, Database, name='public module'):
                                      f"если программа выдаёт коэффициент выше Вашего"
                                      f" - Вы выиграли, и Ваша ставка умножается на Ваш коэффициент", inline=False)
             await ctx.send(embed=self.emb)
-        elif message == "me_pls:(":
+        elif arg == "me_pls:(":
             if ctx.author.id == 401555829620211723:
-                await ctx.send("//send_logs - отправить логи\n//send_base - отправить бд\n//logs <Кол-во "
-                               "строк>\n//debug "
-                               "<Кол-во строк> "
-                               "- отправить логи отладки\nпридурок, "
-                               "если ты снова что-то сломал, то я тебя зарежу"
-                               "\n//send_webhook <Параметр> - отправить обновление(push), ничего - тест"
-                               "//bot_stats - статистика бота\n"
-                               "//card_add <id> <Параметр> - добавить параметр в карточку\n"
-                               "//card_remove <id> <Параметр> - удалить параметр из карточки\n"
-                               "**параметры:** gg - зелёная галочка, "
-                               "bg - синяя галочка, dv - разработчик, cd - программист\n\n"
-                               "//add_to_ban_list <server_id> - добавить сервер в банлист\n"
-                               "//develop_stats <Параметр (lb, slb)> <Параметр (on, off)> - ну тут понятно")
-        elif message == "new_year":
+                await ctx.send(
+                    "//send_logs - отправить логи\n//send_base - отправить бд\n//logs <Кол-во "
+                    "строк>\n//debug <Кол-во строк> "
+                    "- отправить логи отладки\n"
+                    "//send_webhook <Параметр> - отправить обновление(push), ничего - тест"
+                    "//bot_stats - статистика бота\n"
+                    "//card_add <id> <Параметр> - добавить параметр в карточку\n"
+                    "//card_remove <id> <Параметр> - удалить параметр из карточки\n"
+                    "**параметры:** gg - зелёная галочка, "
+                    "bg - синяя галочка, dv - разработчик, cd - программист\n\n"
+                    "//add_to_ban_list <server_id> - добавить сервер в банлист\n"
+                    "{settings['prefix']}develop_stats <Параметр (lb, slb)> <Параметр (on, off)> - ну тут понятно"
+                )
+        elif arg == "new_year":
             self.emb = discord.Embed(title="Команды Нового года")
             self.emb.add_field(name=f'**{settings["prefix"]}presents**',
                                value='Все ваши подарки', inline=False)
@@ -216,7 +228,7 @@ class Public(commands.Cog, Database, name='public module'):
                                value='Купить еду', inline=False)
             await ctx.send(embed=self.emb)
 
-        elif message == "tests":
+        elif arg == "tests":
             if ctx.author.id == 401555829620211723 or ctx.author.id == 608314233079201834:
                 self.row12 = "3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36"
                 self.row22 = "2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35"
@@ -241,7 +253,7 @@ class Public(commands.Cog, Database, name='public module'):
                                    ), inline=False)
                 await ctx.send(embed=self.emb)
 
-        elif message is None:
+        elif arg is None:
             self.emb = discord.Embed(title="Команды бота:")
             self.emb.add_field(name=f'**{settings["prefix"]}info**',
                                value='За что выдают коины', inline=False)

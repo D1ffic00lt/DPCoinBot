@@ -2,6 +2,8 @@ import discord
 
 from discord.ext import commands
 from discord.utils import get
+from dislash import slash_command, Option, OptionType
+from typing import Union
 
 from botsections.helperfunction import logging
 from botsections.database.db import Database
@@ -18,6 +20,13 @@ class Admin(commands.Cog, Database, name='admin module'):
         print("Admin connected")
 
     @commands.command(aliases=['give', 'award'])
+    @slash_command(
+        name="give", description="выдать DP коины",
+        options=[
+            Option("member", "пользователь, которому выдадут коины", OptionType.USER),
+            Option("amount", "количество коинов", OptionType.NUMBER)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give(self, ctx: commands.context.Context, member: discord.Member = None, amount: int = None) -> None:
         if isinstance(self.get_administrator_role_id(ctx.guild.id), bool):
@@ -43,6 +52,13 @@ class Admin(commands.Cog, Database, name='admin module'):
                 await ctx.send("У Вас недостаточно прав для использования данной команды!")
 
     @commands.command(aliases=['take'])
+    @slash_command(
+        name="take", description="списать DP коины",
+        options=[
+            Option("member", "пользователь, которому у которого спишут коины", OptionType.USER),
+            Option("amount", "количество коинов", Union[OptionType.NUMBER, OptionType.STRING])
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __take(self, ctx: commands.context.Context, member: discord.Member = None, amount=None) -> None:
         if isinstance(self.get_administrator_role_id(ctx.guild.id), bool):
@@ -74,6 +90,13 @@ class Admin(commands.Cog, Database, name='admin module'):
                 await ctx.send("У Вас недостаточно прав для использования данной команды!")
 
     @commands.command(aliases=['give-role', 'award-role'])
+    @slash_command(
+        name="give-role", description="выдать DP коины по роли",
+        options=[
+            Option("role", "роль", OptionType.ROLE),
+            Option("amount", "количество коинов", OptionType.NUMBER)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give_role(self, ctx: commands.context.Context, role_: discord.Role = None, amount: int = None) -> None:
         if isinstance(self.get_administrator_role_id(ctx.guild.id), bool):
@@ -104,6 +127,13 @@ class Admin(commands.Cog, Database, name='admin module'):
                 await ctx.send("У Вас недостаточно прав для использования данной команды!")
 
     @commands.command(aliases=['take-role'])
+    @slash_command(
+        name="give-take", description="снять DP коины по роли",
+        options=[
+            Option("role", "роль", OptionType.ROLE),
+            Option("amount", "количество коинов", OptionType.NUMBER)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __take_role(self, ctx: commands.context.Context, role_: discord.Role = None, amount=None) -> None:
         if isinstance(self.get_administrator_role_id(ctx.guild.id), bool):
@@ -142,6 +172,12 @@ class Admin(commands.Cog, Database, name='admin module'):
                 await ctx.send("У Вас недостаточно прав для использования данной команды!")
 
     @commands.command(aliases=['remove-shop'])
+    @slash_command(
+        name="remove-shop", description="убрать роль из магазина",
+        options=[
+            Option("role", "роль", OptionType.ROLE)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __remove_shop(self, ctx: commands.context.Context, role: discord.Role = None) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
@@ -152,6 +188,12 @@ class Admin(commands.Cog, Database, name='admin module'):
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['add-shop'])
+    @slash_command(
+        name="add-shop", description="добавить роль в магазин",
+        options=[
+            Option("role", "пользователь, которому выдадут коины", OptionType.ROLE)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __add_shop(self, ctx: commands.context.Context, role: discord.Role = None, cost: int = None) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
@@ -171,10 +213,17 @@ class Admin(commands.Cog, Database, name='admin module'):
                     await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['add-else'])
+    @slash_command(
+        name="add-else", description="добавить товар в магазин",
+        options=[
+            Option("cash", "цена", OptionType.INTEGER),
+            Option("item", "товар", OptionType.STRING)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __add_item_shop(self, ctx: commands.context.Context, cost: int = None, *, message) -> None:
+    async def __add_item_shop(self, ctx: commands.context.Context, cost: int = None, *, item) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
-            self.msg = message
+            self.msg = item
             if self.msg is None:
                 await ctx.send(f"""{ctx.author}, укажите то, что Вы хотите добавить в магазин""")
             else:
@@ -207,6 +256,12 @@ class Admin(commands.Cog, Database, name='admin module'):
                         await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['remove-else'])
+    @slash_command(
+        name="remove-else", description="добавить товар в магазин",
+        options=[
+            Option("товар", "товар", OptionType.STRING)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __remove_item_shop(self, ctx: commands.context.Context, item_id: int = None) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
