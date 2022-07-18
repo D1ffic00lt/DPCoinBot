@@ -2,9 +2,8 @@ import discord
 
 from discord.ext import commands
 from discord.utils import get
-from typing import Union
-
 from dislash import slash_command, Option, OptionType
+from typing import Union
 
 from botsections.texts import need_settings
 from botsections.database.db import Database

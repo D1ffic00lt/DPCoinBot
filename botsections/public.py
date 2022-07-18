@@ -1,10 +1,9 @@
-from optparse import Option
 
 import discord
 
 from discord.ext import commands
 from datetime import datetime
-from dislash import slash_command, OptionType
+from dislash import slash_command, OptionType, Option
 
 from botsections.helperfunction import logging
 from botsections.texts import *

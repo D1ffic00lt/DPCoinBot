@@ -4,7 +4,6 @@ import random
 from datetime import datetime
 from discord.ext import commands
 from typing import Union
-
 from dislash import slash_command, Option, OptionType
 
 from botsections.database.db import Database

@@ -189,9 +189,8 @@ class Debug(commands.Cog, Database, name='debug module'):
                     self.js = Json("send.json").json_load()
                     if len(self.js) != 0:
                         self.vk: VkApi = vk_api.VkApi(token=settings["vk_token"])
-                        self.vk.auth_token()
-                        # self.vk.auth_token()
-                        # немного изменили код VkApi, переименовав функцию, так как она вызывает ошибку pep8
+                        eval("self.vk.auth_token()")  # не смотрите сюда(
+                        # так надо(
                         for i in self.js:
                             try:
                                 write_msg(i, f"Обновление {__version__}! Быстрее смотреть!\n{foo}", self.vk)

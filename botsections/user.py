@@ -7,7 +7,6 @@ from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
 from types import NoneType
-
 from dislash import slash_command, OptionType, Option
 
 from botsections.helperfunction import (

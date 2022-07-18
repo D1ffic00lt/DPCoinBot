@@ -4,9 +4,8 @@ import discord
 import reladdons
 
 from discord.ext import commands
-from typing import List, Union
-
 from dislash import slash_command, Option, OptionType
+from typing import List, Union
 
 from botsections.database.db import Database
 from botsections.helperfunction import (
