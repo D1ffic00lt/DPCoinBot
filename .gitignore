@@ -5,3 +5,4 @@ __pycache__/
 botsections/config.py
 config_
 server.db
+botsections/.json

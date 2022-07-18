@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime
-import os
 import smtplib
 import sqlite3
 
@@ -402,11 +401,11 @@ class Database:
                 (ID,)
             )
 
-    def get_from_new_year_event(self, ID: int, guild_id: int, item: str) -> int:
+    def get_from_new_year_event(self, ID: int, guild_id: int, item: str) -> Cursor:
         return self.cursor.execute(
             "SELECT `?` FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
             (item, ID, guild_id)
-        ).fetchone()[0]
+        ).fetchone()
 
     def get_user_name(self, ID: int) -> str:
         return self.cursor.execute(f"SELECT `Name` FROM `Users` WHERE `ID` = ?", (ID,)).fetchone()[0]

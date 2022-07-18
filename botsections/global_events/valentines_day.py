@@ -1,9 +1,8 @@
-from __future__ import annotations
-
-from datetime import datetime
 import random
 
+from datetime import datetime
 from discord.ext import commands
+from typing import Union
 
 from botsections.database.db import Database
 
@@ -15,7 +14,7 @@ class Casino(commands.Cog, name='Casino module', Database):
 
     @commands.command(aliases=["val_open"])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __val_open(self, ctx, count: int | str = None):
+    async def __val_open(self, ctx, count: Union[int, str] = None) -> None:
         if int(datetime.today().strftime('%m')) == 2 and int(datetime.today().strftime('%d')) == 14:
             self.valentine = self.get_from_inventory(ctx.author.id, ctx.guild.id, "Valentines")
             if self.valentine == 0:
