@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import smtplib
 import discord
@@ -37,14 +35,13 @@ class Debug(commands.Cog, Database, name='debug module'):
         self.msg: MIMEMultipart
         self.server: smtplib.SMTP
         self.arg: bool
+        self.file_path: str
         self.color: discord.Color
         print("Debug connected")
 
     @commands.command(aliases=["debug"])
     async def __debug_logs(
-            self,
-            ctx: commands.context.Context,
-            count: int = None
+            self, ctx: commands.context.Context, count: int = None
     ) -> None:
         if ctx.author.id == 401555829620211723:
             with open("logs/develop_logs.dpcb", encoding="utf-8", errors="ignore") as read_file, \
@@ -61,8 +58,8 @@ class Debug(commands.Cog, Database, name='debug module'):
                         break
             await ctx.send(f"**debug logs**\nname:{os.name}\nusername: {os.getlogin()}\ndate: {get_time()}\n",
                            file=File("prom_files/debug_send.txt"))
-            file_path = "prom_files/debug_send.txt"
-            os.remove(file_path)
+            self.file_path = "prom_files/debug_send.txt"
+            os.remove(self.file_path)
 
     @commands.command(aliases=['send_base'])  # это лучше не трогать
     async def __bd_send(self, ctx: commands.context.Context) -> None:
@@ -101,10 +98,7 @@ class Debug(commands.Cog, Database, name='debug module'):
 
     @commands.command(aliases=["card_add"])
     async def __card_add(
-            self,
-            ctx: commands.context.Context,
-            user_id: int = 0,
-            type_of_card: str = None
+            self, ctx: commands.context.Context, user_id: int = 0, type_of_card: str = None
     ) -> None:
         if ctx.author.id == 401555829620211723 and self.check_user(user_id):
             if type_of_card == "gg":
@@ -122,10 +116,7 @@ class Debug(commands.Cog, Database, name='debug module'):
 
     @commands.command(aliases=["card_remove"])
     async def __card_remove(
-            self,
-            ctx: commands.context.Context,
-            user_id: int = 0,
-            param: str = None
+            self, ctx: commands.context.Context, user_id: int = 0, param: str = None
     ) -> None:
         if ctx.author.id == 401555829620211723 and self.check_user(user_id):
             if param == "gg":
@@ -143,10 +134,7 @@ class Debug(commands.Cog, Database, name='debug module'):
 
     @commands.command(aliases=['develop_stats'])
     async def __develop_stats(
-            self,
-            ctx: commands.context.Context,
-            place: str = None,
-            arg: str = None
+            self, ctx: commands.context.Context, place: str = None, arg: str = None
     ) -> None:
         if ctx.author.id == 401555829620211723:
             if place is not None and arg is not None:
@@ -166,12 +154,10 @@ class Debug(commands.Cog, Database, name='debug module'):
     @commands.command(aliases=['add_to_ban_list'])
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __add_ban_list(
-            self,
-            ctx: commands.context.Context,
-            server_id: int = None
+            self, ctx: commands.context.Context, server_id: int = None
     ) -> None:
         if ctx.author.id == 401555829620211723:
-            if not os.path.exists("../.json/ban_list.json"):
+            if not Json.check_file_exists("ban_list.json"):
                 Json("ban_list.json").json_dump([])
             else:
                 self.data = Json("ban_list.json").json_load()
@@ -233,9 +219,7 @@ class Debug(commands.Cog, Database, name='debug module'):
 
     @commands.Cog.listener()
     async def on_command_error(
-            self,
-            ctx: commands.context.Context,
-            error: Exception
+            self, ctx: commands.context.Context, error: Exception
     ) -> None:
         if isinstance(error, commands.CommandOnCooldown):
             pass

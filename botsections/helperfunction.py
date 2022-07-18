@@ -1,8 +1,9 @@
-""" не смотрите сюда """
+""" не смотрите сюда пж """
 # -*- coding: utf-8 -*-
 import random
 import discord
 import emoji
+import os
 
 from datetime import datetime
 from typing import Callable, List, Any
@@ -15,17 +16,25 @@ casino2 = {}
 
 
 def write_log(text: str):
-    with open("../logs/develop_logs.dpcb", "a+", encoding="utf-8", errors="ignore") as file:
+    if not os.path.exists(".logs"):
+        os.mkdir(".logs")
+    with open(".logs/develop_logs.dpcb", "a+", encoding="utf-8", errors="ignore") as file:
         file.write(text)
 
 
-def prepare_mask(size, antialias=2):
-    mask = Image.new('L', (size[0] * antialias, size[1] * antialias))
+def prepare_mask(size, anti_alias: int = 2):
+    mask = Image.new('L', (size[0] * anti_alias, size[1] * anti_alias))
     ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
     return mask.resize(size, Image.ANTIALIAS)
 
 
 def crop(im, s):
+    """
+    мне стыдно за эту функцию, но она не моя:(
+    :param im:
+    :param s:
+    :return:
+    """
     w, h = im.size
     if w / s[0] - h / s[1] > 0:
         im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
@@ -100,8 +109,7 @@ def datetime_to_str(datetime_):
 
 
 def create_emb(
-        title: str,
-        args: List[Any] = None,
+        title: str, args: List[Any] = None,
         color: discord.Color = discord.Color.from_rgb(32, 34, 37),
         description: str = EmptyEmbed
 ) -> discord.Embed:

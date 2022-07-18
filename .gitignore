@@ -4,3 +4,4 @@ botsections/database/server.db
 __pycache__/
 botsections/config.py
 config_
+server.db

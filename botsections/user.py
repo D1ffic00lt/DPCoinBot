@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import io
 import os
 import discord
@@ -8,6 +6,7 @@ import requests
 from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
+from types import NoneType
 
 from botsections.helperfunction import (
     divide_the_number, create_emb,
@@ -32,11 +31,13 @@ class User(commands.Cog, Database, name='user module'):
         self.index: int = 0
         self.ID: int = 0
         self.guild_id: int = 0
+        self.server: Union[discord.Guild, NoneType]
+
         print("User connected")
 
     @commands.command(aliases=['slb'])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __slb(self, ctx: commands.context.Context):
+    async def __slb(self, ctx: commands.context.Context) -> None:
         self.all_cash = 0
         self.color = get_color(ctx.author.roles)
         if not os.path.exists("botsections/.json/develop_get.json"):
@@ -76,7 +77,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["leader", "lb"])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __lb(self, ctx: commands.context.Context, type_: str = None):
+    async def __lb(self, ctx: commands.context.Context, type_: str = None) -> None:
         self.counter = 0
         self.name: discord.Member
         self.index = 0
@@ -170,10 +171,9 @@ class User(commands.Cog, Database, name='user module'):
     @commands.command(aliases=["balance", "cash"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __balance(
-            self,
-            ctx: commands.context.Context,
+            self, ctx: commands.context.Context,
             member: discord.Member = None
-    ):
+    ) -> None:
         if member is None:
             await ctx.send(
                 embed=create_emb(
@@ -194,10 +194,8 @@ class User(commands.Cog, Database, name='user module'):
     @commands.command(aliases=["bank"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __bank(
-            self,
-            ctx: commands.context.Context,
-            action: str = None,
-            cash: Union[int, str] = None
+            self, ctx: commands.context.Context,
+            action: str = None, cash: Union[int, str] = None
     ) -> None:
         if action is None:
             await ctx.send(
@@ -404,11 +402,9 @@ class User(commands.Cog, Database, name='user module'):
     @commands.command(aliases=["send"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __send(
-            self,
-            ctx: commands.context.Context,
-            member: discord.Member = None,
-            cash: int = None
-    ):
+            self, ctx: commands.context.Context,
+            member: discord.Member = None, cash: int = None
+    ) -> None:
         if member is None:
             await ctx.send(f"""{ctx.author}, укажите пользователя, которому Вы хотите перевести коины""")
         else:
@@ -423,10 +419,8 @@ class User(commands.Cog, Database, name='user module'):
     @commands.command(aliases=["+rep"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __good_rep(
-            self,
-            ctx: commands.context.Context,
-            member: discord.Member = None
-    ):
+            self, ctx: commands.context.Context, member: discord.Member = None
+    ) -> None:
         if member is None:
             await ctx.send(f"{ctx.author}, Вы не указали пользователя!")
         else:
@@ -439,10 +433,8 @@ class User(commands.Cog, Database, name='user module'):
     @commands.command(aliases=["-rep"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __bad_rep(
-            self,
-            ctx: commands.context.Context,
-            member: discord.Member = None
-    ):
+            self, ctx: commands.context.Context, member: discord.Member = None
+    ) -> None:
         if member is None:
             await ctx.send(f"{ctx.author}, Вы не указали пользователя!")
         else:
@@ -454,7 +446,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["rep"])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __rep(self, ctx: commands.context.Context):
+    async def __rep(self, ctx: commands.context.Context) -> None:
         self.emb = discord.Embed(title="Топ 10 сервера")
         self.counter = 0
         for row in self.get_from_user(ctx.guild.id, "Name", "Reputation", order_by="Reputation", limit=10):
@@ -468,7 +460,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["stats"])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __stats(self, ctx: commands.context.Context, member: discord.Member = None):
+    async def __stats(self, ctx: commands.context.Context, member: discord.Member = None) -> None:
         self.ID = ctx.author.id if member is None else member.id
         self.guild_id = ctx.guild.id if member is None else member.guild.id
         await ctx.send(
@@ -542,7 +534,7 @@ class User(commands.Cog, Database, name='user module'):
         )
 
     @commands.command(aliases=["card"])
-    async def __Card(self, ctx: commands.context.Context):
+    async def __Card(self, ctx: commands.context.Context) -> None:
         self.img = Image.new("RGBA", (500, 300), "#323642")
         Image.open(
             io.BytesIO(
@@ -676,7 +668,10 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=['gift'])
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __gift(self, ctx: commands.context.Context, member: discord.Member = None, role: discord.Role = None):
+    async def __gift(
+            self, ctx: commands.context.Context,
+            member: discord.Member = None, role: discord.Role = None
+    ) -> None:
         if role is None:
             await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
         elif member is None:
@@ -700,7 +695,7 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["promo"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_active(self, ctx: commands.context.Context, promo: str = None):
+    async def __promo_active(self, ctx: commands.context.Context, promo: str = None) -> None:
         if promo is None:
             await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
         elif not self.checking_for_promo_code_existence_in_table(str(promo)):
@@ -722,31 +717,30 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["promos"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_codes(self, ctx: commands.context.Context):
+    async def __promo_codes(self, ctx: commands.context.Context) -> None:
         if ctx.guild is None:
             if not self.checking_for_promo_code_existence_in_table_by_id(ctx.author.id):
                 await ctx.author.send(f"{ctx.author.mention}, у Вас нет промокодов!")
             else:
-                emb = discord.Embed(title="Промокоды")
+                self.emb = discord.Embed(title="Промокоды")
                 for codes in self.get_from_promo_codes("", ["Code", "GuildID", "Cash"], ID=ctx.author.id):
-                    server = None
                     for guild in self.bot.guilds:
                         if guild.id == codes[1]:
-                            server = guild
+                            self.server = guild
                             break
-                    if server is not None:
-                        emb.add_field(
-                            name=f"{server} - {divide_the_number(codes[2])}",
+                    if self.server is not None:
+                        self.emb.add_field(
+                            name=f"{self.server} - {divide_the_number(codes[2])}",
                             value=f"{codes[0]}",
                             inline=False
                         )
-                await ctx.author.send(embed=emb)
+                await ctx.author.send(embed=self.emb)
         else:
             await ctx.send(f"{ctx.author.mention}, эту команду можно использовать только в личных сообщениях бота")
 
     @commands.command(aliases=["promo_create"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_create(self, ctx: commands.context.Context, cash: int = None, index2: str = None):
+    async def __promo_create(self, ctx: commands.context.Context, cash: int = None, index2: str = None) -> None:
         if cash is None:
             await ctx.send(f'{ctx.author.mention}, Вы не ввели сумму!')
         elif cash > self.get_cash(ctx.author.id, ctx.guild.id):
@@ -772,13 +766,13 @@ class User(commands.Cog, Database, name='user module'):
                 )
                 await ctx.send(embed=self.emb)
             except discord.Forbidden:
-                code2 = self.code
+                self.code2 = self.code
                 self.code = ""
-                for i in range(len(code2)):
-                    if i > len(code2) - 4:
+                for i in range(len(self.code2)):
+                    if i > len(self.code2) - 4:
                         self.code += "*"
                     else:
-                        self.code += code2[i]
+                        self.code += self.code2[i]
                 self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
                 self.emb.add_field(
                     name=f'Ваш промокод на **{divide_the_number(cash)}**',
