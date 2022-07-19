@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import annotations
-
 import random
-
 import discord
 import reladdons
 
 from discord.ext import commands
+from dislash import slash_command, Option, OptionType
 from typing import List, Union
 
 from botsections.database.db import Database
@@ -31,16 +29,22 @@ class Casino(commands.Cog, Database, name='Casino module'):
         self.line2: List[int]
         self.line3: List[int]
         self.texts: dict = {}
+        self.count: int
 
         print("Casino connected")
 
     @commands.command(aliases=['rust_casino'])
+    @slash_command(
+        name="rust_casino", description="казино, прямо как в расте",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER),
+            Option("number", "число, на которое Вы ставите", OptionType.INTEGER)
+        ]
+    )
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino_3(
-            self,
-            ctx: commands.context.Context,
-            bid: int = None,
-            number: int = None
+            self, ctx: commands.context.Context,
+            bid: int = None, number: int = None
     ) -> None:
         if self.is_the_casino_allowed(ctx.message.channel.id):
             if bid is None:
@@ -100,12 +104,17 @@ class Casino(commands.Cog, Database, name='Casino module'):
                            )
 
     @commands.command(aliases=['fail'])
+    @slash_command(
+        name="fail", description="просто казино, не знаю как написать",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER),
+            Option("coefficient", "число, на которое Вы ставите", OptionType.NUMBER)
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __fail(
-            self,
-            ctx: commands.context.Context,
-            bid: int = None,
-            coefficient: float = None
+            self, ctx: commands.context.Context,
+            bid: int = None, coefficient: float = None
     ) -> None:
         if self.is_the_casino_allowed(ctx.message.channel.id):
             if bid is None:
@@ -173,6 +182,12 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=['777'])
+    @slash_command(
+        name="777", description="рулетка",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER)
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __casino777(self, ctx: commands.context.Context, bid: int = None) -> None:
         if self.is_the_casino_allowed(ctx.message.channel.id):
@@ -281,6 +296,13 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=['coinflip'])
+    @slash_command(
+        name="coinflip", description="коинфлип",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER),
+            Option("user", "человек, с которым вы можете сыграть", OptionType.USER, required=False)
+        ]
+    )
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def __casino_2(self, ctx: commands.context.Context, count: int = None, member: discord.Member = None):
         self.date_now = get_time()
@@ -350,11 +372,19 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=["roll"])
+    @slash_command(
+        name="roll", description="классическая рулетка",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.INTEGER),
+            Option("coefficient", "Число или аргумент", Union[OptionType.INTEGER, OptionType.STRING])
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __roll(self, ctx: commands.context.Context, count: int = None, *args):
         self.color = get_color(ctx.author.roles)
+        self.count = count
         if self.is_the_casino_allowed(ctx.message.channel.id):
-            if await self.cash_check(ctx, count, min_cash=10, check=True):
+            if await self.cash_check(ctx, self.count, min_cash=10, check=True):
                 self.texts[ctx.author.id] = ""
                 self.casino[ctx.author.id] = {}
                 self.casino[ctx.author.id]["color"] = reladdons.randoms.choice(
@@ -376,33 +406,33 @@ class Casino(commands.Cog, Database, name='Casino module'):
                     elif int(self.texts[ctx.author.id][0]) > 36:
                         pass
                     else:
-                        self.take_coins(ctx.author.id, ctx.guild.id, count)
+                        self.take_coins(ctx.author.id, ctx.guild.id, self.count)
                         if int(self.texts[ctx.author.id]) == 0 and int(self.texts[ctx.author.id][0]) \
                                 == self.casino[ctx.author.id]["number"][0]:
-                            count *= 35
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 35
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value='Выпало число {}, green\n{}'
                                       ", Вы выиграли **{}** DP коинов!!".format(
                                     self.casino[ctx.author.id]['number'][0],
-                                    ctx.author.mention, divide_the_number(count)
+                                    ctx.author.mention, divide_the_number(self.count)
                                 ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif int(self.texts[ctx.author.id]) == self.casino[ctx.author.id]["number"][0]:
-                            count *= 35
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 35
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
                         else:
@@ -415,29 +445,29 @@ class Casino(commands.Cog, Database, name='Casino module'):
                                                                      ctx.author.mention),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            count = -count
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "LosesCount", count)
+                            self.count = -self.count
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "LosesCount", self.count)
                 except ValueError:
                     if self.texts[ctx.author.id] in roll_types:
-                        self.take_coins(ctx.author.id, ctx.guild.id, count)
+                        self.take_coins(ctx.author.id, ctx.guild.id, self.count)
                         if self.texts[ctx.author.id] == "1st12" and self.casino[ctx.author.id]["number"][0] <= 12:
-                            count *= 3
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 3
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "2nd12" and \
                                 24 >= self.casino[ctx.author.id]["number"][0] > 12:
-                            count *= 3
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 3
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
@@ -450,133 +480,133 @@ class Casino(commands.Cog, Database, name='Casino module'):
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "3rd12" and self.casino[ctx.author.id]["number"][0] > 24:
-                            count *= 3
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 3
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "1to18" and \
                                 0 != self.casino[ctx.author.id]["number"][0] <= 18:
-                            count *= 2
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 2
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "19to36" and \
                                 18 < self.casino[ctx.author.id]["number"][0] <= 36:
-                            count *= 2
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 2
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "2to1" and self.casino[ctx.author.id]["number"][0] in row1:
-                            count *= 3
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 3
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "2to2" and self.casino[ctx.author.id]["number"][0] in row2:
-                            count *= 3
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 3
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "2to3" and self.casino[ctx.author.id]["number"][0] in row3:
-                            count *= 3
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 3
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="Вы выиграли!", colour=self.color)
                             self.emb.add_field(
                                 name=f'🎰Поздравляем!🎰',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "b" and self.casino[ctx.author.id]["color"][0] == "black":
-                            count *= 2
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 2
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="Вы выиграли!", colour=self.color)
                             self.emb.add_field(
                                 name=f'🎰Поздравляем!🎰',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "r" and self.casino[ctx.author.id]["color"][0] == "red":
-                            count *= 2
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 2
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
                         elif self.texts[ctx.author.id] == "ch" and self.casino[ctx.author.id]["number"][0] % 2 == 0:
-                            count *= 2
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 2
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="Вы выиграли!", colour=self.color)
                             self.emb.add_field(
                                 name=f'🎰Поздравляем!🎰',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
                         elif self.texts[ctx.author.id] == "nch" and self.casino[ctx.author.id]["number"][0] % 2 == 1:
-                            count *= 2
-                            self.add_coins(ctx.author.id, ctx.guild.id, count)
-                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", count)
+                            self.count *= 2
+                            self.add_coins(ctx.author.id, ctx.guild.id, self.count)
+                            await self.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
                             self.emb = discord.Embed(title="Вы выиграли!", colour=self.color)
                             self.emb.add_field(
                                 name=f'🎰Поздравляем!🎰',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(count)),
+                                    ctx.author.mention, divide_the_number(self.count)),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 
@@ -590,7 +620,7 @@ class Casino(commands.Cog, Database, name='Casino module'):
                                                                     ctx.author.mention),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", -count)
+                            await self.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", -self.count)
 
                     else:
                         await ctx.send(f"{ctx.author.mention}, Такого атрибута не существует! ")
@@ -598,6 +628,12 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=['del_games'])
+    @slash_command(
+        name="del_games", description="удалить активные игры",
+        options=[
+            Option("bid", "сумма, которую Вы ставите", OptionType.USER, required=False),
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __del_games(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
@@ -611,6 +647,12 @@ class Casino(commands.Cog, Database, name='Casino module'):
                 await ctx.send("Ты чё ку-ку? Тебе так нельзя.")
 
     @commands.command(aliases=['reject'])
+    @slash_command(
+        name="reject", description="отклонить игру",
+        options=[
+            Option("user", "человек, предложение которого Вы хотите отклонить", OptionType.USER),
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __reject(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
@@ -626,6 +668,9 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['games'])
+    @slash_command(
+        name="games", description="посмотреть ваши активные игры",
+    )
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def __games(self, ctx: commands.context.Context):
         if not self.check_coinflip_games(ctx.author.id, ctx.guild.id):
@@ -647,6 +692,12 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send("У Вас нет активных игр")
 
     @commands.command(aliases=['accept'])
+    @slash_command(
+        name="accept", description="принять игру",
+        options=[
+            Option("user", "человек, предложение которого Вы хотите принять", OptionType.USER),
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __c_accept(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
@@ -667,10 +718,10 @@ class Casino(commands.Cog, Database, name='Casino module'):
             self.num = self.get_from_coinflip(ctx.author.id, member.id, ctx.guild.id, "Cash")
             self.take_coins(ctx.author.id, ctx.guild.id, self.num)
             self.take_coins(member.id, ctx.guild.id, self.num)
-            ch = random.randint(1, 2)
+            self.ch = random.randint(1, 2)
             # if member.id == 401555829620211723:
-            #       ch = 2
-            if ch == 1:
+            #       self.ch = 2
+            if self.ch == 1:
                 self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=get_color(ctx.author.roles))
                 self.emb.add_field(
                     name=f'Поздравляем!',

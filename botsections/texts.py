@@ -133,14 +133,17 @@ casino_numbers_color: dict = {
     0: "green", 1: "red", 2: "black", 3: "red", 4: "black", 5: "red", 6: "black",
     7: "red", 8: "black", 9: "red", 10: "black", 11: "red", 12: "black", 13: "red",
     14: "black", 15: "red", 16: "black", 17: "red", 18: "black", 19: "red", 20: "black",
-    21: "red", 22: "black", 23: "red", 24: "black", 25: "red", 26: "black", 27: "red", 28: "black",
-    29: "red", 30: "black", 31: "red", 32: "black", 33: "red", 34: "black", 35: "red", 36: "black"
+    21: "red", 22: "black", 23: "red", 24: "black", 25: "red", 26: "black", 27: "red",
+    28: "black", 29: "red", 30: "black", 31: "red", 32: "black", 33: "red", 34: "black",
+    35: "red", 36: "black"
 }
+
 roll_types: list = [
     "1st12", "2nd12", "3rd12", '1to18',
     "19to36", "2to1", "2to2", "2to3", "b",
     "r", "ch", "nch"
 ]
+
 row1 = [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36]
 row2 = [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35]
 row3 = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34]

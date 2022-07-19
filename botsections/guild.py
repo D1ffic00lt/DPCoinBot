@@ -2,6 +2,7 @@ import discord
 
 from discord.ext import commands
 from discord.utils import get
+from dislash import slash_command, Option, OptionType
 from typing import Union
 
 from botsections.texts import need_settings
@@ -21,11 +22,15 @@ class Guild(commands.Cog, Database, name='guild module'):
         self.auto: int
         self.category: Union[discord.CategoryChannel, int]
         self.emb: discord.Embed
+
         print("Guild connected")
 
     @commands.command(aliases=["auto_setup"])
+    @slash_command(
+        name="auto_setup", description="авто-настройка каналов бота на сервере",
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __cat_create(self, ctx: commands.context.Context):
+    async def __cat_create(self, ctx: commands.context.Context) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             guild = ctx.message.guild
             if self.checking_for_guild_existence_in_table(ctx.guild.id):
@@ -78,8 +83,15 @@ class Guild(commands.Cog, Database, name='guild module'):
             await ctx.send(embed=self.emb)
 
     @commands.command(aliases=["start_money"])
+    @slash_command(
+        name="start_money", description="стартовый баланс",
+        options=[
+            Option("arg", "аргумент (set)", OptionType.STRING, required=False),
+            Option("cash", "число, на которое Вы ставите", OptionType.INTEGER, required=False)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __start_money(self, ctx: commands.context.Context, arg: str = None, cash: int = None):
+    async def __start_money(self, ctx: commands.context.Context, arg: str = None, cash: int = None) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             if arg == "set":
                 if await self.cash_check(ctx, cash, max_cash=1000000) or cash == 0:

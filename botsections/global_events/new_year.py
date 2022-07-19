@@ -1,10 +1,10 @@
-from __future__ import annotations
-
-import random
-from datetime import datetime
-
 import discord
+import random
+
+from datetime import datetime
 from discord.ext import commands
+from typing import Union
+from dislash import slash_command, Option, OptionType
 
 from botsections.database.db import Database
 from botsections.texts import *
@@ -16,8 +16,14 @@ class NewYear(commands.Cog, name='NewYear module', Database):
         self.bot: commands.Bot = bot
 
     @commands.command(aliases=["use"])
+    @slash_command(
+        name="use", description="использовать предмет",
+        options=[
+            Option("item", "номер предмета, который вы хотите использовать", OptionType.INTEGER)
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __use(self, ctx, item: int = None):
+    async def __use(self, ctx: commands.context.Context, item: int = None) -> None:
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
@@ -70,8 +76,15 @@ class NewYear(commands.Cog, name='NewYear module', Database):
                             await ctx.send(embed=self.emb)
 
     @commands.command(aliases=["buy_food"])
+    @slash_command(
+        name="buy_food", description="купить еду",
+        options=[
+            Option("number", "номер предмета, который вы хотите использовать", OptionType.INTEGER),
+            Option("count", "количество предметов, которых вы хотите купить", OptionType.INTEGER)
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __buy_food(self, ctx, number: int = 0, count: int = 1):
+    async def __buy_food(self, ctx: commands.context.Context, number: int = 0, count: int = 1):
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
@@ -95,8 +108,15 @@ class NewYear(commands.Cog, name='NewYear module', Database):
                         await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["send_present"])
+    @slash_command(
+        name="send_present", description="отправить подарок",
+        options=[
+            Option("member", "пользователь", OptionType.USER),
+            Option("count", "количество подарков", OptionType.INTEGER)
+        ]
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __send_present(self, ctx, member: discord.Member = None, amount: int = None):
+    async def __send_present(self, ctx: commands.context.Context, member: discord.Member = None, amount: int = None):
         if member is None:
             await ctx.send(f"""{ctx.author.mention}, укажите пользователя, которому Вы хотите перевести коины""")
         else:
@@ -116,8 +136,14 @@ class NewYear(commands.Cog, name='NewYear module', Database):
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["open"])
+    @slash_command(
+        name="open", description="открыть подарок",
+        options=[
+            Option("count", "количество подарков", Union[OptionType.INTEGER, OptionType.STRING])
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __open(self, ctx, count: int | str = None):
+    async def __open(self, ctx: commands.context.Context, count: Union[int, str] = None) -> None:
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
@@ -153,8 +179,11 @@ class NewYear(commands.Cog, name='NewYear module', Database):
                         pass
 
     @commands.command(aliases=["presents"])
+    @slash_command(
+        name="presents", description="узнать количество подарков",
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __presents(self, ctx):
+    async def __presents(self, ctx: commands.context.Context) -> None:
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
@@ -165,8 +194,11 @@ class NewYear(commands.Cog, name='NewYear module', Database):
                 )
 
     @commands.command(aliases=["foodshop"])
+    @slash_command(
+        name="foodshop", description="магазин еды",
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __nwp(self, ctx):
+    async def __nwp(self, ctx: commands.context.Context) -> None:
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
@@ -183,8 +215,11 @@ class NewYear(commands.Cog, name='NewYear module', Database):
                 await ctx.send(embed=self.emb)
 
     @commands.command(aliases=["food"])
+    @slash_command(
+        name="food", description="Ваша еда",
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __food_e(self, ctx):
+    async def __food_e(self, ctx: commands.context.Context) -> None:
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
@@ -192,7 +227,7 @@ class NewYear(commands.Cog, name='NewYear module', Database):
                 self.emb = discord.Embed(title=f"Еда {ctx.author}")
                 self.emb.set_thumbnail(url=ctx.author.avatar_url)
                 self.index2 = 3
-                self.items = self.get_from_new_year_event(ctx.author.id, ctx.guild.id, "*")
+                self.items = tuple(self.get_from_new_year_event(ctx.author.id, ctx.guild.id, "*"))
                 for t in range(len(self.items) - 3):
                     if self.items[self.index2] != 0:
                         for j in new_year:

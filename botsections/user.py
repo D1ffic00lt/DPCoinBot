@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import io
 import os
 import discord
@@ -8,6 +6,8 @@ import requests
 from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
+from types import NoneType
+from dislash import slash_command, OptionType, Option
 
 from botsections.helperfunction import (
     divide_the_number, create_emb,
@@ -32,11 +32,16 @@ class User(commands.Cog, Database, name='user module'):
         self.index: int = 0
         self.ID: int = 0
         self.guild_id: int = 0
+        self.server: Union[discord.Guild, NoneType]
+
         print("User connected")
 
     @commands.command(aliases=['slb'])
+    @slash_command(
+        name="slb", description="общий баланс сервера",
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __slb(self, ctx: commands.context.Context):
+    async def __slb(self, ctx: commands.context.Context) -> None:
         self.all_cash = 0
         self.color = get_color(ctx.author.roles)
         if not os.path.exists("botsections/.json/develop_get.json"):
@@ -76,7 +81,13 @@ class User(commands.Cog, Database, name='user module'):
 
     @commands.command(aliases=["leader", "lb"])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __lb(self, ctx: commands.context.Context, type_: str = None):
+    @slash_command(
+        name="lb", description="стартовый баланс",
+        options=[
+            Option("type", "аргумент (voice, chat или пустое значение)", OptionType.STRING, required=False),
+        ]
+    )
+    async def __lb(self, ctx: commands.context.Context, type_: str = None) -> None:
         self.counter = 0
         self.name: discord.Member
         self.index = 0
@@ -166,14 +177,30 @@ class User(commands.Cog, Database, name='user module'):
                             break
 
             await ctx.send(embed=self.emb)
+        elif type_ == "rep":
+            self.emb = discord.Embed(title="Топ 10 сервера")
+            self.counter = 0
+            for row in self.get_from_user(ctx.guild.id, "Name", "Reputation", order_by="Reputation", limit=10):
+                self.counter += 1
+                self.emb.add_field(
+                    name=f'# {self.counter} | `{row[0]}`',
+                    value=f'Репутация: {row[1]}',
+                    inline=False
+                )
+            await ctx.send(embed=self.emb)
 
-    @commands.command(aliases=["balance", "cash"])
+    @commands.command(aliases=["cash"])
+    @slash_command(
+        name="cash", description="узнать баланс",
+        options=[
+            Option("member", "узнать баланс другого человека", OptionType.USER, required=False)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __balance(
-            self,
-            ctx: commands.context.Context,
+            self, ctx: commands.context.Context,
             member: discord.Member = None
-    ):
+    ) -> None:
         if member is None:
             await ctx.send(
                 embed=create_emb(
@@ -192,12 +219,17 @@ class User(commands.Cog, Database, name='user module'):
             )
 
     @commands.command(aliases=["bank"])
+    @slash_command(
+        name="bank", description="операции с банков",
+        options=[
+            Option("action", "тип операции с банком", OptionType.STRING, required=False),
+            Option("cash", "количество DP коинов", Union[OptionType.STRING, OptionType.INTEGER], required=False)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __bank(
-            self,
-            ctx: commands.context.Context,
-            action: str = None,
-            cash: Union[int, str] = None
+            self, ctx: commands.context.Context,
+            action: str = None, cash: Union[int, str] = None
     ) -> None:
         if action is None:
             await ctx.send(
@@ -240,6 +272,9 @@ class User(commands.Cog, Database, name='user module'):
                     await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['levels'])
+    @slash_command(
+        name="levels", description="информация о левелах",
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __levels_shop(self, ctx: commands.context.Context):
         await ctx.send(embed=create_emb(
@@ -280,6 +315,9 @@ class User(commands.Cog, Database, name='user module'):
         )
 
     @commands.command(aliases=['lvl_up'])
+    @slash_command(
+        name="lvl_up", description="поднять свой левел"
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __level_up(self, ctx: commands.context.Context):
         self.level = self.get_level(ctx.author.id, ctx.guild.id)
@@ -315,6 +353,9 @@ class User(commands.Cog, Database, name='user module'):
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['shop'])
+    @slash_command(
+        name="shop", description="посмотреть магазин ролей"
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __shop(self, ctx: commands.context.Context):
         self.emb = discord.Embed(title="Магазин ролей")
@@ -350,6 +391,12 @@ class User(commands.Cog, Database, name='user module'):
         await ctx.send(embed=self.emb)
 
     @commands.command(aliases=["buy_item"])
+    @slash_command(
+        name="buy_item", description="купит предмет",
+        options=[
+            Option("item", "номер предмета", OptionType.INTEGER)
+        ]
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __buy_item(self, ctx: commands.context.Context, item: int = None):
         if item is None:
@@ -374,6 +421,12 @@ class User(commands.Cog, Database, name='user module'):
                 await ctx.send("Администрация скоро выдаст Вам товар")
 
     @commands.command(aliases=["buy", "buy-role"])
+    @slash_command(
+        name="buy", description="купить роль из магазина",
+        options=[
+            Option("action", "тип операции с банком", OptionType.ROLE),
+        ]
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __buy(self, ctx: commands.context.Context, role: discord.Role = None):
         if role is None:
@@ -402,13 +455,18 @@ class User(commands.Cog, Database, name='user module'):
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["send"])
+    @slash_command(
+        name="send", description="операции с банков",
+        options=[
+            Option("member", "пользователь, кому перевести DP коины", OptionType.USER),
+            Option("cash", "количество DP коинов", OptionType.INTEGER)
+        ]
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __send(
-            self,
-            ctx: commands.context.Context,
-            member: discord.Member = None,
-            cash: int = None
-    ):
+            self, ctx: commands.context.Context,
+            member: discord.Member = None, cash: int = None
+    ) -> None:
         if member is None:
             await ctx.send(f"""{ctx.author}, укажите пользователя, которому Вы хотите перевести коины""")
         else:
@@ -421,12 +479,16 @@ class User(commands.Cog, Database, name='user module'):
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["+rep"])
+    @slash_command(
+        name="+rep", description="повысить репутацию пользователю",
+        options=[
+            Option("member", "тип операции с банком", OptionType.USER)
+        ]
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __good_rep(
-            self,
-            ctx: commands.context.Context,
-            member: discord.Member = None
-    ):
+            self, ctx: commands.context.Context, member: discord.Member = None
+    ) -> None:
         if member is None:
             await ctx.send(f"{ctx.author}, Вы не указали пользователя!")
         else:
@@ -437,12 +499,16 @@ class User(commands.Cog, Database, name='user module'):
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["-rep"])
+    @slash_command(
+        name="-rep", description="понизить репутацию пользователя",
+        options=[
+            Option("member", "количество DP коинов", OptionType.USER)
+        ]
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __bad_rep(
-            self,
-            ctx: commands.context.Context,
-            member: discord.Member = None
-    ):
+            self, ctx: commands.context.Context, member: discord.Member = None
+    ) -> None:
         if member is None:
             await ctx.send(f"{ctx.author}, Вы не указали пользователя!")
         else:
@@ -452,23 +518,15 @@ class User(commands.Cog, Database, name='user module'):
                 self.add_reputation(ctx.author.id, ctx.guild.id, -1)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["rep"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __rep(self, ctx: commands.context.Context):
-        self.emb = discord.Embed(title="Топ 10 сервера")
-        self.counter = 0
-        for row in self.get_from_user(ctx.guild.id, "Name", "Reputation", order_by="Reputation", limit=10):
-            self.counter += 1
-            self.emb.add_field(
-                name=f'# {self.counter} | `{row[0]}`',
-                value=f'Репутация: {row[1]}',
-                inline=False
-            )
-        await ctx.send(embed=self.emb)
-
     @commands.command(aliases=["stats"])
+    @slash_command(
+        name="stats", description="посмотреть статистику пользователя",
+        options=[
+            Option("member", "пользователь", OptionType.USER, required=False),
+        ]
+    )
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __stats(self, ctx: commands.context.Context, member: discord.Member = None):
+    async def __stats(self, ctx: commands.context.Context, member: discord.Member = None) -> None:
         self.ID = ctx.author.id if member is None else member.id
         self.guild_id = ctx.guild.id if member is None else member.guild.id
         await ctx.send(
@@ -542,7 +600,11 @@ class User(commands.Cog, Database, name='user module'):
         )
 
     @commands.command(aliases=["card"])
-    async def __Card(self, ctx: commands.context.Context):
+    @slash_command(
+        name="card", description="получить карточку",
+    )
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __Card(self, ctx: commands.context.Context) -> None:
         self.img = Image.new("RGBA", (500, 300), "#323642")
         Image.open(
             io.BytesIO(
@@ -653,6 +715,12 @@ class User(commands.Cog, Database, name='user module'):
         os.remove(f"prom_files/out_avatar{ctx.author.id}.png")
 
     @commands.command(aliases=["promo"])
+    @slash_command(
+        name="promo", description="использовать промокод",
+        options=[
+            Option("promo", "промокод", OptionType.STRING),
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __promo_active(self, ctx: commands.context.Context, promo: str = None):
         if promo is None:
@@ -675,8 +743,18 @@ class User(commands.Cog, Database, name='user module'):
             await ctx.send(embed=self.emb)
 
     @commands.command(aliases=['gift'])
+    @slash_command(
+        name="gift", description="подарить роль",
+        options=[
+            Option("member", "пользователь", OptionType.USER),
+            Option("role", "роль", OptionType.ROLE)
+        ]
+    )
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __gift(self, ctx: commands.context.Context, member: discord.Member = None, role: discord.Role = None):
+    async def __gift(
+            self, ctx: commands.context.Context,
+            member: discord.Member = None, role: discord.Role = None
+    ) -> None:
         if role is None:
             await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
         elif member is None:
@@ -698,55 +776,42 @@ class User(commands.Cog, Database, name='user module'):
                 )
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["promo"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_active(self, ctx: commands.context.Context, promo: str = None):
-        if promo is None:
-            await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
-        elif not self.checking_for_promo_code_existence_in_table(str(promo)):
-            await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
-        elif self.get_from_promo_codes(promo, "Global") == "0" and \
-                ctx.guild.id != self.get_from_promo_codes(promo, "GuildID"):
-            await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
-        else:
-            self.cash = self.get_from_promo_codes(promo, "Cash")
-            self.add_coins(ctx.author.id, ctx.guild.id, self.cash)
-            self.delete_from_promo_codes(str(promo))
-            self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
-            self.emb.add_field(
-                name=f'Промокод активирован!',
-                value=f'Вам начислено **{divide_the_number(self.cash)}** коинов!',
-                inline=False
-            )
-            await ctx.send(embed=self.emb)
-
     @commands.command(aliases=["promos"])
+    @slash_command(
+        name="promos", description="получить все промокоды"
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_codes(self, ctx: commands.context.Context):
+    async def __promo_codes(self, ctx: commands.context.Context) -> None:
         if ctx.guild is None:
             if not self.checking_for_promo_code_existence_in_table_by_id(ctx.author.id):
                 await ctx.author.send(f"{ctx.author.mention}, у Вас нет промокодов!")
             else:
-                emb = discord.Embed(title="Промокоды")
+                self.emb = discord.Embed(title="Промокоды")
                 for codes in self.get_from_promo_codes("", ["Code", "GuildID", "Cash"], ID=ctx.author.id):
-                    server = None
                     for guild in self.bot.guilds:
                         if guild.id == codes[1]:
-                            server = guild
+                            self.server = guild
                             break
-                    if server is not None:
-                        emb.add_field(
-                            name=f"{server} - {divide_the_number(codes[2])}",
+                    if self.server is not None:
+                        self.emb.add_field(
+                            name=f"{self.server} - {divide_the_number(codes[2])}",
                             value=f"{codes[0]}",
                             inline=False
                         )
-                await ctx.author.send(embed=emb)
+                await ctx.author.send(embed=self.emb)
         else:
             await ctx.send(f"{ctx.author.mention}, эту команду можно использовать только в личных сообщениях бота")
 
     @commands.command(aliases=["promo_create"])
+    @slash_command(
+        name="lb", description="стартовый баланс",
+        options=[
+            Option("cash", "аргумент (voice, chat или пустое значение)", OptionType.INTEGER),
+            Option("key", "просто рандомный текст, он почти ни на что не влияет", OptionType.STRING)
+        ]
+    )
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_create(self, ctx: commands.context.Context, cash: int = None, index2: str = None):
+    async def __promo_create(self, ctx: commands.context.Context, cash: int = None, key: str = None) -> None:
         if cash is None:
             await ctx.send(f'{ctx.author.mention}, Вы не ввели сумму!')
         elif cash > self.get_cash(ctx.author.id, ctx.guild.id):
@@ -757,7 +822,7 @@ class User(commands.Cog, Database, name='user module'):
             pass
         else:
             self.code = get_promo_code(10)
-            if index2 == "global" and ctx.author.id == 401555829620211723:
+            if key == "global" and ctx.author.id == 401555829620211723:
                 self.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 1)
             else:
                 self.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 0)
@@ -772,13 +837,13 @@ class User(commands.Cog, Database, name='user module'):
                 )
                 await ctx.send(embed=self.emb)
             except discord.Forbidden:
-                code2 = self.code
+                self.code2 = self.code
                 self.code = ""
-                for i in range(len(code2)):
-                    if i > len(code2) - 4:
+                for i in range(len(self.code2)):
+                    if i > len(self.code2) - 4:
                         self.code += "*"
                     else:
-                        self.code += code2[i]
+                        self.code += self.code2[i]
                 self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
                 self.emb.add_field(
                     name=f'Ваш промокод на **{divide_the_number(cash)}**',

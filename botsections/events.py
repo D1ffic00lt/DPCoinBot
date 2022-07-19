@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import discord
 import random
 
@@ -167,9 +165,7 @@ class Events(commands.Cog, Database, name='events module'):
 
     @commands.Cog.listener()
     async def on_command_error(
-            self,
-            ctx: commands.context.Context,
-            error: Exception
+            self, ctx: commands.context.Context, error: Exception
     ) -> None:
         if isinstance(error, commands.CommandOnCooldown):
             pass
