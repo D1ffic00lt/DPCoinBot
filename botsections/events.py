@@ -14,7 +14,7 @@ from database.db import Database
 class Events(commands.Cog, Database, name='events module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("../server.db")
+        super().__init__("server.db")
         self.level: int = 0
         self.index: int = 0
         self.data: dict = {}

@@ -12,7 +12,7 @@ from botsections.helperfunction import divide_the_number, logging
 class Guild(commands.Cog, Database, name='guild module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("../server.db")
+        super().__init__("server.db")
         self.bot = bot
         self.found: bool
         self.admin: Union[discord.TextChannel, int]

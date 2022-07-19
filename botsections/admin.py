@@ -10,7 +10,7 @@ from database.db import Database
 class Admin(commands.Cog, Database, name='admin module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("../server.db")
+        super().__init__("server.db")
         self.bot = bot
         self.role: discord.Role
         self.msg: str

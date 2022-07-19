@@ -21,7 +21,7 @@ from botsections.texts import *
 class UserSlash(commands.Cog, Database, name='user module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("../server.db")
+        super().__init__("server.db")
         self.bot: commands.Bot = bot
         self.name: discord.Member
         self.color: discord.Color

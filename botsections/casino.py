@@ -17,7 +17,7 @@ from botsections.texts import *
 class Casino(commands.Cog, Database, name='Casino module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("../server.db")
+        super().__init__("server.db")
         self.bot: commands.Bot = bot
         self.result_bid: int
         self.casino: List[Union[list, dict]] = []
@@ -162,7 +162,7 @@ class Casino(commands.Cog, Database, name='Casino module'):
                             ]
                         )
                     )
-                    await self.stats_update(ctx, "FailsCount", "Fails", "WinsCount", bid * coefficient)
+                    await self.stats_update(ctx, "FailsCount", "Fails", "WinsCount", int(bid * coefficient))
         else:
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
@@ -612,7 +612,6 @@ class Casino(commands.Cog, Database, name='Casino module'):
             await ctx.send("Вы не ввели человека")
         elif member.id == ctx.author.id:
             await ctx.send("Вы не можете ввести себя")
-            self.get_active_coinflip()
         elif not self.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
             await ctx.send(f"Такой игры не существует, посмотреть все ваши активные игры - "
                            f"{settings['prefix']}games")
@@ -704,3 +703,4 @@ class Casino(commands.Cog, Database, name='Casino module'):
                 await ctx.send(embed=self.emb)
                 self.add_coins(member.id, member.guild.id, self.num * 2)
             self.delete_from_coinflip(ctx.author.id, member.id, ctx.guild.id)
+

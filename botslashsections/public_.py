@@ -13,7 +13,7 @@ from database.db import Database
 class PublicSlash(commands.Cog, Database, name='public module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("../server.db")
+        super().__init__("server.db")
         self.bot: commands.Bot = bot
 
         print("Public Slash connected")

@@ -27,7 +27,7 @@ from botsections.version import __version__
 class Debug(commands.Cog, Database, name='debug module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("../server.db")
+        super().__init__("server.db")
         self.bot: commands.Bot = bot
         self.js: dict[Any]
         self.data: list[Union[dict, int]]

@@ -213,7 +213,7 @@ class Database:
 
     def checking_for_promo_code_existence_in_table(self, Code: str) -> bool:
         if self.cursor.execute(
-                "SELECT `*` FROM `PromoCodes` WHERE `Code` = ?",
+                "SELECT * FROM `PromoCodes` WHERE `Code` = ?",
                 (Code,)
         ).fetchone() is None:
             return False
@@ -221,7 +221,7 @@ class Database:
 
     def checking_for_promo_code_existence_in_table_by_id(self, ID: int) -> bool:
         if self.cursor.execute(
-                "SELECT `*` FROM `PromoCodes` WHERE `ID` = ?",
+                "SELECT * FROM `PromoCodes` WHERE `ID` = ?",
                 (ID,)
         ).fetchone() is None:
             return False
@@ -229,14 +229,14 @@ class Database:
 
     def checking_for_guild_existence_in_table(self, guild_id: int) -> bool:
         if self.cursor.execute(
-                "SELECT `*` FROM `Server` WHERE `GuildID` = ?",
+                "SELECT * FROM `Server` WHERE `GuildID` = ?",
                 (guild_id,)
         ).fetchone() is None:
             return False
         return True
 
     def checking_for_levels_existence_in_table(self) -> bool:
-        if self.cursor.execute("SELECT `*` FROM `Levels` WHERE `Level` = 1").fetchone() is None:
+        if self.cursor.execute("SELECT * FROM `Levels` WHERE `Level` = 1").fetchone() is None:
             return False
         return True
 
@@ -289,7 +289,7 @@ class Database:
             )
 
     def insert_into_card(self, ID: int) -> Cursor:
-        if self.cursor.execute("SELECT `*` FROM `Card` WHERE `ID` = ?", (ID,)).fetchone() is None:
+        if self.cursor.execute("SELECT * FROM `Card` WHERE `ID` = ?", (ID,)).fetchone() is None:
             with self.connection:
                 return self.cursor.execute("INSERT INTO `Card` (ID) VALUES (?)", (ID,))
 
@@ -316,7 +316,7 @@ class Database:
 
     def insert_into_achievements(self, name: str, ID: int, guild_id: int) -> Cursor:
         if self.cursor.execute(
-                "SELECT `*` FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
+                "SELECT * FROM `Achievements` WHERE `ID` = ? AND `GuildID` = ?",
                 (ID, guild_id)
         ).fetchone() is None:
             with self.connection:
@@ -327,7 +327,7 @@ class Database:
 
     def insert_into_inventory(self, name: str, ID: int, guild_id: int) -> Cursor:
         if self.cursor.execute(
-                "SELECT `*` FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
+                "SELECT * FROM `Inventory` WHERE `ID` = ? AND `GuildID` = ?",
                 (ID, guild_id)
         ).fetchone() is None:
             with self.connection:
@@ -338,7 +338,7 @@ class Database:
 
     def insert_into_new_year_event(self, name: str, ID: int, guild_id: int) -> Cursor:
         if self.cursor.execute(
-                "SELECT `*` FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
+                "SELECT * FROM `NewYearEvent` WHERE `ID` = ? AND `GuildID` = ?",
                 (ID, guild_id)
         ).fetchone() is None:
             with self.connection:
@@ -416,7 +416,6 @@ class Database:
     def get_from_levels(self, *args: str) -> Any:
         return self.cursor.execute(f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Levels`")
 
-    @ignore_exceptions
     def get_from_user(
             self,
             guild_id: int,
@@ -437,7 +436,6 @@ class Database:
                 (guild_id,)
             )
 
-    @ignore_exceptions
     def get_from_shop(self, guild_id: int, *args: Tuple[str], order_by: str, role_id: int = None) -> Any:
         if role_id is None:
             return self.cursor.execute(
@@ -451,7 +449,6 @@ class Database:
                 (guild_id, role_id)
             ).fetchone()[0]
 
-    @ignore_exceptions
     def get_from_item_shop(self, guild_id: int, *args: str, order_by: str) -> Any:
         return self.cursor.execute(
             f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `ItemShop` "
@@ -459,7 +456,6 @@ class Database:
             (guild_id,)
         )
 
-    @ignore_exceptions
     def get_item_from_item_shop(
             self,
             guild_id: int,
@@ -522,13 +518,13 @@ class Database:
             return self.cursor.execute('UPDATE `Card` SET `?` = ? WHERE `ID` =?', (type_of_card, mode, ID))
 
     def check_user(self, ID: int) -> bool:
-        if self.cursor.execute("SELECT `*` FROM `Users` WHERE `ID` = ?", (ID,)).fetchone() is None:
+        if self.cursor.execute("SELECT * FROM `Users` WHERE `ID` = ?", (ID,)).fetchone() is None:
             return False
         return True
 
     def check_coinflip_games(self, ID: int, guild_id: int) -> bool:
         if self.cursor.execute(
-                "SELECT `*` FROM `Coinflip` WHERE `GuildID` = ? "
+                "SELECT * FROM `Coinflip` WHERE `GuildID` = ? "
                 "AND (`FirstPlayerID` = ? OR `SecondPlayerID` = ?)",
                 (guild_id, ID, ID)
         ).fetchone() is None:
@@ -634,7 +630,6 @@ class Database:
                 (reputation, ID, GuildID)
             )
 
-    @ignore_exceptions
     def take_coins_from_the_bank(
             self,
             ID: int,
@@ -775,7 +770,6 @@ class Database:
                 (count, ID, guild_id)
             )
 
-    @ignore_exceptions
     def stats_update_member(
             self,
             ID: int,
@@ -806,7 +800,6 @@ class Database:
             (guild_id, ID)
         )
 
-    @ignore_exceptions
     def get_active_coinflip(
             self, first_player_id: int,
             second_player_id: int,
@@ -1102,7 +1095,6 @@ class Database:
                     f"получено достижение «А у меня есть личная жизнь?»!\nВам начислено 56000 коинов!"
                 )
 
-    @ignore_exceptions
     async def achievement(self, ctx: commands.context.Context) -> None:
         loses = self.get_loses_count(ctx.author.id, ctx.guild.id)
         wins = self.get_wins_count(ctx.author.id, ctx.guild.id)
@@ -1154,7 +1146,6 @@ class Database:
                 f"получено достижение «Кажется меня не любят...»!\nВам начислено 20000 коинов!"
             )
 
-    @ignore_exceptions
     async def achievement_member(self, member: discord.Member) -> None:
         loses = self.get_loses_count(member.id, member.guild.id)
         wins = self.get_wins_count(member.id, member.guild.id)
@@ -1206,7 +1197,6 @@ class Database:
                 f"получено достижение «Кажется меня не любят...»!\nВам начислено 20000 коинов!"
             )
 
-    @ignore_exceptions
     async def cash_check(
             self,
             ctx: commands.context.Context,
@@ -1235,7 +1225,6 @@ class Database:
                     return True
         return False
 
-    @ignore_exceptions
     async def stats_update(
             self,
             ctx: commands.context.Context,
@@ -1259,7 +1248,6 @@ class Database:
 
         await self.achievement(ctx)
 
-    @ignore_exceptions
     async def voice_delete(self, member: discord.Member, arg: bool = True) -> None:
         try:
             now2 = self.get_time_from_online_stats(member.id, member.guild.id)
@@ -1319,7 +1307,6 @@ class Database:
             if arg:
                 self.insert_into_stats(member.id, member.guild.id)
 
-    @ignore_exceptions
     def is_the_casino_allowed(self, channel_id: int) -> bool:
         if self.cursor.execute(
                 "SELECT `CasinoChannelID` FROM `Server` WHERE `GuildID` = ?",

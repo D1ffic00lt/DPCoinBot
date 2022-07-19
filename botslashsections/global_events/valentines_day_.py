@@ -14,6 +14,7 @@ class ValentinesDaySlash(commands.Cog, Database, name='ValentinesDay module'):
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.bot: commands.Bot = bot
+        
         print("Valentines Day Slash connected")
 
     @slash_command(
