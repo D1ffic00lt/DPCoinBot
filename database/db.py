@@ -811,7 +811,7 @@ class Database:
             self, first_player_id: int,
             second_player_id: int,
             guild_id: int
-    ) -> tuple[Any, Any]:
+    ) -> Tuple[Any, Any]:
         return self.cursor.execute(
             "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
             (first_player_id, guild_id, second_player_id)

@@ -5,12 +5,10 @@ from datetime import datetime
 from discord.ext import commands
 
 from botsections.helperfunction import (
-    write_log,
-    get_time,
-    logging
+    write_log, get_time, logging
 )
 from botsections.json_ import Json
-from botsections.database.db import Database
+from database.db import Database
 
 
 class Events(commands.Cog, Database, name='events module'):

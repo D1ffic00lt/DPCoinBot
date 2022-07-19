@@ -5,23 +5,30 @@ from discord.ext import commands
 from typing import Union
 from dislash import slash_command, Option, OptionType
 
+from botsections.helperfunction import logging
 from database.db import Database
 
 
-class ValentinesDay(commands.Cog, Database, name='ValentinesDay module'):
+class ValentinesDaySlash(commands.Cog, Database, name='ValentinesDay module'):
+    @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
         self.bot: commands.Bot = bot
+        print("Valentines Day Slash connected")
 
-    @commands.command(aliases=["val_open"])
-    @commands.cooldown(1, 4, commands.BucketType.user)
+    @slash_command(
+        name="val_open", description="открыть валентинку",
+        options=[
+            Option("сount", "количество", OptionType.STRING, required=False)
+        ]
+    )
     async def __val_open(self, ctx, count: Union[int, str] = None) -> None:
         if int(datetime.today().strftime('%m')) == 2 and int(datetime.today().strftime('%d')) == 14:
             self.valentine = self.get_from_inventory(ctx.author.id, ctx.guild.id, "Valentines")
             if self.valentine == 0:
                 await ctx.send("У Вас нет валентинок:(")
                 return
-            if isinstance(count, int):
+            if count != "all":
                 if int(count) > self.valentine:
                     await ctx.send("У Вас недостаточно валентинок:(\nУ Вас {} валентинок".format(self.valentine))
                     return

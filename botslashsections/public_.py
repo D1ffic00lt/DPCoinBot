@@ -3,23 +3,25 @@ import discord
 
 from discord.ext import commands
 from datetime import datetime
+from dislash import slash_command, OptionType, Option
 
 from botsections.helperfunction import logging
 from botsections.texts import *
 from database.db import Database
 
 
-class Public(commands.Cog, Database, name='public module'):
+class PublicSlash(commands.Cog, Database, name='public module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("../server.db")
         self.bot: commands.Bot = bot
 
-        print("Public connected")
+        print("Public Slash connected")
 
-    @commands.command(aliases=["info"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __info(self, ctx: commands.context.Context):
+    @slash_command(
+        name="info", description="информация о коинах"
+    )
+    async def __info_slash(self, ctx: commands.context.Context):
         self.emb = discord.Embed(title="За что выдают коины?")
         self.emb.add_field(
             name='Общение в голосовых каналах',
@@ -37,9 +39,13 @@ class Public(commands.Cog, Database, name='public module'):
         )
         await ctx.send(embed=self.emb)
 
-    @commands.command(aliases=["help"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __help(self, ctx: commands.context.Context, arg: str = None):
+    @slash_command(
+        name="start_money", description="стартовый баланс",
+        options=[
+            Option("arg", "аргумент", OptionType.STRING, required=False),
+        ]
+    )
+    async def __help_slash(self, ctx: commands.context.Context, arg: str = None):
         if arg == "admin":
             if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
                 self.emb = discord.Embed(title="Команды бота:")
@@ -65,8 +71,7 @@ class Public(commands.Cog, Database, name='public module'):
                 self.emb.add_field(name=f'**{settings["prefix"]}give <Упоминание пользователя> <Сумма>**',
                                    value='Выдать деньги пользователю', inline=False)
                 self.emb.add_field(name=f'**{settings["prefix"]}take <Упоминание пользователя> <Сумма(Либо all для '
-                                        f'обнуления '
-                                        f'счёта)>**',
+                                        f'обнуления счёта)>**',
                                    value='Забрать деньги у пользователя', inline=False)
                 self.emb.add_field(name=f'**{settings["prefix"]}give-role <Упоминание роли> <Сумма>**',
                                    value='Выдать деньги пользователю', inline=False)
