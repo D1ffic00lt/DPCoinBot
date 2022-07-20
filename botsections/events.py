@@ -5,18 +5,16 @@ from datetime import datetime
 from discord.ext import commands
 
 from botsections.helperfunction import (
-    write_log,
-    get_time,
-    logging
+    write_log, get_time, logging
 )
 from botsections.json_ import Json
-from botsections.database.db import Database
+from database.db import Database
 
 
 class Events(commands.Cog, Database, name='events module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("../server.db")
+        super().__init__("server.db")
         self.level: int = 0
         self.index: int = 0
         self.data: dict = {}
@@ -162,19 +160,19 @@ class Events(commands.Cog, Database, name='events module'):
     async def on_member_join(self, member: discord.Member) -> None:
         self.server_add(self.bot)
         print(f"{member.id} add")
-
-    @commands.Cog.listener()
-    async def on_command_error(
-            self, ctx: commands.context.Context, error: Exception
-    ) -> None:
-        if isinstance(error, commands.CommandOnCooldown):
-            pass
-        elif isinstance(error, commands.CommandNotFound):
-            pass
-        else:
-            print("[ERROR]:" + str(error))
-            try:
-                write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
-                          f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
-            except AttributeError:
-                pass
+    #
+    # @commands.Cog.listener()
+    # async def on_command_error(
+    #         self, ctx: commands.context.Context, error: Exception
+    # ) -> None:
+    #     if isinstance(error, commands.CommandOnCooldown):
+    #         pass
+    #     elif isinstance(error, commands.CommandNotFound):
+    #         pass
+    #     else:
+    #         print("[ERROR]:" + str(error))
+    #         try:
+    #             write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
+    #                       f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
+    #         except AttributeError:
+    #             pass

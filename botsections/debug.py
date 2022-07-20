@@ -19,7 +19,7 @@ from botsections.helperfunction import (
 )
 from botsections.texts import *
 from botsections.json_ import Json
-from botsections.database.db import Database
+from database.db import Database
 from botsections.config import settings
 from botsections.version import __version__
 
@@ -27,7 +27,7 @@ from botsections.version import __version__
 class Debug(commands.Cog, Database, name='debug module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("../server.db")
+        super().__init__("server.db")
         self.bot: commands.Bot = bot
         self.js: dict[Any]
         self.data: list[Union[dict, int]]
@@ -139,17 +139,17 @@ class Debug(commands.Cog, Database, name='debug module'):
         if ctx.author.id == 401555829620211723:
             if place is not None and arg is not None:
                 if place in ["lb", "slb"] and arg in ["on", "off"]:
-                    if not os.path.exists("botsections/.json/develop_get.json"):
-                        Json("develop_get.json").json_dump({"lb": True, "slb": True})
+                    if not os.path.exists("../.json/develop_get.json"):
+                        Json("../.json/develop_get.json").json_dump({"lb": True, "slb": True})
                         self.js = {"lb": True, "slb": True}
                     else:
-                        self.js = Json("develop_get.json").json_load()
+                        self.js = Json("../.json/develop_get.json").json_load()
                     if arg == "on":
                         self.arg = True
                     else:
                         self.arg = False
                     self.js[place] = self.arg
-                    Json("develop_get.json").json_dump(self.js)
+                    Json("../.json/develop_get.json").json_dump(self.js)
 
     @commands.command(aliases=['add_to_ban_list'])
     @commands.cooldown(1, 4, commands.BucketType.user)
@@ -157,12 +157,12 @@ class Debug(commands.Cog, Database, name='debug module'):
             self, ctx: commands.context.Context, server_id: int = None
     ) -> None:
         if ctx.author.id == 401555829620211723:
-            if not Json.check_file_exists("ban_list.json"):
-                Json("ban_list.json").json_dump([])
+            if not Json.check_file_exists("../.json/ban_list.json"):
+                Json("../.json/ban_list.json").json_dump([])
             else:
-                self.data = Json("ban_list.json").json_load()
+                self.data = Json("../.json/ban_list.json").json_load()
                 self.data.append(server_id)
-                Json("ban_list.json").json_dump(self.data)
+                Json("../.json/ban_list.json").json_dump(self.data)
 
     @commands.command(aliases=['send_webhook'])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -183,10 +183,10 @@ class Debug(commands.Cog, Database, name='debug module'):
                         'v': "5.52"
                     }
                 ).json()
-                if not os.path.exists(".json/send.json") or os.stat(".json/send.json").st_size == 0:
-                    Json("send.json").json_dump([])
+                if not os.path.exists("../.json/send.json") or os.stat("../.json/send.json").st_size == 0:
+                    Json("../.json/send.json").json_dump([])
                 else:
-                    self.js = Json("send.json").json_load()
+                    self.js = Json("../.json/send.json").json_load()
                     if len(self.js) != 0:
                         self.vk: VkApi = vk_api.VkApi(token=settings["vk_token"])
                         eval("self.vk.auth_token()")  # не смотрите сюда(

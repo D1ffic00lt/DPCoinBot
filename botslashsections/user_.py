@@ -6,6 +6,7 @@ import requests
 from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
+from dislash import slash_command, OptionType, Option
 
 from botsections.helperfunction import (
     divide_the_number, create_emb,
@@ -17,7 +18,7 @@ from botsections.json_ import Json
 from botsections.texts import *
 
 
-class User(commands.Cog, Database, name='user module'):
+class UserSlash(commands.Cog, Database, name='user module'):
     @logging
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__("server.db")
@@ -32,11 +33,12 @@ class User(commands.Cog, Database, name='user module'):
         self.guild_id: int = 0
         self.server: Union[discord.Guild, type(None)]
 
-        print("User connected")
+        print("User Slash connected")
 
-    @commands.command(aliases=['slb'])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __slb(self, ctx: commands.context.Context) -> None:
+    @slash_command(
+        name="slb", description="общий баланс сервера",
+    )
+    async def __slb_slash(self, ctx: commands.context.Context) -> None:
         self.all_cash = 0
         self.color = get_color(ctx.author.roles)
         if not os.path.exists("../.json/develop_get.json"):
@@ -74,9 +76,13 @@ class User(commands.Cog, Database, name='user module'):
             )
         )
 
-    @commands.command(aliases=["leader", "lb"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __lb(self, ctx: commands.context.Context, type_: str = None) -> None:
+    @slash_command(
+        name="lb", description="стартовый баланс",
+        options=[
+            Option("type", "аргумент (voice, chat или пустое значение)", OptionType.STRING, required=False),
+        ]
+    )
+    async def __lb_slash(self, ctx: commands.context.Context, type_: str = None) -> None:
         self.counter = 0
         self.name: discord.Member
         self.index = 0
@@ -178,36 +184,41 @@ class User(commands.Cog, Database, name='user module'):
                 )
             await ctx.send(embed=self.emb)
 
-    @commands.command(aliases=["cash"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __balance(
+    @slash_command(
+        name="cash", description="узнать баланс",
+        options=[
+            Option("member", "узнать баланс другого человека", OptionType.USER, required=False)
+        ]
+    )
+    async def __balance_slash(
             self, ctx: commands.context.Context,
             member: discord.Member = None
     ) -> None:
         if member is None:
-            try:
-                await ctx.send(
-                    embed=create_emb(
-                        title="Баланс",
-                        description=f"Баланс пользователя `{ctx.author.mention}` составляет "
-                                    f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id))}` DP коинов"
-                    )
+            await ctx.send(
+                embed=create_emb(
+                    title="Баланс",
+                    description=f"Баланс пользователя `{ctx.author}` составляет "
+                                f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id))}` DP коинов"
                 )
-            except TypeError:
-                print(self.get_cash(ctx.author.id, ctx.guild.id))
-
+            )
         else:
             await ctx.send(
                 embed=create_emb(
                     title="Баланс",
-                    description=f"Баланс пользователя `{member.mention}` составляет "
+                    description=f"Баланс пользователя `{member}` составляет "
                                 f"`{divide_the_number(self.get_cash(member.id, ctx.guild.id))}` DP коинов"
                 )
             )
 
-    @commands.command(aliases=["bank"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __bank(
+    @slash_command(
+        name="bank", description="операции с банков",
+        options=[
+            Option("action", "тип операции с банком", OptionType.STRING, required=False),
+            Option("cash", "количество DP коинов", OptionType.STRING, required=False)
+        ]
+    )
+    async def __bank_slash(
             self, ctx: commands.context.Context,
             action: str = None, cash: Union[int, str] = None
     ) -> None:
@@ -215,7 +226,7 @@ class User(commands.Cog, Database, name='user module'):
             await ctx.send(
                 embed=create_emb(
                     title="Баланс",
-                    description=f"Баланс пользователя `{ctx.author.mention}` составляет "
+                    description=f"Баланс пользователя `{ctx.author}` составляет "
                                 f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id))}` DP коинов\n\n"
                                 f"Баланс в банке составляет"
                                 f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id, bank=True))}` "
@@ -235,8 +246,8 @@ class User(commands.Cog, Database, name='user module'):
                 )
             )
         elif action == "add":
-            if await self.cash_check(ctx, cash):
-                self.add_coins_to_the_bank(ctx.author.id, ctx.guild.id, cash)
+            if await self.cash_check(ctx, int(cash)):
+                self.add_coins_to_the_bank(ctx.author.id, ctx.guild.id, int(cash))
                 await ctx.message.add_reaction('✅')
 
         elif action == "take":
@@ -245,15 +256,16 @@ class User(commands.Cog, Database, name='user module'):
             else:
                 if cash is None:
                     await ctx.send(f"""{ctx.author.mention}, Вы не ввели сумму!""")
-                elif cash > self.get_cash(ctx.author.id, ctx.guild.id, bank=True):
+                elif int(cash) > self.get_cash(ctx.author.id, ctx.guild.id, bank=True):
                     await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно средств!""")
-                if await self.cash_check(ctx, cash):
-                    self.take_coins_from_the_bank(ctx.author.id, ctx.guild.id, cash)
+                if await self.cash_check(ctx, int(cash)):
+                    self.take_coins_from_the_bank(ctx.author.id, ctx.guild.id, int(cash))
                     await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=['levels'])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __levels_shop(self, ctx: commands.context.Context):
+    @slash_command(
+        name="levels", description="информация о левелах",
+    )
+    async def __levels_shop_slash(self, ctx: commands.context.Context):
         await ctx.send(embed=create_emb(
             title="Всё о левелах!",
             args=[
@@ -291,9 +303,10 @@ class User(commands.Cog, Database, name='user module'):
         )
         )
 
-    @commands.command(aliases=['lvl_up'])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __level_up(self, ctx: commands.context.Context):
+    @slash_command(
+        name="lvl_up", description="поднять свой левел"
+    )
+    async def __level_up_slash(self, ctx: commands.context.Context):
         self.level = self.get_level(ctx.author.id, ctx.guild.id)
         if self.level == 5:
             await ctx.send("У Вас максимальный левел!")
@@ -326,9 +339,10 @@ class User(commands.Cog, Database, name='user module'):
                 self.add_level(ctx.author.id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=['shop'])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __shop(self, ctx: commands.context.Context):
+    @slash_command(
+        name="shop", description="посмотреть магазин ролей"
+    )
+    async def __shop_slash(self, ctx: commands.context.Context):
         self.emb = discord.Embed(title="Магазин ролей")
         for row in self.get_from_shop(ctx.guild.id, "RoleID", "RoleCost", order_by="RoleCost"):
             if ctx.guild.get_role(row[0]) is not None:
@@ -361,9 +375,13 @@ class User(commands.Cog, Database, name='user module'):
             value=f"```diff\n- {settings['prefix']}buy @роль, которую Вы хотите купить\n```")
         await ctx.send(embed=self.emb)
 
-    @commands.command(aliases=["buy_item"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __buy_item(self, ctx: commands.context.Context, item: int = None):
+    @slash_command(
+        name="buy_item", description="купит предмет",
+        options=[
+            Option("item", "номер предмета", OptionType.INTEGER)
+        ]
+    )
+    async def __buy_item_slash(self, ctx: commands.context.Context, item: int = None):
         if item is None:
             await ctx.send(f"""{ctx.author}, укажите то, что Вы хотите приобрести""")
         else:
@@ -385,9 +403,13 @@ class User(commands.Cog, Database, name='user module'):
                 await channel.send(f"Покупка {ctx.author.mention} товар номер {item}")
                 await ctx.send("Администрация скоро выдаст Вам товар")
 
-    @commands.command(aliases=["buy", "buy-role"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __buy(self, ctx: commands.context.Context, role: discord.Role = None):
+    @slash_command(
+        name="buy", description="купить роль из магазина",
+        options=[
+            Option("action", "тип операции с банком", OptionType.ROLE),
+        ]
+    )
+    async def __buy_slash(self, ctx: commands.context.Context, role: discord.Role = None):
         if role is None:
             await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
         else:
@@ -413,9 +435,14 @@ class User(commands.Cog, Database, name='user module'):
                 )
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["send"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __send(
+    @slash_command(
+        name="send", description="операции с банков",
+        options=[
+            Option("member", "пользователь, кому перевести DP коины", OptionType.USER),
+            Option("cash", "количество DP коинов", OptionType.INTEGER)
+        ]
+    )
+    async def __send_slash(
             self, ctx: commands.context.Context,
             member: discord.Member = None, cash: int = None
     ) -> None:
@@ -430,9 +457,13 @@ class User(commands.Cog, Database, name='user module'):
                     self.add_coins(member.id, ctx.guild.id, cash)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["+rep"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __good_rep(
+    @slash_command(
+        name="add_rep", description="повысить репутацию пользователю",
+        options=[
+            Option("member", "тип операции с банком", OptionType.USER)
+        ]
+    )
+    async def __good_rep_slash(
             self, ctx: commands.context.Context, member: discord.Member = None
     ) -> None:
         if member is None:
@@ -444,9 +475,13 @@ class User(commands.Cog, Database, name='user module'):
                 self.add_reputation(ctx.author.id, ctx.guild.id, 1)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["-rep"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __bad_rep(
+    @slash_command(
+        name="take_rep", description="понизить репутацию пользователя",
+        options=[
+            Option("member", "количество DP коинов", OptionType.USER)
+        ]
+    )
+    async def __bad_rep_slash(
             self, ctx: commands.context.Context, member: discord.Member = None
     ) -> None:
         if member is None:
@@ -458,9 +493,13 @@ class User(commands.Cog, Database, name='user module'):
                 self.add_reputation(ctx.author.id, ctx.guild.id, -1)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["stats"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __stats(self, ctx: commands.context.Context, member: discord.Member = None) -> None:
+    @slash_command(
+        name="stats", description="посмотреть статистику пользователя",
+        options=[
+            Option("member", "пользователь", OptionType.USER, required=False),
+        ]
+    )
+    async def __stats_slash(self, ctx: commands.context.Context, member: discord.Member = None) -> None:
         self.ID = ctx.author.id if member is None else member.id
         self.guild_id = ctx.guild.id if member is None else member.guild.id
         await ctx.send(
@@ -533,9 +572,10 @@ class User(commands.Cog, Database, name='user module'):
             )
         )
 
-    @commands.command(aliases=["card"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __Card(self, ctx: commands.context.Context) -> None:
+    @slash_command(
+        name="card", description="получить карточку",
+    )
+    async def __Card_slash(self, ctx: commands.context.Context) -> None:
         self.img = Image.new("RGBA", (500, 300), "#323642")
         Image.open(
             io.BytesIO(
@@ -645,9 +685,13 @@ class User(commands.Cog, Database, name='user module'):
         os.remove(f"prom_files/avatar{ctx.author.id}.png")
         os.remove(f"prom_files/out_avatar{ctx.author.id}.png")
 
-    @commands.command(aliases=["promo"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_active(self, ctx: commands.context.Context, promo: str = None):
+    @slash_command(
+        name="promo", description="использовать промокод",
+        options=[
+            Option("promo", "промокод", OptionType.STRING),
+        ]
+    )
+    async def __promo_active_slash(self, ctx: commands.context.Context, promo: str = None):
         if promo is None:
             await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
         elif not self.checking_for_promo_code_existence_in_table(promo):
@@ -667,9 +711,14 @@ class User(commands.Cog, Database, name='user module'):
             )
             await ctx.send(embed=self.emb)
 
-    @commands.command(aliases=['gift'])
-    @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __gift(
+    @slash_command(
+        name="gift", description="подарить роль",
+        options=[
+            Option("member", "пользователь", OptionType.USER),
+            Option("role", "роль", OptionType.ROLE)
+        ]
+    )
+    async def __gift_slash(
             self, ctx: commands.context.Context,
             member: discord.Member = None, role: discord.Role = None
     ) -> None:
@@ -694,9 +743,10 @@ class User(commands.Cog, Database, name='user module'):
                 )
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["promos"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_codes(self, ctx: commands.context.Context) -> None:
+    @slash_command(
+        name="promos", description="получить все промокоды"
+    )
+    async def __promo_codes_slash(self, ctx: commands.context.Context) -> None:
         if ctx.guild is None:
             if not self.checking_for_promo_code_existence_in_table_by_id(ctx.author.id):
                 await ctx.author.send(f"{ctx.author.mention}, у Вас нет промокодов!")
@@ -717,9 +767,14 @@ class User(commands.Cog, Database, name='user module'):
         else:
             await ctx.send(f"{ctx.author.mention}, эту команду можно использовать только в личных сообщениях бота")
 
-    @commands.command(aliases=["promo_create"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __promo_create(self, ctx: commands.context.Context, cash: int = None, key: str = None) -> None:
+    @slash_command(
+        name="lb", description="стартовый баланс",
+        options=[
+            Option("cash", "аргумент (voice, chat или пустое значение)", OptionType.INTEGER),
+            Option("key", "просто рандомный текст, он почти ни на что не влияет", OptionType.STRING)
+        ]
+    )
+    async def __promo_create_slash(self, ctx: commands.context.Context, cash: int = None, key: str = None) -> None:
         if cash is None:
             await ctx.send(f'{ctx.author.mention}, Вы не ввели сумму!')
         elif cash > self.get_cash(ctx.author.id, ctx.guild.id):
