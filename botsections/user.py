@@ -185,18 +185,22 @@ class User(commands.Cog, Database, name='user module'):
             member: discord.Member = None
     ) -> None:
         if member is None:
-            await ctx.send(
-                embed=create_emb(
-                    title="Баланс",
-                    description=f"Баланс пользователя `{ctx.author}` составляет "
-                                f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id))}` DP коинов"
+            try:
+                await ctx.send(
+                    embed=create_emb(
+                        title="Баланс",
+                        description=f"Баланс пользователя `{ctx.author.mention}` составляет "
+                                    f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id))}` DP коинов"
+                    )
                 )
-            )
+            except TypeError:
+                print(self.get_cash(ctx.author.id, ctx.guild.id))
+
         else:
             await ctx.send(
                 embed=create_emb(
                     title="Баланс",
-                    description=f"Баланс пользователя `{member}` составляет "
+                    description=f"Баланс пользователя `{member.mention}` составляет "
                                 f"`{divide_the_number(self.get_cash(member.id, ctx.guild.id))}` DP коинов"
                 )
             )
@@ -211,7 +215,7 @@ class User(commands.Cog, Database, name='user module'):
             await ctx.send(
                 embed=create_emb(
                     title="Баланс",
-                    description=f"Баланс пользователя `{ctx.author}` составляет "
+                    description=f"Баланс пользователя `{ctx.author.mention}` составляет "
                                 f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id))}` DP коинов\n\n"
                                 f"Баланс в банке составляет"
                                 f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id, bank=True))}` "

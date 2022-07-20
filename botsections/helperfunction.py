@@ -114,7 +114,7 @@ def create_emb(
         description: str = EmptyEmbed
 ) -> discord.Embed:
     emb = discord.Embed(title=title, colour=color, description=description)
-    if args is not EmptyEmbed:
+    if args is not None:
         for row in list(args):
             emb.add_field(name=row["name"], value=row["value"], inline=row["inline"])
     return emb

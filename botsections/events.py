@@ -160,19 +160,19 @@ class Events(commands.Cog, Database, name='events module'):
     async def on_member_join(self, member: discord.Member) -> None:
         self.server_add(self.bot)
         print(f"{member.id} add")
-
-    @commands.Cog.listener()
-    async def on_command_error(
-            self, ctx: commands.context.Context, error: Exception
-    ) -> None:
-        if isinstance(error, commands.CommandOnCooldown):
-            pass
-        elif isinstance(error, commands.CommandNotFound):
-            pass
-        else:
-            print("[ERROR]:" + str(error))
-            try:
-                write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
-                          f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
-            except AttributeError:
-                pass
+    #
+    # @commands.Cog.listener()
+    # async def on_command_error(
+    #         self, ctx: commands.context.Context, error: Exception
+    # ) -> None:
+    #     if isinstance(error, commands.CommandOnCooldown):
+    #         pass
+    #     elif isinstance(error, commands.CommandNotFound):
+    #         pass
+    #     else:
+    #         print("[ERROR]:" + str(error))
+    #         try:
+    #             write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
+    #                       f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
+    #         except AttributeError:
+    #             pass
