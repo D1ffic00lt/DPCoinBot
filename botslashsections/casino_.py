@@ -173,7 +173,7 @@ class CasinoSlash(commands.Cog, Database, name='Casino module'):
                             ]
                         )
                     )
-                    await self.stats_update(ctx, "FailsCount", "Fails", "WinsCount", bid * coefficient)
+                    await self.stats_update(ctx, "FailsCount", "Fails", "WinsCount", int(bid * coefficient))
         else:
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
@@ -645,7 +645,6 @@ class CasinoSlash(commands.Cog, Database, name='Casino module'):
             await ctx.send("Вы не ввели человека")
         elif member.id == ctx.author.id:
             await ctx.send("Вы не можете ввести себя")
-            self.get_active_coinflip()
         elif not self.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
             await ctx.send(f"Такой игры не существует, посмотреть все ваши активные игры - "
                            f"{settings['prefix']}games")

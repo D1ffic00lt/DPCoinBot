@@ -209,64 +209,44 @@ class Casino(commands.Cog, Database, name='Casino module'):
                 if self.line2[0] == self.line2[1] and self.line2[1] == self.line2[2]:
                     self.add_coins(ctx.author.id, ctx.guild.id, self.result_bid)
                     await self.stats_update(ctx, "ThreeSevensCount", "ThreeSevens", "WinsCount", self.result_bid)
-                    await ctx.send(
-                        embed=create_emb(
-                            title="🎰Вы выиграли!🎰",
-                            color=self.color,
-                            args=[
-                                {
-                                    "name": f'🎰Поздравляем!🎰',
-                                    "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, '
-                                             'Вы выиграли **{}** DP коинов!'.format(
-                                        *self.line1[0], *self.line1[1], *self.line1[2],
-                                        *self.line2[0], *self.line2[1], *self.line2[2],
-                                        *self.line3[0], *self.line3[1], *self.line3[2],
-                                        ctx.author.mention, divide_the_number(bid)
-                                    ),
-                                    "inline": False
-                                }
-                            ]
+                    self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
+                    self.emb.add_field(
+                        name=f'🎰Поздравляем!🎰',
+                        value='`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, Вы выиграли **{}** DP коинов!'.format(
+                            *self.line1[0], *self.line1[1], *self.line1[2],
+                            *self.line2[0], *self.line2[1], *self.line2[2],
+                            *self.line3[0], *self.line3[1], *self.line3[2],
+                            ctx.author.mention, divide_the_number(bid),
+                            inline=False
                         )
                     )
+                    await ctx.send(embed=self.emb)
                 elif self.line1[2] == self.line2[1] and self.line2[1] == self.line3[0]:
                     self.add_coins(ctx.author.id, ctx.guild.id, self.result_bid)
-                    await ctx.send(
-                        embed=create_emb(
-                            title="🎰Вы выиграли!🎰",
-                            color=self.color,
-                            args=[
-                                {
-                                    "name": f'🎰Поздравляем!🎰',
-                                    "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, '
-                                             'Вы выиграли **{}** DP коинов!'.format(
-                                        *self.line1[0], *self.line1[1], *self.line1[2],
-                                        *self.line2[0], *self.line2[1], *self.line2[2],
-                                        *self.line3[0], *self.line3[1], *self.line3[2],
-                                        ctx.author.mention, divide_the_number(bid)
-                                    ),
-                                    "inline": False
-                                }
-                            ])
+                    self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
+                    self.emb.add_field(
+                        name=f'🎰Вы выиграли!🎰',
+                        value='`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, Вы выиграли **{}** DP коинов!'.format(
+                            *self.line1[0], *self.line1[1], *self.line1[2],
+                            *self.line2[0], *self.line2[1], *self.line2[2],
+                            *self.line3[0], *self.line3[1], *self.line3[2],
+                            ctx.author.mention, divide_the_number(bid),
+                            inline=False
+                        )
                     )
                     self.add_coins(ctx.author.id, ctx.guild.id, self.result_bid)
                     await self.stats_update(ctx, "ThreeSevensCount", "ThreeSevens", "WinsCount", self.result_bid)
 
                 else:
-                    await ctx.send(
-                        embed=create_emb(
-                            title="🎰Вы проиграли:(🎰",
-                            color=self.color, args=[
-                                {
-                                    "name": f':(',
-                                    "value": '`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}'.format(
-                                        *self.line1[0], *self.line1[1], *self.line1[2],
-                                        *self.line2[0], *self.line2[1], *self.line2[2],
-                                        *self.line3[0], *self.line3[1], *self.line3[2],
-                                        ctx.author.mention
-                                    ),
-                                    "inline": False
-                                }
-                            ]
+                    self.emb = discord.Embed(title="🎰Вы проиграли:(🎰", colour=self.color)
+                    self.emb.add_field(
+                        name=f':(',
+                        value='{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, Вы выиграли **{}** DP коинов!'.format(
+                            *self.line1[0], *self.line1[1], *self.line1[2],
+                            *self.line2[0], *self.line2[1], *self.line2[2],
+                            *self.line3[0], *self.line3[1], *self.line3[2],
+                            ctx.author.mention, divide_the_number(bid),
+                            inline=False
                         )
                     )
                     await self.stats_update(ctx, "ThreeSevensCount", "ThreeSevens", "LosesCount", -bid)
