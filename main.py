@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import discord
+import os
 
 from bot import DPcoinBOT
 from botsections.admin import Admin
@@ -33,6 +34,9 @@ def main() -> None:
         intents=discord.Intents.all()
     )
     print("version: {}".format(__version__))
+    print(os.path)
+    if not os.path.exists(".json"):
+        os.mkdir(".json")
     if not Json.check_file_exists(".json/ban_list.json"):
         Json(".json/ban_list.json").json_dump([])
 
