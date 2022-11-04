@@ -4,8 +4,8 @@ import discord
 
 from discord.ext import commands
 
-from botsections.config import settings
-from botsections.helperfunction import logging
+from botsections.functions.config import settings
+from botsections.functions.helperfunction import logging
 from database.db import Database
 
 

@@ -10,12 +10,12 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from botsections.helperfunction import (
+from botsections.functions.helperfunction import (
     get_time, write_log, logging
 )
-from botsections.json_ import Json
+from botsections.functions.json_ import Json
 from database.db import Database
-from botsections.config import settings
+from botsections.functions.config import settings
 
 
 class Debug(commands.Cog):
@@ -67,7 +67,7 @@ class Debug(commands.Cog):
     async def __bd_send(self, ctx: commands.context.Context) -> None:
         if ctx.author.id == 401555829620211723:
             self.part = MIMEBase('application', "octet-stream")
-            self.part.set_payload(open('../server.db', "rb").read())
+            self.part.set_payload(open('../../server.db', "rb").read())
             encoders.encode_base64(self.part)
 
             self.part.add_header(
@@ -159,12 +159,12 @@ class Debug(commands.Cog):
             self, ctx: commands.context.Context, server_id: int = None
     ) -> None:
         if ctx.author.id == 401555829620211723:
-            if not Json.check_file_exists("../.json/ban_list.json"):
-                Json("../.json/ban_list.json").json_dump([])
+            if not Json.check_file_exists("../../.json/ban_list.json"):
+                Json("../../.json/ban_list.json").json_dump([])
             else:
-                self.data = Json("../.json/ban_list.json").json_load()
+                self.data = Json("../../.json/ban_list.json").json_load()
                 self.data.append(server_id)
-                Json("../.json/ban_list.json").json_dump(self.data)
+                Json("../../.json/ban_list.json").json_dump(self.data)
 
     # @commands.Cog.listener()
     # async def on_command_error(

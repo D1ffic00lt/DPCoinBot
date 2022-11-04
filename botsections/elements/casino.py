@@ -7,11 +7,11 @@ from discord.ext import commands
 from typing import List, Union
 
 from database.db import Database
-from botsections.helperfunction import (
+from botsections.functions.helperfunction import (
     create_emb, fail_rand, logging,
     get_color, divide_the_number, casino2ch, get_time
 )
-from botsections.texts import *
+from botsections.functions.texts import *
 
 
 class Casino(commands.Cog):

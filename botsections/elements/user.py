@@ -7,14 +7,14 @@ from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
 
-from botsections.helperfunction import (
+from botsections.functions.helperfunction import (
     divide_the_number, create_emb,
     get_color, prepare_mask, crop,
     logging, get_promo_code, get_time
 )
 from database.db import Database
-from botsections.json_ import Json
-from botsections.texts import *
+from botsections.functions.json_ import Json
+from botsections.functions.texts import *
 
 
 class User(commands.Cog):
@@ -198,7 +198,6 @@ class User(commands.Cog):
                 )
             except TypeError:
                 print(f"[{get_time()}] [ERROR]: TypeError: user.py 199")
-
         else:
             await ctx.send(
                 embed=create_emb(

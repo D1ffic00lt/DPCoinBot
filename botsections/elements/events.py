@@ -4,15 +4,16 @@ import random
 from datetime import datetime
 from discord.ext import commands
 
-from botsections.helperfunction import (
+from botsections.functions.helperfunction import (
     get_time, logging
 )
-from botsections.json_ import Json
+from botsections.functions.json_ import Json
 from database.db import Database
 
 
 class Events(commands.Cog):
     NAME = 'events module'
+
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -94,7 +95,7 @@ class Events(commands.Cog):
                     (self.day < self.data["day"] and self.month > self.data["month"]) or \
                     (self.month == 1 and self.day == 1 and self.day < self.data["day"]):
                 self.db.send_files()
-                Json("../.json/last_save.json").json_dump(
+                Json("../../.json/last_save.json").json_dump(
                     {
                         "day": self.day,
                         "month": self.month

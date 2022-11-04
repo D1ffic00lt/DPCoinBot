@@ -5,7 +5,7 @@ from discord.ext import commands
 from typing import Union
 
 from database.db import Database
-from botsections.helperfunction import logging
+from botsections.functions.helperfunction import logging
 
 
 class ValentinesDay(commands.Cog):
