@@ -1,8 +1,7 @@
 *.DS_Store
 *.db
 *.dpcb
-
 .idea/
-__pycache__/
+*__pycache__/
 .json
 .logs
