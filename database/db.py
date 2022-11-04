@@ -13,10 +13,12 @@ from discord.ext import commands
 
 from botsections.config import settings
 from botsections.helperfunction import *
+from botsections.encoding import Encoder
 
 
-class Database:
-    def __init__(self, filename: str) -> None:
+class Database(object):
+    def __init__(self, filename: str, encoder: Encoder) -> None:
+        self.encoder = encoder
         self.server: smtplib.SMTP = smtplib.SMTP('smtp.gmail.com: 587')
         self.msg: MIMEMultipart = MIMEMultipart()
         self.part2: MIMEBase = MIMEBase('application', "octet-stream")
@@ -1357,8 +1359,8 @@ class Database:
             'Content-Disposition', "attachment; filename= %s" % os.path.basename("../logs/develop_logs.dpcb")
         )
 
-        self.msg['From'] = settings["sender_email"]
-        self.msg['To'] = settings["sender_email"]
+        self.msg['From'] = self.encoder.decrypt(settings["sender_email"])
+        self.msg['To'] = self.encoder.decrypt(settings["sender_email"])
         self.msg['Subject'] = "Копии"
 
         self.msg.attach(self.part1)
@@ -1366,7 +1368,7 @@ class Database:
 
         self.msg.attach(MIMEText("Копии от {}".format(str(get_time()))))
         self.server.starttls()
-        self.server.login(self.msg['From'], settings["password"])
+        self.server.login(self.msg['From'], self.encoder.decrypt(settings["password"]))
         self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
         self.server.quit()
         write_log("[{}] [INFO]: Копии данных отправлена на почту".format(str(get_time())))

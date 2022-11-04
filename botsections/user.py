@@ -17,10 +17,12 @@ from botsections.json_ import Json
 from botsections.texts import *
 
 
-class User(commands.Cog, name='user module'):
+class User(commands.Cog):
+    NAME = 'user module'
+
     @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
-        super().__init__()
+    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.db = db
         self.bot: commands.Bot = bot
         self.name: discord.Member

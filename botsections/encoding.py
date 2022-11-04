@@ -10,7 +10,7 @@ class Encoder(object):
         if save_key:
             if not os.path.exists(".json"):
                 os.mkdir(".json")
-            with open(".json/key.txt", "+wb") as file:
+            with open(".json/key.dpcb", "+wb") as file:
                 file.write(self.__key)
 
     def encrypt(self, text: str = None) -> bytes:
@@ -34,4 +34,3 @@ class Encoder(object):
     @staticmethod
     def __from_base64(text: bytes) -> str:
         return base64.b64decode(text).decode()
-    

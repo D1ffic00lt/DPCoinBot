@@ -11,10 +11,11 @@ from botsections.json_ import Json
 from database.db import Database
 
 
-class Events(commands.Cog, name='events module'):
+class Events(commands.Cog):
+    NAME = 'events module'
     @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
-        super().__init__()
+    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.time = None
         self.day = None
         self.month = None

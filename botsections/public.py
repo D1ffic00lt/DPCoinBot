@@ -9,10 +9,12 @@ from botsections.texts import *
 from database.db import Database
 
 
-class Public(commands.Cog, name='public module'):
+class Public(commands.Cog):
+    NAME = 'public module'
+
     @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
-        super().__init__()
+    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.db = db
         self.logs = logs
         self.bot: commands.Bot = bot

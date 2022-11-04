@@ -2,7 +2,7 @@ import os
 import smtplib
 import discord
 
-from typing import Any, Union
+from typing import Any, Union, List, Dict
 from discord import File
 from discord.ext import commands
 from email import encoders
@@ -18,14 +18,20 @@ from database.db import Database
 from botsections.config import settings
 
 
-class Debug(commands.Cog, name='debug module'):
+class Debug(commands.Cog):
+    NAME = 'debug module'
+
     @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
-        super().__init__()
+    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+        self.encoder = kwargs["encoder"]
+        del kwargs["encoder"]
+
+        super().__init__(*args, **kwargs)
+
         self.db = db
         self.bot: commands.Bot = bot
-        self.js: dict[Any]
-        self.data: list[Union[dict, int]]
+        self.js: Dict[Any]
+        self.data: List[Union[dict, int]]
         self.part: MIMEBase
         self.msg: MIMEMultipart
         self.server: smtplib.SMTP
@@ -69,8 +75,8 @@ class Debug(commands.Cog, name='debug module'):
                 "attachment; filename= %s" % os.path.basename('botsections/database/server.db')
             )
             self.msg = MIMEMultipart()
-            self.msg['From'] = settings["sender_email"]
-            self.msg['To'] = settings["to_send_email"]
+            self.msg['From'] = self.encoder.decrypt(settings["sender_email"])
+            self.msg['To'] = self.encoder.decrypt(settings["to_send_email"])
             self.msg['Subject'] = "База данных"
             self.msg.attach(self.part)
             self.msg.attach(MIMEText("База данных за {}".format(str(get_time()))))
@@ -78,7 +84,7 @@ class Debug(commands.Cog, name='debug module'):
             self.server.starttls()
             self.server.login(
                 self.msg['From'],
-                settings["password"]
+                self.encoder.decrypt(settings["password"])
             )
             self.server.sendmail(
                 self.msg['From'],
