@@ -10,7 +10,6 @@ class Json(object):
     def __init__(self, filename: str) -> None:
         self.file: _io.TextIOWrapper
         self.filename: str = filename
-        print(os.listdir())
 
     def json_load(self) -> Union[dict, list]:
         with open(f"{self.filename}", "r") as self.file:
@@ -22,9 +21,9 @@ class Json(object):
 
     @staticmethod
     def get_ban_list() -> list:
-        if not Json.check_file_exists("ban_list.json"):
+        if not Json.check_file_exists("../.json/ban_list.json"):
             return []
-        return Json("ban_list.json").json_load()
+        return Json("../.json/ban_list.json").json_load()
 
     @staticmethod
     def check_file_exists(filename: str) -> bool:

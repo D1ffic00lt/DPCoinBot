@@ -5,16 +5,20 @@ from datetime import datetime
 from discord.ext import commands
 
 from botsections.helperfunction import (
-    write_log, get_time, logging
+    get_time, logging
 )
 from botsections.json_ import Json
 from database.db import Database
 
 
-class Events(commands.Cog, Database, name='events module'):
+class Events(commands.Cog, name='events module'):
     @logging
-    def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
+        super().__init__()
+        self.time = None
+        self.day = None
+        self.month = None
+        self.db = db
         self.level: int = 0
         self.index: int = 0
         self.data: dict = {}
@@ -30,6 +34,7 @@ class Events(commands.Cog, Database, name='events module'):
         self.last_message: dict = {}
         self.text: str = ""
         self.time: datetime
+        self.logs = logs
         print("Events connected")
 
     @commands.Cog.listener()
@@ -44,53 +49,51 @@ class Events(commands.Cog, Database, name='events module'):
         if not member.bot:
             if not before.channel and after.channel and \
                     self.member_guild_afk_channel_id != self.channel_into_which_the_member_entered:
-                self.voice_create(member.id, member.guild.id)
-                self.insert_into_online_stats(member.id, member.guild.id)
+                self.db.voice_create(member.id, member.guild.id)
+                self.db.insert_into_online_stats(member.id, member.guild.id)
             elif before.channel and after.channel:
                 if self.member_guild_afk_channel_id == self.channel_into_which_the_member_entered:
-                    await self.voice_delete(member, False)
-                    await self.voice_delete_stats(member, False)
+                    await self.db.voice_delete(member, False)
+                    await self.db.voice_delete_stats(member, False)
                 elif self.member_guild_afk_channel_id == self.the_channel_from_which_the_member_came_out:
-                    self.voice_create(member.id, member.guild.id, voice_create_stats=True)
+                    self.db.voice_create(member.id, member.guild.id, voice_create_stats=True)
                 elif self.channel_into_which_the_member_entered == self.the_channel_from_which_the_member_came_out:
                     if after.self_mute:
-                        await self.voice_delete(member, False)
-                        await self.voice_delete_stats(member, True)
+                        await self.db.voice_delete(member, False)
+                        await self.db.voice_delete_stats(member, True)
                     elif not after.self_mute and before.self_mute:
-                        self.voice_create(member.id, member.guild.id)
-                        await self.voice_delete_stats(member, True)
+                        self.db.voice_create(member.id, member.guild.id)
+                        await self.db.voice_delete_stats(member, True)
                 else:
-                    await self.voice_delete(member, True)
-                    await self.voice_delete_stats(member, True)
+                    await self.db.voice_delete(member, True)
+                    await self.db.voice_delete_stats(member, True)
             elif before.channel and not after.channel:
-                await self.voice_delete(member, False)
-                await self.voice_delete_stats(member, False)
+                await self.db.voice_delete(member, False)
+                await self.db.voice_delete_stats(member, False)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         if message.guild is not None:
-            if not Json.check_file_exists("ban_list.json"):
-                Json("ban_list.json").json_dump([])
             if message.guild.id in Json.get_ban_list():
                 await self.bot.get_guild(message.guild.id).leave()
-        if not self.check_user(message.author.id):
-            self.server_add(self.bot)
+        if not self.db.check_user(message.author.id):
+            self.db.server_add(self.bot)
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
-        if not Json.check_file_exists("last_save.json"):
-            Json("last_save.json").json_dump(
+        if not Json.check_file_exists(".json/last_save.json"):
+            Json(".json/last_save.json").json_dump(
                 {
                     "day": self.day,
                     "month": self.month
                 }
             )
         else:
-            self.data = Json("last_save.json").json_load()
+            self.data = Json(".json/last_save.json").json_load()
             if (self.day > self.data["day"] and self.month == self.data["month"]) or \
                     (self.day < self.data["day"] and self.month > self.data["month"]) or \
                     (self.month == 1 and self.day == 1 and self.day < self.data["day"]):
-                self.send_files()
-                Json("last_save.json").json_dump(
+                self.db.send_files()
+                Json("../.json/last_save.json").json_dump(
                     {
                         "day": self.day,
                         "month": self.month
@@ -120,22 +123,22 @@ class Events(commands.Cog, Database, name='events module'):
             if self.text != self.last_message[message.author.id]["message"]:
                 self.last_message[message.author.id]["message"] = self.text
                 if len(self.text) > 7 and message.author is not None and message.guild is not None:
-                    self.update_stat(message.author.id, message.guild.id, "MessagesCount", 1)
+                    self.db.update_stat(message.author.id, message.guild.id, "MessagesCount", 1)
                     if self.time > 60 or self.time == 0:
-                        self.update_stat(message.author.id, message.guild.id, "Xp", random.randint(1, 15))
-                        self.xp = self.get_stat(message.author.id, message.guild.id, "Xp")
-                        self.level_in_chat = self.get_stat(message.author.id, message.guild.id, "ChatLevel")
-                        for i in self.get_from_levels("XP", "Level", "Award"):
+                        self.db.update_stat(message.author.id, message.guild.id, "Xp", random.randint(1, 15))
+                        self.xp = self.db.get_stat(message.author.id, message.guild.id, "Xp")
+                        self.level_in_chat = self.db.get_stat(message.author.id, message.guild.id, "ChatLevel")
+                        for i in self.db.get_from_levels("XP", "Level", "Award"):
                             if i[0] <= self.xp and i[1] > self.level_in_chat:
-                                self.update_stat(message.author.id, message.guild.id, "ChatLevel", 1)
-                                self.add_coins(message.author.id, message.guild.id, i[2])
+                                self.db.update_stat(message.author.id, message.guild.id, "ChatLevel", 1)
+                                self.db.add_coins(message.author.id, message.guild.id, i[2])
                                 try:
                                     await message.author.send(
                                         f"{message.author.mention}, поздравляем с {i[1]} левелом!\n"
                                         f"Вот "
                                         f"тебе "
                                         f"немного коинов! (**{i[2]}**)\n"
-                                        f"Опыта для следующего левела - **{self.get_xp(i[1] + 1) - self.xp}**, "
+                                        f"Опыта для следующего левела - **{self.db.get_xp(i[1] + 1) - self.xp}**, "
                                         f"{self.xp} опыта "
                                         f"всего")
                                 except discord.errors.Forbidden:
@@ -144,35 +147,19 @@ class Events(commands.Cog, Database, name='events module'):
                                 break
                     self.last_message[message.author.id]["date"] = get_time()
                     if self.index == 1 and message.author is not None and message.guild is not None:
-                        self.level = self.get_level(message.author.id, message.guild.id)
+                        self.level = self.db.get_level(message.author.id, message.guild.id)
                         if self.level != 1:
                             if self.level != 5:
                                 self.level *= 2
                             else:
                                 self.level *= 4
-                        self.add_coins(message.author.id, message.guild.id, self.level)
+                        self.db.add_coins(message.author.id, message.guild.id, self.level)
 
                     elif self.index == 2 and message.author is not None and message.guild is not None:
-                        self.add_reputation(message.author.id, message.guild.id, 1)
+                        self.db.add_reputation(message.author.id, message.guild.id, 1)
 
     @logging
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
-        self.server_add(self.bot)
-        print(f"{member.id} add")
-    #
-    # @commands.Cog.listener()
-    # async def on_command_error(
-    #         self, ctx: commands.context.Context, error: Exception
-    # ) -> None:
-    #     if isinstance(error, commands.CommandOnCooldown):
-    #         pass
-    #     elif isinstance(error, commands.CommandNotFound):
-    #         pass
-    #     else:
-    #         print("[ERROR]:" + str(error))
-    #         try:
-    #             write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
-    #                       f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
-    #         except AttributeError:
-    #             pass
+        self.db.server_add(self.bot)
+        print(f"{member.id} add to the database")

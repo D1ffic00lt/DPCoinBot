@@ -1,7 +1,8 @@
-.DS_Store
+*.DS_Store
 database/server.db
 .idea/
 __pycache__/
 config_
 server.db
 .json
+.logs

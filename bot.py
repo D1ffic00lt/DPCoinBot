@@ -13,7 +13,7 @@ class DPcoinBOT(commands.Bot):
     def __init__(self, command_prefix: str, **kwargs) -> None:
         super().__init__(command_prefix, **kwargs)
         self.lvl: int = 0
-        self.db: Database = Database("server.db")
+        self.db: Database = kwargs["db"]
         self.remove_command('help')
 
     @logging

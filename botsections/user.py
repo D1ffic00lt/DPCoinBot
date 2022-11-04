@@ -9,18 +9,19 @@ from typing import Union
 
 from botsections.helperfunction import (
     divide_the_number, create_emb,
-    get_color,
-    prepare_mask, crop, logging, get_promo_code
+    get_color, prepare_mask, crop,
+    logging, get_promo_code, get_time
 )
 from database.db import Database
 from botsections.json_ import Json
 from botsections.texts import *
 
 
-class User(commands.Cog, Database, name='user module'):
+class User(commands.Cog, name='user module'):
     @logging
-    def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
+        super().__init__()
+        self.db = db
         self.bot: commands.Bot = bot
         self.name: discord.Member
         self.color: discord.Color
@@ -31,7 +32,7 @@ class User(commands.Cog, Database, name='user module'):
         self.ID: int = 0
         self.guild_id: int = 0
         self.server: Union[discord.Guild, type(None)]
-
+        self.logs = logs
         print("User connected")
 
     @commands.command(aliases=['slb'])
@@ -44,7 +45,7 @@ class User(commands.Cog, Database, name='user module'):
             self.js = {"lb": True, "slb": True}
         else:
             self.js = Json("../.json/develop_get.json").json_load()
-        for row in self.get_from_user(ctx.guild.id, "Name", "Cash", "ID", order_by="Cash"):
+        for row in self.db.get_from_user(ctx.guild.id, "Name", "Cash", "ID", order_by="Cash"):
             for member in ctx.guild.members:
                 if str(member) == row[0]:
                     self.name = member
@@ -87,7 +88,7 @@ class User(commands.Cog, Database, name='user module'):
             self.js = Json("../.json/develop_get.json").json_load()
         if type_ is None:
             self.emb = discord.Embed(title="Топ 10 сервера")
-            for row in self.get_from_user(ctx.guild.id, "Name", "Cash", "Lvl", "ID", order_by="Cash"):
+            for row in self.db.get_from_user(ctx.guild.id, "Name", "Cash", "Lvl", "ID", order_by="Cash"):
                 if self.index == 10:
                     break
                 for member in ctx.guild.members:
@@ -116,7 +117,7 @@ class User(commands.Cog, Database, name='user module'):
             await ctx.send(embed=self.emb)
         elif type_ == "chat":
             self.emb = discord.Embed(title="Топ 10 сервера по левелу")
-            for row in self.get_from_user(ctx.guild.id, "Name", "ChatLevel", "ID", "Xp", order_by="Xp"):
+            for row in self.db.get_from_user(ctx.guild.id, "Name", "ChatLevel", "ID", "Xp", order_by="Xp"):
                 if self.index == 10:
                     break
                 for member in ctx.guild.members:
@@ -139,7 +140,7 @@ class User(commands.Cog, Database, name='user module'):
             await ctx.send(embed=self.emb)
         elif type_ == "voice":
             self.emb = discord.Embed(title="Топ 10 сервера по времени в голосовых каналах")
-            for row in self.get_from_user(
+            for row in self.db.get_from_user(
                     ctx.guild.id,
                     "Name",
                     "MinutesInVoiceChannels",
@@ -169,7 +170,7 @@ class User(commands.Cog, Database, name='user module'):
         elif type_ == "rep":
             self.emb = discord.Embed(title="Топ 10 сервера")
             self.counter = 0
-            for row in self.get_from_user(ctx.guild.id, "Name", "Reputation", order_by="Reputation", limit=10):
+            for row in self.db.get_from_user(ctx.guild.id, "Name", "Reputation", order_by="Reputation", limit=10):
                 self.counter += 1
                 self.emb.add_field(
                     name=f'# {self.counter} | `{row[0]}`',
@@ -189,19 +190,19 @@ class User(commands.Cog, Database, name='user module'):
                 await ctx.send(
                     embed=create_emb(
                         title="Баланс",
-                        description=f"Баланс пользователя `{ctx.author.mention}` составляет "
-                                    f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id))}` DP коинов"
+                        description=f"Баланс пользователя ```{ctx.author}``` составляет "
+                                    f"```{divide_the_number(self.db.get_cash(ctx.author.id, ctx.guild.id))}``` DP коинов"
                     )
                 )
             except TypeError:
-                print(self.get_cash(ctx.author.id, ctx.guild.id))
+                print(f"[{get_time()}] [ERROR]: TypeError: user.py 199")
 
         else:
             await ctx.send(
                 embed=create_emb(
                     title="Баланс",
-                    description=f"Баланс пользователя `{member.mention}` составляет "
-                                f"`{divide_the_number(self.get_cash(member.id, ctx.guild.id))}` DP коинов"
+                    description=f"Баланс пользователя ```{member.mention}``` составляет "
+                                f"```{divide_the_number(self.db.get_cash(member.id, ctx.guild.id))}``` DP коинов"
                 )
             )
 
@@ -215,18 +216,18 @@ class User(commands.Cog, Database, name='user module'):
             await ctx.send(
                 embed=create_emb(
                     title="Баланс",
-                    description=f"Баланс пользователя `{ctx.author.mention}` составляет "
-                                f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id))}` DP коинов\n\n"
+                    description=f"Баланс пользователя ```{ctx.author}``` составляет "
+                                f"```{divide_the_number(self.db.get_cash(ctx.author.id, ctx.guild.id))}``` DP коинов\n\n"
                                 f"Баланс в банке составляет"
-                                f"`{divide_the_number(self.get_cash(ctx.author.id, ctx.guild.id, bank=True))}` "
+                                f"```{divide_the_number(self.db.get_cash(ctx.author.id, ctx.guild.id, bank=True))}``` "
                                 f"DP коинов\n\nВсего коинов - `"
                                 f"""{divide_the_number(
-                                    self.get_cash(
+                                    self.db.get_cash(
                                         ctx.author.id,
                                         ctx.guild.id
                                     )
                                 ) + divide_the_number(
-                                    self.get_cash(
+                                    self.db.get_cash(
                                         ctx.author.id,
                                         ctx.guild.id,
                                         bank=True
@@ -235,20 +236,20 @@ class User(commands.Cog, Database, name='user module'):
                 )
             )
         elif action == "add":
-            if await self.cash_check(ctx, cash):
-                self.add_coins_to_the_bank(ctx.author.id, ctx.guild.id, cash)
+            if await self.db.cash_check(ctx, cash):
+                self.db.add_coins_to_the_bank(ctx.author.id, ctx.guild.id, cash)
                 await ctx.message.add_reaction('✅')
 
         elif action == "take":
             if cash == "all":
-                self.take_coins_from_the_bank(ctx.author.id, ctx.guild.id, "all")
+                self.db.take_coins_from_the_bank(ctx.author.id, ctx.guild.id, "all")
             else:
                 if cash is None:
                     await ctx.send(f"""{ctx.author.mention}, Вы не ввели сумму!""")
-                elif cash > self.get_cash(ctx.author.id, ctx.guild.id, bank=True):
+                elif cash > self.db.get_cash(ctx.author.id, ctx.guild.id, bank=True):
                     await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно средств!""")
-                if await self.cash_check(ctx, cash):
-                    self.take_coins_from_the_bank(ctx.author.id, ctx.guild.id, cash)
+                if await self.db.cash_check(ctx, cash):
+                    self.db.take_coins_from_the_bank(ctx.author.id, ctx.guild.id, cash)
                     await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['levels'])
@@ -294,43 +295,43 @@ class User(commands.Cog, Database, name='user module'):
     @commands.command(aliases=['lvl_up'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __level_up(self, ctx: commands.context.Context):
-        self.level = self.get_level(ctx.author.id, ctx.guild.id)
+        self.level = self.db.get_level(ctx.author.id, ctx.guild.id)
         if self.level == 5:
             await ctx.send("У Вас максимальный левел!")
         elif self.level == 1:
-            if 50000 > self.get_cash(ctx.author.id, ctx.guild.id):
+            if 50000 > self.db.get_cash(ctx.author.id, ctx.guild.id):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
             else:
-                self.take_coins(ctx.author.id, ctx.guild.id, 50000)
-                self.add_level(ctx.author.id, ctx.guild.id)
+                self.db.take_coins(ctx.author.id, ctx.guild.id, 50000)
+                self.db.add_level(ctx.author.id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
         elif self.level == 2:
-            if 100000 > self.get_cash(ctx.author.id, ctx.guild.id):
+            if 100000 > self.db.get_cash(ctx.author.id, ctx.guild.id):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
             else:
-                self.take_coins(ctx.author.id, ctx.guild.id, 100000)
-                self.add_level(ctx.author.id, ctx.guild.id)
+                self.db.take_coins(ctx.author.id, ctx.guild.id, 100000)
+                self.db.add_level(ctx.author.id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
         elif self.level == 3:
-            if 200000 > self.get_cash(ctx.author.id, ctx.guild.id):
+            if 200000 > self.db.get_cash(ctx.author.id, ctx.guild.id):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
             else:
-                self.take_coins(ctx.author.id, ctx.guild.id, 200000)
-                self.add_level(ctx.author.id, ctx.guild.id)
+                self.db.take_coins(ctx.author.id, ctx.guild.id, 200000)
+                self.db.add_level(ctx.author.id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
         elif self.level == 4:
-            if 400000 > self.get_cash(ctx.author.id, ctx.guild.id):
+            if 400000 > self.db.get_cash(ctx.author.id, ctx.guild.id):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
             else:
-                self.take_coins(ctx.author.id, ctx.guild.id, 400000)
-                self.add_level(ctx.author.id, ctx.guild.id)
+                self.db.take_coins(ctx.author.id, ctx.guild.id, 400000)
+                self.db.add_level(ctx.author.id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['shop'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __shop(self, ctx: commands.context.Context):
         self.emb = discord.Embed(title="Магазин ролей")
-        for row in self.get_from_shop(ctx.guild.id, "RoleID", "RoleCost", order_by="RoleCost"):
+        for row in self.db.get_from_shop(ctx.guild.id, "RoleID", "RoleCost", order_by="RoleCost"):
             if ctx.guild.get_role(row[0]) is not None:
                 self.emb.add_field(
                     name=f'Роль {ctx.guild.get_role(row[0]).mention}',
@@ -339,8 +340,8 @@ class User(commands.Cog, Database, name='user module'):
                 )
         self.emb.add_field(name="**Как купить роль?**",
                            value=f'''```diff\n- {settings["prefix"]}buy <Упоминание роли>\n```''')
-        self.get_from_item_shop(ctx.guild.id, "ItemID", "ItemName", "ItemCost", order_by="Cost")
-        if self.get_from_item_shop(
+        self.db.get_from_item_shop(ctx.guild.id, "ItemID", "ItemName", "ItemCost", order_by="Cost")
+        if self.db.get_from_item_shop(
                 ctx.guild.id,
                 "ItemID",
                 "ItemName",
@@ -348,7 +349,7 @@ class User(commands.Cog, Database, name='user module'):
                 order_by="Cost"
         ).fetchone() is not None:
             self.emb.add_field(name='**Другое:**\n', value="Сообщение о покупке придет администрации!", inline=False)
-            for row in self.get_from_item_shop(ctx.guild.id, "ItemID", "ItemName", "ItemCost", order_by="Cost"):
+            for row in self.db.get_from_item_shop(ctx.guild.id, "ItemID", "ItemName", "ItemCost", order_by="Cost"):
                 self.emb.add_field(
                     name=f'**{row[1]}**',
                     value=f'Стоимость: **{row[2]} DP коинов**\n'
@@ -367,21 +368,21 @@ class User(commands.Cog, Database, name='user module'):
         if item is None:
             await ctx.send(f"""{ctx.author}, укажите то, что Вы хотите приобрести""")
         else:
-            self.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="Cost")
-            if self.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="Cost").fetchone() is None:
+            self.db.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="Cost")
+            if self.db.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="Cost").fetchone() is None:
                 await ctx.send(f"""{ctx.author}, такого товара не существует!""")
-            elif self.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="Cost").fetchone()[0] > self.get_cash(
+            elif self.db.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="Cost").fetchone()[0] > self.db.get_cash(
                     ctx.author.id, ctx.guild.id
             ):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
             else:
-                self.take_coins(
+                self.db.take_coins(
                     ctx.author.id,
                     ctx.guild.id,
-                    self.get_item_from_item_shop(ctx.guild.id, item, "Cost", order_by="Cost")
+                    self.db.get_item_from_item_shop(ctx.guild.id, item, "Cost", order_by="Cost")
                 )
                 await ctx.message.add_reaction('✅')
-                channel = self.bot.get_channel(self.get_from_server(ctx.guild.id, "ChannelID"))
+                channel = self.bot.get_channel(self.db.get_from_server(ctx.guild.id, "ChannelID"))
                 await channel.send(f"Покупка {ctx.author.mention} товар номер {item}")
                 await ctx.send("Администрация скоро выдаст Вам товар")
 
@@ -393,18 +394,18 @@ class User(commands.Cog, Database, name='user module'):
         else:
             if role in ctx.author.roles:
                 await ctx.send(f"""{ctx.author}, у Вас уже есть эта роль!""")
-            elif self.get_from_shop(ctx.author.id, ctx.guild.id, "Cost", order_by="Cost").fetchone() is None:
+            elif self.db.get_from_shop(ctx.author.id, str(ctx.guild.id), "Cost", order_by="Cost").fetchone() is None:
                 pass
-            elif self.get_from_shop(ctx.author.id, ctx.guild.id, "Cost", order_by="Cost").fetchone()[0] > self.get_cash(
+            elif self.db.get_from_shop(ctx.author.id, str(ctx.guild.id), "Cost", order_by="Cost").fetchone()[0] > self.db.get_cash(
                     ctx.author.id, ctx.guild.id
             ):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно средств для покупки этой роли!""")
             else:
                 await ctx.author.add_roles(role)
-                self.take_coins(
+                self.db.take_coins(
                     ctx.author.id,
                     ctx.guild.id,
-                    self.get_from_shop(
+                    self.db.get_from_shop(
                         ctx.guild.id,
                         "RoleCost",
                         order_by="RoleCost",
@@ -422,12 +423,12 @@ class User(commands.Cog, Database, name='user module'):
         if member is None:
             await ctx.send(f"""{ctx.author}, укажите пользователя, которому Вы хотите перевести коины""")
         else:
-            if await self.cash_check(ctx, cash, check=True):
+            if await self.db.cash_check(ctx, cash, check=True):
                 if member.id == ctx.author.id:
                     await ctx.send(f"""{ctx.author}, Вы не можете перевести деньги себе""")
                 else:
-                    self.take_coins(ctx.author.id, ctx.guild.id, cash)
-                    self.add_coins(member.id, ctx.guild.id, cash)
+                    self.db.take_coins(ctx.author.id, ctx.guild.id, cash)
+                    self.db.add_coins(member.id, ctx.guild.id, cash)
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["+rep"])
@@ -441,7 +442,7 @@ class User(commands.Cog, Database, name='user module'):
             if member.id == ctx.author.id:
                 await ctx.send(f"{ctx.author}, Вы не можете повысить репутацию самому себе")
             else:
-                self.add_reputation(ctx.author.id, ctx.guild.id, 1)
+                self.db.add_reputation(ctx.author.id, ctx.guild.id, 1)
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["-rep"])
@@ -455,7 +456,7 @@ class User(commands.Cog, Database, name='user module'):
             if member.id == ctx.author.id:
                 await ctx.send(f"{ctx.author}, Вы не можете понизить репутацию самому себе")
             else:
-                self.add_reputation(ctx.author.id, ctx.guild.id, -1)
+                self.db.add_reputation(ctx.author.id, ctx.guild.id, -1)
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["stats"])
@@ -468,45 +469,45 @@ class User(commands.Cog, Database, name='user module'):
                 title="Статистика {}".format(ctx.author),
                 args=[
                     {
-                        "name": f'Coinflips - {self.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}',
-                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}\n '
-                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "CoinFlipsLosesCount")}',
+                        "name": f'Coinflips - {self.db.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "CoinFlipsLosesCount")}',
                         "inline": True
                     },
                     {
-                        "name": f'Rust casinos - {self.get_stat(self.ID, self.guild_id, "RustCasinosCount")}',
-                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "RustCasinoWinsCount")}\n '
-                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "RustCasinoLosesCount")}',
+                        "name": f'Rust casinos - {self.db.get_stat(self.ID, self.guild_id, "RustCasinosCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "RustCasinoWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "RustCasinoLosesCount")}',
                         "inline": True
                     },
                     {
-                        "name": f'Rolls - {self.get_stat(self.ID, self.guild_id, "RollsCount")}',
-                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "RollsWinsCount")}\n '
-                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "RollsLosesCount")}',
+                        "name": f'Rolls - {self.db.get_stat(self.ID, self.guild_id, "RollsCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "RollsWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "RollsLosesCount")}',
                         "inline": True
                     },
                     {
-                        "name": f'Fails - {self.get_stat(self.ID, self.guild_id, "FailsCount")}',
-                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "FailsWinsCount")}\n '
-                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "FailsLosesCount")}',
+                        "name": f'Fails - {self.db.get_stat(self.ID, self.guild_id, "FailsCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "FailsWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "FailsLosesCount")}',
                         "inline": True
                     },
                     {
-                        "name": f'777s - {self.get_stat(self.ID, self.guild_id, "ThreeSevensCount")}',
-                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "ThreeSevensWinsCount")}\n '
-                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "ThreeSevensLosesCount")}',
+                        "name": f'777s - {self.db.get_stat(self.ID, self.guild_id, "ThreeSevensCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "ThreeSevensWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "ThreeSevensLosesCount")}',
                         "inline": True
                     },
                     {
                         "name": 'Побед/Поражений всего',
-                        "value": f'Wins - {self.get_stat(self.ID, self.guild_id, "AllWins")}\n '
-                                 f'Loses - {self.get_stat(self.ID, self.guild_id, "AllLoses")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "AllWins")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "AllLoses")}',
                         "inline": True
                     },
                     {
                         "name": 'Выиграно всего',
                         "value": divide_the_number(
-                            self.get_stat(
+                            self.db.get_stat(
                                 self.ID,
                                 self.guild_id,
                                 "EntireAmountOfWinnings"
@@ -516,16 +517,16 @@ class User(commands.Cog, Database, name='user module'):
                     },
                     {
                         "name": 'Минут в голосовых каналах',
-                        "value": f'{self.get_stat(self.ID, self.guild_id, "MinutesInVoiceChannels")} минут',
+                        "value": f'{self.db.get_stat(self.ID, self.guild_id, "MinutesInVoiceChannels")} минут',
                         "inline": True
                     },
                     {
                         "name": 'Сообщений в чате',
-                        "value": f'{self.get_stat(self.ID, self.guild_id, "MessagesCount")} сообщений в чате',
+                        "value": f'{self.db.get_stat(self.ID, self.guild_id, "MessagesCount")} сообщений в чате',
                         "inline": True
                     },
                     {
-                        "name": f'{self.get_stat(self.ID, self.guild_id, "ChatLevel")} левел в чате',
+                        "name": f'{self.db.get_stat(self.ID, self.guild_id, "ChatLevel")} левел в чате',
                         "value": '{} опыта до следующего левела, {} опыта всего',
                         "inline": True
                     }
@@ -569,8 +570,8 @@ class User(commands.Cog, Database, name='user module'):
         self.vm = 0  # честно, не помню, что это такое, так что просто vm
         self.messages = 0
 
-        for i in self.get_from_user(
-                ctx.author.id, ctx.guild.id,
+        for i in self.db.get_from_user(
+                ctx.author.id, str(ctx.guild.id),
                 "AllWins", "AllLoses", "MinutesInVoiceChannels", "MessagesCount",
                 order_by="AllWins"
         ):
@@ -611,7 +612,7 @@ class User(commands.Cog, Database, name='user module'):
         )
         self.images = []
         self.verification,  self.developer, self.coder = \
-            self.get_from_card(ctx.author.id, "Verification", "Developer", "Coder")
+            self.db.get_from_card(ctx.author.id, "Verification", "Developer", "Coder")
         if int(self.verification) == 1:
             self.image = Image.open("progfiles/images/green_galka.png")
             self.image = self.image.convert("RGBA")
@@ -650,15 +651,15 @@ class User(commands.Cog, Database, name='user module'):
     async def __promo_active(self, ctx: commands.context.Context, promo: str = None):
         if promo is None:
             await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
-        elif not self.checking_for_promo_code_existence_in_table(promo):
+        elif not self.db.checking_for_promo_code_existence_in_table(promo):
             await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
-        elif self.get_from_promo_codes(promo, "Global") == 0 and \
-                ctx.guild.id != self.get_from_promo_codes(promo, "GuildID"):
+        elif self.db.get_from_promo_codes(promo, "Global") == 0 and \
+                ctx.guild.id != self.db.get_from_promo_codes(promo, "GuildID"):
             await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
         else:
-            self.cash = self.get_from_promo_codes(promo, "Cash")
-            self.add_coins(ctx.author.id, ctx.guild.id, self.cash)
-            self.delete_from_promo_codes(promo)
+            self.cash = self.db.get_from_promo_codes(promo, "Cash")
+            self.db.add_coins(ctx.author.id, ctx.guild.id, self.cash)
+            self.db.delete_from_promo_codes(promo)
             self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
             self.emb.add_field(
                 name=f'Промокод активирован!',
@@ -681,15 +682,15 @@ class User(commands.Cog, Database, name='user module'):
             if role in member.roles:
                 await ctx.send(f"""{ctx.author}, у Вас уже есть эта роль!""")
 
-            elif self.get_from_shop(ctx.guild.id, "RoleCost", order_by="price", role_id=role.id).fetchone()[0] > \
-                    self.get_cash(ctx.author.id, ctx.guild.id):
+            elif self.db.get_from_shop(ctx.guild.id, "RoleCost", order_by="price", role_id=role.id).fetchone()[0] > \
+                    self.db.get_cash(ctx.author.id, ctx.guild.id):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно денег для покупки этой роли!""")
             else:
                 await member.add_roles(role)
-                self.take_coins(
+                self.db.take_coins(
                     ctx.author.id,
                     ctx.guild.id,
-                    self.get_from_shop(ctx.guild.id, "RoleCost", order_by="price", role_id=role.id
+                    self.db.get_from_shop(ctx.guild.id, "RoleCost", order_by="price", role_id=role.id
                                        ).fetchone()[0]
                 )
                 await ctx.message.add_reaction('✅')
@@ -698,11 +699,11 @@ class User(commands.Cog, Database, name='user module'):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __promo_codes(self, ctx: commands.context.Context) -> None:
         if ctx.guild is None:
-            if not self.checking_for_promo_code_existence_in_table_by_id(ctx.author.id):
+            if not self.db.checking_for_promo_code_existence_in_table_by_id(ctx.author.id):
                 await ctx.author.send(f"{ctx.author.mention}, у Вас нет промокодов!")
             else:
                 self.emb = discord.Embed(title="Промокоды")
-                for codes in self.get_from_promo_codes("", ["Code", "GuildID", "Cash"], ID=ctx.author.id):
+                for codes in self.db.get_from_promo_codes("", ["Code", "GuildID", "Cash"], ID=ctx.author.id):
                     for guild in self.bot.guilds:
                         if guild.id == codes[1]:
                             self.server = guild
@@ -722,7 +723,7 @@ class User(commands.Cog, Database, name='user module'):
     async def __promo_create(self, ctx: commands.context.Context, cash: int = None, key: str = None) -> None:
         if cash is None:
             await ctx.send(f'{ctx.author.mention}, Вы не ввели сумму!')
-        elif cash > self.get_cash(ctx.author.id, ctx.guild.id):
+        elif cash > self.db.get_cash(ctx.author.id, ctx.guild.id):
             await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно денег для создания промокода!""")
         elif cash < 1:
             await ctx.send(f"""{ctx.author.mention}, не-не-не:)""")
@@ -731,10 +732,10 @@ class User(commands.Cog, Database, name='user module'):
         else:
             self.code = get_promo_code(10)
             if key == "global" and ctx.author.id == 401555829620211723:
-                self.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 1)
+                self.db.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 1)
             else:
-                self.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 0)
-                self.take_coins(ctx.author.id, ctx.guild.id, cash)
+                self.db.insert_into_promo_codes(ctx.author.id, ctx.guild.id, str(self.code), cash, 0)
+                self.db.take_coins(ctx.author.id, ctx.guild.id, cash)
             try:
                 await ctx.author.send(self.code)
                 self.emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))

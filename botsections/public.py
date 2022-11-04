@@ -9,10 +9,12 @@ from botsections.texts import *
 from database.db import Database
 
 
-class Public(commands.Cog, Database, name='public module'):
+class Public(commands.Cog, name='public module'):
     @logging
-    def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
+        super().__init__()
+        self.db = db
+        self.logs = logs
         self.bot: commands.Bot = bot
 
         print("Public connected")
@@ -43,8 +45,8 @@ class Public(commands.Cog, Database, name='public module'):
         if arg == "admin":
             if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
                 self.emb = discord.Embed(title="Команды бота:")
-                self.get_administrator_role_id(ctx.guild.id)
-                if isinstance(self.get_administrator_role_id(ctx.guild.id), bool):
+                self.db.get_administrator_role_id(ctx.guild.id)
+                if isinstance(self.db.get_administrator_role_id(ctx.guild.id), bool):
                     self.emb.add_field(name="```НАСТРОЙКА СЕРВЕРА```", value=setup_value)
                 self.emb.add_field(
                     name=f'{settings["prefix"]}auto_setup',

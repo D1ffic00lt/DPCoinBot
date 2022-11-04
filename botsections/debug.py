@@ -1,33 +1,28 @@
 import os
 import smtplib
 import discord
-import vk_api
-import requests
 
 from typing import Any, Union
-from discord import File, Webhook, RequestsWebhookAdapter
+from discord import File
 from discord.ext import commands
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from vk_api import VkApi
 
 from botsections.helperfunction import (
-    get_time, write_msg, get_color,
-    create_emb, write_log, logging
+    get_time, write_log, logging
 )
-from botsections.texts import *
 from botsections.json_ import Json
 from database.db import Database
 from botsections.config import settings
-from botsections.version import __version__
 
 
-class Debug(commands.Cog, Database, name='debug module'):
+class Debug(commands.Cog, name='debug module'):
     @logging
-    def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
+        super().__init__()
+        self.db = db
         self.bot: commands.Bot = bot
         self.js: dict[Any]
         self.data: list[Union[dict, int]]
@@ -37,6 +32,7 @@ class Debug(commands.Cog, Database, name='debug module'):
         self.arg: bool
         self.file_path: str
         self.color: discord.Color
+        self.logs = logs
         print("Debug connected")
 
     @commands.command(aliases=["debug"])
@@ -90,7 +86,7 @@ class Debug(commands.Cog, Database, name='debug module'):
                 self.msg.as_string()
             )
             self.server.quit()
-            write_log("\nБаза данных отправлена на почту\tдата: {}\n\n".format(str(get_time())))
+            write_log("[{}] [INFO]: База данных отправлена на почту".format(str(get_time())))
             await ctx.send("Копия бд отправлена на почту")
 
         else:
@@ -100,36 +96,36 @@ class Debug(commands.Cog, Database, name='debug module'):
     async def __card_add(
             self, ctx: commands.context.Context, user_id: int = 0, type_of_card: str = None
     ) -> None:
-        if ctx.author.id == 401555829620211723 and self.check_user(user_id):
+        if ctx.author.id == 401555829620211723 and self.db.check_user(user_id):
             if type_of_card == "gg":
-                self.update_card(user_id, "Verification", 1)
+                self.db.update_card(user_id, "Verification", 1)
                 await ctx.message.add_reaction('✅')
             elif type_of_card == "bg":
-                self.update_card(user_id, "Verification", 2)
+                self.db.update_card(user_id, "Verification", 2)
                 await ctx.message.add_reaction('✅')
             elif type_of_card == "dv":
-                self.update_card(user_id, "Developer", 1)
+                self.db.update_card(user_id, "Developer", 1)
                 await ctx.message.add_reaction('✅')
             elif type_of_card == "cd":
-                self.update_card(user_id, "Coder", 1)
+                self.db.update_card(user_id, "Coder", 1)
             await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["card_remove"])
     async def __card_remove(
             self, ctx: commands.context.Context, user_id: int = 0, param: str = None
     ) -> None:
-        if ctx.author.id == 401555829620211723 and self.check_user(user_id):
+        if ctx.author.id == 401555829620211723 and self.db.check_user(user_id):
             if param == "gg":
-                self.update_card(user_id, "Verification", 0)
+                self.db.update_card(user_id, "Verification", 0)
                 await ctx.message.add_reaction('✅')
             elif param == "bg":
-                self.update_card(user_id, "Verification", 0)
+                self.db.update_card(user_id, "Verification", 0)
                 await ctx.message.add_reaction('✅')
             elif param == "dv":
-                self.update_card(user_id, "Developer", 0)
+                self.db.update_card(user_id, "Developer", 0)
                 await ctx.message.add_reaction('✅')
             elif param == "cd":
-                self.update_card(user_id, "Coder", 0)
+                self.db.update_card(user_id, "Coder", 0)
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['develop_stats'])
@@ -164,70 +160,18 @@ class Debug(commands.Cog, Database, name='debug module'):
                 self.data.append(server_id)
                 Json("../.json/ban_list.json").json_dump(self.data)
 
-    @commands.command(aliases=['send_webhook'])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __send_webhook(self, ctx: commands.context.Context, par: str = None) -> None:
-        if ctx.author.id == 401555829620211723:
-            if par == "push":
-                self.webhook = Webhook.from_url(
-                    "https://discord.com/api/webhooks/798442296265408542/" + settings["webhook"],
-                    adapter=RequestsWebhookAdapter()
-                )
-                requests.post(
-                    'https://api.vk.com/method/wall.post', data={
-                        'access_token': settings["token"],
-                        'owner_id': settings["owner_id_group"],
-                        'from_group': 1,
-                        'message': foo,
-                        'signed': 0,
-                        'v': "5.52"
-                    }
-                ).json()
-                if not os.path.exists("../.json/send.json") or os.stat("../.json/send.json").st_size == 0:
-                    Json("../.json/send.json").json_dump([])
-                else:
-                    self.js = Json("../.json/send.json").json_load()
-                    if len(self.js) != 0:
-                        self.vk: VkApi = vk_api.VkApi(token=settings["vk_token"])
-                        eval("self.vk.auth_token()")  # не смотрите сюда(
-                        # так надо(
-                        for i in self.js:
-                            try:
-                                write_msg(i, f"Обновление {__version__}! Быстрее смотреть!\n{foo}", self.vk)
-                            except vk_api.exceptions.ApiError:
-                                pass
-
-            else:
-                self.webhook = Webhook.from_url(
-                    "https://discord.com/api/webhooks/798211458352939008/" + settings["test_webhook"],
-                    adapter=RequestsWebhookAdapter()
-                )
-            self.color = get_color(ctx.author.roles)
-            self.webhook.send(
-                embed=create_emb(
-                    title="Обновление DPcoin BOT",
-                    color=self.color, args=[
-                        {
-                            "name": f'Версия {__version__}',
-                            "value": discord_foo,
-                            "inline": False
-                        }
-                    ]
-                )
-            )
-
-    @commands.Cog.listener()
-    async def on_command_error(
-            self, ctx: commands.context.Context, error: Exception
-    ) -> None:
-        if isinstance(error, commands.CommandOnCooldown):
-            pass
-        elif isinstance(error, commands.CommandNotFound):
-            pass
-        else:
-            print(error)
-            try:
-                write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
-                          f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
-            except AttributeError:
-                pass
+    # @commands.Cog.listener()
+    # async def on_command_error(
+    #         self, ctx: commands.context.Context, error: Exception
+    # ) -> None:
+    #     if isinstance(error, commands.CommandOnCooldown):
+    #         pass
+    #     elif isinstance(error, commands.CommandNotFound):
+    #         pass
+    #     else:
+    #         print(error)
+    #         try:
+    #             write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
+    #                       f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
+    #         except AttributeError:
+    #             pass
