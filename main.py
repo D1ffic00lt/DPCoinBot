@@ -20,6 +20,7 @@ from botsections.user import User
 from botsections.version import __version__
 from database.db import Database
 from botsections.helperfunction import get_time, write_log
+from botsections.encoding import Encoder
 
 write_log("")
 logs = open(".logs/develop_logs.dpcb", "+a")
@@ -30,21 +31,28 @@ nest_asyncio.apply()
 
 
 async def main() -> None:
-    db = Database("server.db")
-    print(f"[{get_time()}] [INFO]: Database connected", file=logs)
+
     BOT: DPcoinBOT = DPcoinBOT(
         command_prefix=settings["prefix"],
         intents=discord.Intents.all(),
         db=db
     )
     print("[{}] [INFO]: version: {}".format(get_time(), __version__), file=logs)
+
     if not os.path.exists(".json"):
         os.mkdir(".json")
     if not Json.check_file_exists(".json/ban_list.json"):
         Json(".json/ban_list.json").json_dump([])
+    if not os.path.exists(".json/key.dpcb"):
+        raise FileExistsError("not found key.txt")
+    with open(".json/key.dpcb", "rb") as file:
+        encoder = Encoder(file.read())
 
+    print("[{}] [INFO]: Encoder connected", file=logs)
+    db = Database("server.db")
+    print(f"[{get_time()}] [INFO]: Database connected", file=logs)
     await BOT.add_cog(Casino(BOT, db))
-    await BOT.add_cog(Debug(BOT, db))
+    await BOT.add_cog(Debug(BOT, db, encoder=encoder))
     await BOT.add_cog(User(BOT, db))
     await BOT.add_cog(Events(BOT, db))
     await BOT.add_cog(Guild(BOT, db))
@@ -53,7 +61,7 @@ async def main() -> None:
     await BOT.add_cog(NewYear(BOT, db))
     await BOT.add_cog(ValentinesDay(BOT, db))
 
-    BOT.run(settings["token"])
+    BOT.run(encoder.decrypt(settings["token"]))
     logs.close()
 
 if __name__ == '__main__':

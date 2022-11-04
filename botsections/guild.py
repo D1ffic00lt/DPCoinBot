@@ -9,10 +9,12 @@ from database.db import Database
 from botsections.helperfunction import divide_the_number, logging
 
 
-class Guild(commands.Cog, name='guild module'):
+class Guild(commands.Cog):
+    NAME = 'guild module'
+
     @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
-        super().__init__()
+    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.db = db
         self.bot = bot
         self.found: bool

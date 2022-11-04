@@ -7,10 +7,12 @@ from botsections.helperfunction import logging
 from database.db import Database
 
 
-class Admin(commands.Cog, name='admin module'):
+class Admin(commands.Cog):
+    NAME = 'admin module'
+
     @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
-        super().__init__()
+    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.db: Database = db
         self.bot = bot
         self.role: discord.Role
