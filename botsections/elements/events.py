@@ -95,7 +95,7 @@ class Events(commands.Cog):
                     (self.day < self.data["day"] and self.month > self.data["month"]) or \
                     (self.month == 1 and self.day == 1 and self.day < self.data["day"]):
                 self.db.send_files()
-                Json("../../.json/last_save.json").json_dump(
+                Json(".json/last_save.json").json_dump(
                     {
                         "day": self.day,
                         "month": self.month

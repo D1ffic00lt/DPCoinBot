@@ -46,8 +46,10 @@ class Debug(commands.Cog):
             self, ctx: commands.context.Context, count: int = None
     ) -> None:
         if ctx.author.id == 401555829620211723:
-            with open("logs/develop_logs.dpcb", encoding="utf-8", errors="ignore") as read_file, \
-                    open("prom_files/debug_send.txt", "w+", encoding="utf-8", errors="ignore") as write_file:
+            if not os.path.exists(".intermediate_files"):
+                os.mkdir(".intermediate_files")
+            with open(".logs/develop_logs.dpcb", encoding="utf-8", errors="ignore") as read_file, \
+                    open(".intermediate_files/debug_send.txt", "w+", encoding="utf-8", errors="ignore") as write_file:
                 self.lines = read_file.readlines()
                 if count is None:
                     count = 5
@@ -59,20 +61,20 @@ class Debug(commands.Cog):
                             write_file.write(self.lines[j])
                         break
             await ctx.send(f"**debug logs**\nname:{os.name}\nusername: {os.getlogin()}\ndate: {get_time()}\n",
-                           file=File("prom_files/debug_send.txt"))
-            self.file_path = "prom_files/debug_send.txt"
+                           file=File(".intermediate_files/debug_send.txt"))
+            self.file_path = ".intermediate_files/debug_send.txt"
             os.remove(self.file_path)
 
     @commands.command(aliases=['send_base'])  # это лучше не трогать
     async def __bd_send(self, ctx: commands.context.Context) -> None:
         if ctx.author.id == 401555829620211723:
             self.part = MIMEBase('application', "octet-stream")
-            self.part.set_payload(open('../../server.db', "rb").read())
+            self.part.set_payload(open('database/server.db', "rb").read())
             encoders.encode_base64(self.part)
 
             self.part.add_header(
                 'Content-Disposition',
-                "attachment; filename= %s" % os.path.basename('botsections/database/server.db')
+                "attachment; filename= %s" % os.path.basename('database/server.db')
             )
             self.msg = MIMEMultipart()
             self.msg['From'] = self.encoder.decrypt(settings["sender_email"])
@@ -141,17 +143,17 @@ class Debug(commands.Cog):
         if ctx.author.id == 401555829620211723:
             if place is not None and arg is not None:
                 if place in ["lb", "slb"] and arg in ["on", "off"]:
-                    if not os.path.exists("../.json/develop_get.json"):
-                        Json("../.json/develop_get.json").json_dump({"lb": True, "slb": True})
+                    if not os.path.exists(".json/develop_get.json"):
+                        Json(".json/develop_get.json").json_dump({"lb": True, "slb": True})
                         self.js = {"lb": True, "slb": True}
                     else:
-                        self.js = Json("../.json/develop_get.json").json_load()
+                        self.js = Json(".json/develop_get.json").json_load()
                     if arg == "on":
                         self.arg = True
                     else:
                         self.arg = False
                     self.js[place] = self.arg
-                    Json("../.json/develop_get.json").json_dump(self.js)
+                    Json(".json/develop_get.json").json_dump(self.js)
 
     @commands.command(aliases=['add_to_ban_list'])
     @commands.cooldown(1, 4, commands.BucketType.user)
@@ -159,12 +161,12 @@ class Debug(commands.Cog):
             self, ctx: commands.context.Context, server_id: int = None
     ) -> None:
         if ctx.author.id == 401555829620211723:
-            if not Json.check_file_exists("../../.json/ban_list.json"):
-                Json("../../.json/ban_list.json").json_dump([])
+            if not Json.check_file_exists(".json/ban_list.json"):
+                Json(".json/ban_list.json").json_dump([])
             else:
-                self.data = Json("../../.json/ban_list.json").json_load()
+                self.data = Json(".json/ban_list.json").json_load()
                 self.data.append(server_id)
-                Json("../../.json/ban_list.json").json_dump(self.data)
+                Json(".json/ban_list.json").json_dump(self.data)
 
     # @commands.Cog.listener()
     # async def on_command_error(

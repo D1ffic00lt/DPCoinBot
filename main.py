@@ -37,11 +37,17 @@ async def main() -> None:
         Json(".json/ban_list.json").json_dump([])
     if not os.path.exists(".json/key.dpcb"):
         raise FileExistsError("not found key.txt")
+    if not os.path.exists(".intermediate_files"):
+        os.mkdir(".intermediate_files")
+        os.mkdir(".intermediate_files/images")
+    if not os.path.exists(".intermediate_files/images"):
+        os.mkdir(".intermediate_files/images")
+
     with open(".json/key.dpcb", "rb") as file:
         encoder = Encoder(file.read())
 
     print("[{}] [INFO]: Encoder connected", file=logs)
-    db = Database("server.db", encoder=encoder)
+    db = Database("database/server.db", encoder=encoder)
     print(f"[{get_time()}] [INFO]: Database connected", file=logs)
     BOT: DPcoinBOT = DPcoinBOT(
         command_prefix=settings["prefix"],
