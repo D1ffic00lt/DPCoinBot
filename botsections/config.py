@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 """
     Да, я конч, спалил все токены, пароли и всякое такое,
@@ -6,10 +5,10 @@
     можете теперь даже не пытаться
 """
 settings = {
-    'token': b'gAAAAABjZM5mNSr8tZSUBQx15CyMPwyj_fiEo4HbJnOeLSYYQBF6Svnj0ZGj8gx1o'
-             b'TFWzd9CWmV-OOioJxwSv4U7N0BkZYLRikB_oNRTNinB3djaNWEp_abirS1A5sJB4K'
-             b'0_AxZp333zQCHSUBR3rY1gfFRzwletOOUxgbaJIEBZPBfymHJ4nMavMWLfgMMn1jL'
-             b'yvtqaPmTC-EOZSSblgiimGdFgnNtgfA==',
+    'token': b'gAAAAABjZNuG9AfbDpnoMSRjmbJtFyekQL3y-aM0nc8BpAOPtKxNt3-oFwtFjLTyI'
+             b'9EhjgutkFyiPga1U6cbjzm7BXvmVfK2s8ZbrYPGYJNSxKm8wkEUXSBUYkt0edRyx_'
+             b'M_AGbSRf7NPTP26Xnla71pOtppcT-wb0q5ofacOGG_M7eHOPz3JCABWKLknubwjoi'
+             b'BOeWof9BMPlO-SIYDV2w_OHpXaY4HFA==',
     'vk_token': b'gAAAAABjZM_E-hsfiBaZRos2aEU5R0rJlNzCVj1HkS6sQgABEdk1SOn0DYEKMQ'
                 b'2jz5wBSwMzd8Yv6XTOrCrb6HolYhUR6OlwP9VDZIEStH_Nxclg_HuD7CmO9Y5i'
                 b'kI_gnTLK3qaJMWdrrT2CPEcuKmuWoYE3255cfKKbUT9SlWzEm_GUBsKuMD-E34'
