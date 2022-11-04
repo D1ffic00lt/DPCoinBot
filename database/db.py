@@ -11,14 +11,14 @@ from sqlite3 import Cursor
 from typing import Tuple, Union
 from discord.ext import commands
 
-from botsections.config import settings
-from botsections.helperfunction import *
-from botsections.encoding import Encoder
+from botsections.functions.config import settings
+from botsections.functions.helperfunction import *
+from botsections.functions.encoding import Encoder
 
 
 class Database(object):
     def __init__(self, filename: str, encoder: Encoder) -> None:
-        self.encoder = encoder
+        self.encoder: Encoder = encoder
         self.server: smtplib.SMTP = smtplib.SMTP('smtp.gmail.com: 587')
         self.msg: MIMEMultipart = MIMEMultipart()
         self.part2: MIMEBase = MIMEBase('application', "octet-stream")

@@ -6,8 +6,8 @@ from discord.ext import commands
 from typing import Union
 
 from database.db import Database
-from botsections.texts import *
-from botsections.helperfunction import logging
+from botsections.functions.texts import *
+from botsections.functions.helperfunction import logging
 
 
 class NewYear(commands.Cog):
@@ -17,7 +17,7 @@ class NewYear(commands.Cog):
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
-        self.db = db
+        self.db: Database = db
         self.logs = logs
         self.logs.write("NewYear event connected\n")
         print("NewYear event connected")

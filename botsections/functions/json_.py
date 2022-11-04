@@ -21,9 +21,9 @@ class Json(object):
 
     @staticmethod
     def get_ban_list() -> list:
-        if not Json.check_file_exists("../.json/ban_list.json"):
+        if not Json.check_file_exists("../../.json/ban_list.json"):
             return []
-        return Json("../.json/ban_list.json").json_load()
+        return Json("../../.json/ban_list.json").json_load()
 
     @staticmethod
     def check_file_exists(filename: str) -> bool:

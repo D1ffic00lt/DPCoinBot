@@ -4,9 +4,9 @@ from discord.ext import commands
 from discord.utils import get
 from typing import Union
 
-from botsections.texts import need_settings
+from botsections.functions.texts import need_settings
 from database.db import Database
-from botsections.helperfunction import divide_the_number, logging
+from botsections.functions.helperfunction import divide_the_number, logging
 
 
 class Guild(commands.Cog):
