@@ -42,11 +42,11 @@ class User(commands.Cog):
     async def __slb(self, ctx: commands.context.Context) -> None:
         self.all_cash = 0
         self.color = get_color(ctx.author.roles)
-        if not os.path.exists("../.json/develop_get.json"):
-            Json("../.json/develop_get.json").json_dump({"lb": True, "slb": True})
+        if not os.path.exists(".json/develop_get.json"):
+            Json(".json/develop_get.json").json_dump({"lb": True, "slb": True})
             self.js = {"lb": True, "slb": True}
         else:
-            self.js = Json("../.json/develop_get.json").json_load()
+            self.js = Json(".json/develop_get.json").json_load()
         for row in self.db.get_from_user(ctx.guild.id, "Name", "Cash", "ID", order_by="Cash"):
             for member in ctx.guild.members:
                 if str(member) == row[0]:
@@ -83,11 +83,11 @@ class User(commands.Cog):
         self.counter = 0
         self.name: discord.Member
         self.index = 0
-        if not os.path.exists("../.json/develop_get.json"):
-            Json("../.json/develop_get.json").json_dump({"lb": True, "slb": True})
+        if not os.path.exists(".json/develop_get.json"):
+            Json(".json/develop_get.json").json_dump({"lb": True, "slb": True})
             self.js = {"lb": True, "slb": True}
         else:
-            self.js = Json("../.json/develop_get.json").json_load()
+            self.js = Json(".json/develop_get.json").json_load()
         if type_ is None:
             self.emb = discord.Embed(title="Топ 10 сервера")
             for row in self.db.get_from_user(ctx.guild.id, "Name", "Cash", "Lvl", "ID", order_by="Cash"):
@@ -537,7 +537,7 @@ class User(commands.Cog):
 
     @commands.command(aliases=["card"])
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __Card(self, ctx: commands.context.Context) -> None:
+    async def __card(self, ctx: commands.context.Context) -> None:
         self.img = Image.new("RGBA", (500, 300), "#323642")
         Image.open(
             io.BytesIO(
@@ -547,19 +547,19 @@ class User(commands.Cog):
             )
         ).convert("RGBA").resize(
             (100, 100), Image.ANTIALIAS
-        ).save(f"prom_files/avatar{ctx.author.id}.png")
+        ).save(f".intermediate_files/avatar{ctx.author.id}.png")
         crop(
-            Image.open(f'prom_files/avatar{ctx.author.id}.png'),
+            Image.open(f'.intermediate_files/avatar{ctx.author.id}.png'),
             (100, 100)
         ).putalpha(
             prepare_mask(
                 (100, 100), 4
             )
-        ).save(f'prom_files/out_avatar{ctx.author.id}.png')
+        ).save(f'.intermediate_files/out_avatar{ctx.author.id}.png')
 
         self.img.alpha_composite(
             Image.open(
-                f'prom_files/out_avatar{ctx.author.id}.png',
+                f'.intermediate_files/out_avatar{ctx.author.id}.png',
             ).convert("RGBA").resize(
                 (100, 100), Image.ANTIALIAS
             ), (15, 15)
@@ -615,22 +615,22 @@ class User(commands.Cog):
         self.verification,  self.developer, self.coder = \
             self.db.get_from_card(ctx.author.id, "Verification", "Developer", "Coder")
         if int(self.verification) == 1:
-            self.image = Image.open("progfiles/images/green_galka.png")
+            self.image = Image.open(".intermediate_files/images/green_galka.png")
             self.image = self.image.convert("RGBA")
             self.image = self.image.resize((30, 30), Image.ANTIALIAS)
             self.images.append(self.image)
         elif int(self.verification) == 2:
-            self.image = Image.open("progfiles/images/galka.png")
+            self.image = Image.open(".intermediate_files/images/galka.png")
             self.image = self.image.convert("RGBA")
             self.image = self.image.resize((30, 30), Image.ANTIALIAS)
             self.images.append(self.image)
         if int(self.developer) == 1:
-            self.image = Image.open("progfiles/images/developer.png")
+            self.image = Image.open(".intermediate_files/images/developer.png")
             self.image = self.image.convert("RGBA")
             self.image = self.image.resize((30, 30), Image.ANTIALIAS)
             self.images.append(self.image)
         if int(self.coder) == 1:
-            self.image = Image.open("progfiles/images/cmd.png")
+            self.image = Image.open(".intermediate_files/images/cmd.png")
             self.image = self.image.convert("RGBA")
             self.image = self.image.resize((30, 30), Image.ANTIALIAS)
             self.images.append(self.image)
@@ -640,12 +640,12 @@ class User(commands.Cog):
                 self.img.alpha_composite(self.images[i], (self.x, 70))
                 self.x += 35
 
-        self.img.save(f'prom_files/user_card{ctx.author.id}.png')
+        self.img.save(f'.intermediate_files/user_card{ctx.author.id}.png')
 
-        await ctx.send(file=discord.File(fp=f'prom_files/user_card{ctx.author.id}.png'))
-        os.remove(f"prom_files/user_card{ctx.author.id}.png")
-        os.remove(f"prom_files/avatar{ctx.author.id}.png")
-        os.remove(f"prom_files/out_avatar{ctx.author.id}.png")
+        await ctx.send(file=discord.File(fp=f'.intermediate_files/user_card{ctx.author.id}.png'))
+        os.remove(f".intermediate_files/user_card{ctx.author.id}.png")
+        os.remove(f".intermediate_files/avatar{ctx.author.id}.png")
+        os.remove(f".intermediate_files/out_avatar{ctx.author.id}.png")
 
     @commands.command(aliases=["promo"])
     @commands.cooldown(1, 5, commands.BucketType.user)
