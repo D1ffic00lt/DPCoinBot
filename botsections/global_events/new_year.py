@@ -4,16 +4,21 @@ import random
 from datetime import datetime
 from discord.ext import commands
 from typing import Union
-from dislash import slash_command, Option, OptionType
 
 from database.db import Database
 from botsections.texts import *
+from botsections.helperfunction import logging
 
 
-class NewYear(commands.Cog, Database, name='NewYear module'):
-    def __init__(self, bot: commands.Bot) -> None:
-        super().__init__("server.db")
+class NewYear(commands.Cog, name='NewYear module'):
+    @logging
+    def __init__(self, bot: commands.Bot, db: Database, logs) -> None:
+        super().__init__()
         self.bot: commands.Bot = bot
+        self.db = db
+        self.logs = logs
+        self.logs.write("NewYear event connected\n")
+        print("NewYear event connected")
 
     @commands.command(aliases=["use"])
     @commands.cooldown(1, 4, commands.BucketType.user)
@@ -31,11 +36,11 @@ class NewYear(commands.Cog, Database, name='NewYear module'):
                             if new_year[i]['index'] == item:
                                 self.index = i
                                 break
-                        if self.get_from_new_year_event(ctx.author.id, ctx.guild.id, self.index) == 0:
+                        if self.db.get_from_new_year_event(ctx.author.id, ctx.guild.id, self.index) == 0:
                             await ctx.send(f"{ctx.author.mention}, у Вас нет этого:(")
                         else:
                             self.emb = discord.Embed(title=f"Использовано {new_year[self.index]['name']}!")
-                            self.update_new_year_event(
+                            self.db.update_new_year_event(
                                 ctx.author.id, ctx.guild.id,
                                 "MoodCount", new_year[self.index]['mood']
                             )
@@ -44,29 +49,29 @@ class NewYear(commands.Cog, Database, name='NewYear module'):
                                 value=f'Получено - {new_year[self.index]["mood"]}'
                             )
                             if random.randint(1, 101) >= new_year[self.index]['ylt_%']:
-                                self.update_stat(ctx.author.id, ctx.guild.id, "Xp", new_year[self.index]['xp'])
+                                self.db.update_stat(ctx.author.id, ctx.guild.id, "Xp", new_year[self.index]['xp'])
                                 self.emb.add_field(
                                     name=f"Получено опыта",
                                     value=f'Получено - {new_year[self.index]["xp"]}')
-                                self.xp = self.get_stat(ctx.author.id, ctx.guild.id, "Xp")
-                                self.level_in_chat = self.get_stat(ctx.author.id, ctx.guild.id, "ChatLevel")
-                                for i in self.get_from_levels("XP", "Level", "Award"):
+                                self.xp = self.db.get_stat(ctx.author.id, ctx.guild.id, "Xp")
+                                self.level_in_chat = self.db.get_stat(ctx.author.id, ctx.guild.id, "ChatLevel")
+                                for i in self.db.get_from_levels("XP", "Level", "Award"):
                                     if i[0] <= self.xp and i[1] > self.level_in_chat:
-                                        self.update_stat(ctx.author.id, ctx.guild.id, "ChatLevel", 1)
-                                        self.add_coins(ctx.author.id, ctx.guild.id, i[2])
+                                        self.db.update_stat(ctx.author.id, ctx.guild.id, "ChatLevel", 1)
+                                        self.db.add_coins(ctx.author.id, ctx.guild.id, i[2])
                                         try:
                                             await ctx.author.send(
                                                 f"{ctx.author.mention}, поздравляем с "
                                                 f"{i[1]} левелом!\n"
                                                 f"Вот тебе немного коинов! (**{i[2]}**)\n"
                                                 f"Опыта для следующего левела - "
-                                                f"**{self.get_xp(i[1] + 1) - self.xp}**, "
+                                                f"**{self.db.get_xp(i[1] + 1) - self.xp}**, "
                                                 f"{self.xp} опыта всего"
                                             )
                                         except discord.errors.Forbidden:
                                             pass
                                         break
-                            self.update_new_year_event(ctx.author.id, ctx.guild.id, self.index, -1)
+                            self.db.update_new_year_event(ctx.author.id, ctx.guild.id, self.index, -1)
                             await ctx.send(embed=self.emb)
 
     @commands.command(aliases=["buy_food"])
@@ -87,11 +92,11 @@ class NewYear(commands.Cog, Database, name='NewYear module'):
                         if new_year[i]['index'] == int(number):
                             self.index = i
                             break
-                    if (new_year[self.index]['price'] * count) > self.get_cash(ctx.author.id, ctx.guild.id):
+                    if (new_year[self.index]['price'] * count) > self.db.get_cash(ctx.author.id, ctx.guild.id):
                         await ctx.send(f"{ctx.author.mention}, у Вас недостаточно средств!")
                     else:
-                        self.take_coins(ctx.author.id, ctx.guild.id, new_year[self.index]['price'] * count)
-                        self.update_new_year_event(ctx.author.id, ctx.guild.id, self.index, count)
+                        self.db.take_coins(ctx.author.id, ctx.guild.id, new_year[self.index]['price'] * count)
+                        self.db.update_new_year_event(ctx.author.id, ctx.guild.id, self.index, count)
                         await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["send_present"])
@@ -102,7 +107,7 @@ class NewYear(commands.Cog, Database, name='NewYear module'):
         else:
             if amount is None:
                 await ctx.send(f"""{ctx.author.mention}, Вы не ввели сумму!""")
-            elif amount > self.get_from_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises"):
+            elif amount > self.db.get_from_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises"):
                 await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно подарков для перевода""")
             elif amount < 1:
                 await ctx.send(f"""{ctx.author.mention}, Вы не можете ввести число меньше 1!""")
@@ -110,8 +115,8 @@ class NewYear(commands.Cog, Database, name='NewYear module'):
                 if member.id == ctx.author.id:
                     await ctx.send(f"""{ctx.author}, Вы не можете перевести деньги себе""")
                 else:
-                    self.update_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises", -amount)
-                    self.update_inventory(member.id, member.guild.id, "NewYearPrises", amount)
+                    self.db.update_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises", -amount)
+                    self.db.update_inventory(member.id, member.guild.id, "NewYearPrises", amount)
 
                 await ctx.message.add_reaction('✅')
 
@@ -122,7 +127,7 @@ class NewYear(commands.Cog, Database, name='NewYear module'):
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
             if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
-                self.present = self.get_from_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises")
+                self.present = self.db.get_from_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises")
                 if self.present == 0:
                     await ctx.send("У Вас нет подарков:(")
                     return
@@ -135,19 +140,19 @@ class NewYear(commands.Cog, Database, name='NewYear module'):
                         return
                 if count is None:
                     self.prize = random.randint(100, 3500)
-                    self.add_coins(ctx.author.id, ctx.guild.id, self.prize)
-                    self.add_present(ctx.author.id, ctx.guild.id, -1)
+                    self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
+                    self.db.add_present(ctx.author.id, ctx.guild.id, -1)
                     await ctx.send(f"{ctx.author.mention}, из подарка выпало {self.prize} коинов! Поздравляем!")
                 elif count == "all":
                     self.prize = sum(random.randint(100, 3500) for _ in range(self.present))
-                    self.add_coins(ctx.author.id, ctx.guild.id, self.prize)
+                    self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                     await ctx.send(f"{ctx.author.mention}, из подарков выпало {self.prize} коинов! Поздравляем!")
-                    self.add_present(ctx.author.id, ctx.guild.id, -self.present)
+                    self.db.add_present(ctx.author.id, ctx.guild.id, -self.present)
                 else:
                     try:
                         self.prize = sum(random.randint(100, 3500) for _ in range(int(count)))
-                        self.add_coins(ctx.author.id, ctx.guild.id, self.prize)
-                        self.add_present(ctx.author.id, ctx.guild.id, -count)
+                        self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
+                        self.db.add_present(ctx.author.id, ctx.guild.id, -count)
                         await ctx.send(f"{ctx.author.mention}, из подарков выпало {self.prize} коинов! Поздравляем!")
                     except TypeError:
                         pass
@@ -161,7 +166,7 @@ class NewYear(commands.Cog, Database, name='NewYear module'):
             if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                 await ctx.send(
                     f"{ctx.author.mention}\n```У Вас "
-                    f"{self.get_from_inventory(ctx.author.id, ctx.guild.id, 'NewYearPrises')} подарков```"
+                    f"{self.db.get_from_inventory(ctx.author.id, ctx.guild.id, 'NewYearPrises')} подарков```"
                 )
 
     @commands.command(aliases=["foodshop"])
@@ -192,7 +197,7 @@ class NewYear(commands.Cog, Database, name='NewYear module'):
                 self.emb = discord.Embed(title=f"Еда {ctx.author}")
                 self.emb.set_thumbnail(url=ctx.author.avatar_url)
                 self.index2 = 3
-                self.items = tuple(self.get_from_new_year_event(ctx.author.id, ctx.guild.id, "*"))
+                self.items = tuple(self.db.get_from_new_year_event(ctx.author.id, ctx.guild.id, "*"))
                 for t in range(len(self.items) - 3):
                     if self.items[self.index2] != 0:
                         for j in new_year:

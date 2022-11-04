@@ -393,7 +393,7 @@ class Database:
         if isinstance(item, str):
             return self.cursor.execute(
                 f"SELECT `{item}` FROM `PromoCodes` WHERE `Code` = ?",
-                (code, )
+                (code,)
             ).fetchone()[0]
         else:
             return self.cursor.execute(
@@ -492,10 +492,12 @@ class Database:
             if not unique else self.cursor.execute('SELECT COUNT(1) FROM `Card`').fetchone()[0]
 
     def get_cash(self, ID: int, guild_id: int, bank: bool = False) -> int:
-        return self.cursor.execute(
-            f"SELECT `{'Cash' if not bank else 'CashInBank'}` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
-            (ID, guild_id)
-        ).fetchone()[0]
+        return int(
+            self.cursor.execute(
+                f"SELECT `{'Cash' if not bank else 'CashInBank'}` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, guild_id)
+            ).fetchone()[0]
+        )
 
     def update_new_year_event(self, ID: int, guild_id: int, item: str, value: int) -> Cursor:
         with self.connection:
@@ -1208,7 +1210,7 @@ class Database:
     async def cash_check(
             self,
             ctx: commands.context.Context,
-            cash: int,
+            cash: Union[str, int],
             max_cash: int = None,
             min_cash: int = 1,
             check: bool = False
@@ -1221,13 +1223,13 @@ class Database:
             if cash == "all":
                 return True
             elif max_cash is not None:
-                if (cash < min_cash or cash > max_cash) and ctx.author.id != 401555829620211723:
+                if (int(cash) < min_cash or int(cash) > max_cash) and ctx.author.id != 401555829620211723:
                     await ctx.send(f'{ctx.author.mention}, нельзя ввести число меньше '
                                    f'{divide_the_number(min_cash)} и больше {divide_the_number(max_cash)}!')
                 else:
                     return True
             elif max_cash is None:
-                if cash < min_cash and ctx.author.id != 401555829620211723:
+                if int(cash) < min_cash and ctx.author.id != 401555829620211723:
                     await ctx.send(f'{ctx.author.mention}, нельзя ввести число меньше {divide_the_number(min_cash)}!')
                 else:
                     return True
@@ -1367,4 +1369,4 @@ class Database:
         self.server.login(self.msg['From'], settings["password"])
         self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
         self.server.quit()
-        write_log("Копии данных отправлена на почту\tдата: {}\n".format(str(get_time())))
+        write_log("[{}] [INFO]: Копии данных отправлена на почту".format(str(get_time())))

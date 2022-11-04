@@ -7,7 +7,6 @@ import os
 
 from datetime import datetime
 from typing import Callable, List, Any
-from discord.embeds import EmptyEmbed
 from PIL import Image, ImageDraw
 from vk_api import VkApi
 
@@ -98,7 +97,9 @@ def logging(func: Callable) -> Callable:
     """
 
     def decorator(*args, **kwargs):
-        print("[INFO]: ", end="")
+        with open(".logs/develop_logs.dpcb", "+a") as file:
+            print(f"[{get_time()}] [INFO]: ", end="", file=file)
+            print(f"[{get_time()}] [INFO]: ", end="")
         return func(*args, **kwargs)
 
     return decorator
@@ -111,7 +112,7 @@ def datetime_to_str(datetime_):
 def create_emb(
         title: str, args: List[Any] = None,
         color: discord.Color = discord.Color.from_rgb(32, 34, 37),
-        description: str = EmptyEmbed
+        description: str = ""
 ) -> discord.Embed:
     emb = discord.Embed(title=title, colour=color, description=description)
     if args is not None:
