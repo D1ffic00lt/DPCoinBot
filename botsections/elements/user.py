@@ -16,6 +16,10 @@ from database.db import Database
 from botsections.functions.json_ import Json
 from botsections.functions.texts import *
 
+__all__ = (
+    "User",
+)
+
 
 class User(commands.Cog):
     NAME = 'user module'

@@ -11,6 +11,10 @@ from botsections.functions.helperfunction import (
 from botsections.functions.json_ import Json
 from database.db import Database
 
+__all__ = (
+    "Events",
+)
+
 
 class Events(commands.Cog):
     NAME = 'events module'

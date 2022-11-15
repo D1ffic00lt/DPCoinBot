@@ -7,15 +7,7 @@ from asyncio import run
 
 from bot import DPcoinBOT
 from database.db import Database
-from botsections.elements.admin import Admin
-from botsections.elements.casino import Casino
-from botsections.elements.debug import Debug
-from botsections.elements.events import Events
-from botsections.elements.public import Public
-from botsections.elements.user import User
-from botsections.elements.guild import Guild
-from botsections.global_events.new_year import NewYear
-from botsections.global_events.valentines_day import ValentinesDay
+from botsections import *
 from botsections.functions.config import settings
 from botsections.functions.json_ import Json
 from botsections.functions.version import __version__
@@ -35,7 +27,7 @@ async def main() -> None:
         os.mkdir(".json")
     if not Json.check_file_exists(".json/ban_list.json"):
         Json(".json/ban_list.json").json_dump([])
-    if not os.path.exists(".json/key.dpcb"):
+    if not os.path.exists(".json/key.dpcb"):    # тут его как-то с сервера получать надо
         raise FileExistsError("not found key.txt")
     if not os.path.exists(".intermediate_files"):
         os.mkdir(".intermediate_files")

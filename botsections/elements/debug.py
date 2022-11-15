@@ -18,6 +18,10 @@ from botsections.functions.json_ import Json
 from database.db import Database
 from botsections.functions.config import settings
 
+__all__ = (
+    "Debug",
+)
+
 
 class Debug(commands.Cog):
     NAME = 'debug module'

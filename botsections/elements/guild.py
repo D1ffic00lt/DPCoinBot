@@ -8,6 +8,10 @@ from botsections.functions.texts import need_settings
 from database.db import Database
 from botsections.functions.helperfunction import divide_the_number, logging
 
+__all__ = (
+    "Guild",
+)
+
 
 class Guild(commands.Cog):
     NAME = 'guild module'

@@ -9,6 +9,10 @@ from database.db import Database
 from botsections.functions.texts import *
 from botsections.functions.helperfunction import logging
 
+__all__ = (
+    "NewYear",
+)
+
 
 class NewYear(commands.Cog):
     NAME = 'NewYear module'

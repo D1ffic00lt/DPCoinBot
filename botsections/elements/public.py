@@ -7,6 +7,10 @@ from botsections.functions.helperfunction import logging
 from botsections.functions.texts import *
 from database.db import Database
 
+__all__ = (
+    "Public",
+)
+
 
 class Public(commands.Cog):
     NAME = 'public module'

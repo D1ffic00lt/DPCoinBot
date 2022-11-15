@@ -15,6 +15,10 @@ from botsections.functions.helperfunction import (
 )
 from botsections.functions.texts import *
 
+__all__ = (
+    "Casino",
+)
+
 
 class Casino(commands.Cog):
     NAME = 'Casino module'

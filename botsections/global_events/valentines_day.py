@@ -7,6 +7,10 @@ from typing import Union
 from database.db import Database
 from botsections.functions.helperfunction import logging
 
+__all__ = (
+    "ValentinesDay",
+)
+
 
 class ValentinesDay(commands.Cog):
     NAME = 'ValentinesDay module'

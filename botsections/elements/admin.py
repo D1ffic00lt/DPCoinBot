@@ -6,6 +6,10 @@ from discord.utils import get
 from botsections.functions.helperfunction import logging
 from database.db import Database
 
+__all__ = (
+    "Admin",
+)
+
 
 class Admin(commands.Cog):
     NAME = 'admin module'
