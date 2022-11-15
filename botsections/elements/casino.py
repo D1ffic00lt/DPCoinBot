@@ -17,6 +17,12 @@ from botsections.functions.texts import *
 class Casino(commands.Cog):
     NAME = 'Casino module'
 
+    __slots__ = (
+        "db", "bot", "result_bid", "casino", "rust_casino",
+        "color", "dropped_coefficient", "line1", "line2",
+        "line3", "texts", "count", "logs"
+    )
+
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -129,12 +135,12 @@ class Casino(commands.Cog):
                                   [" Вам выпал 0.00...🎰" if self.dropped_coefficient == 0 else ""][0],
                             color=self.color,
                             args=[
-                                {
-                                    "name": f':(',
-                                    "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}',
-                                    "inline": False
-                                }
-                            ]
+                                    {
+                                        "name": f':(',
+                                        "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}',
+                                        "inline": False
+                                    }
+                                ]
                         )
                     )
                     await self.db.stats_update(ctx, "FailsCount", "Fails", "LosesCount", -bid)
@@ -367,8 +373,9 @@ class Casino(commands.Cog):
                                 value='Выпало число {}, green\n{}'
                                       ", Вы выиграли **{}** DP коинов!!".format(
                                         self.casino[ctx.author.id]['number'][0],
-                                        ctx.author.mention, divide_the_number(self.count)
-                                    ),
+                                        ctx.author.mention,
+                                        divide_the_number(self.count)
+                                        ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 

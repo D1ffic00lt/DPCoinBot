@@ -12,6 +12,12 @@ from botsections.functions.helperfunction import divide_the_number, logging
 class Guild(commands.Cog):
     NAME = 'guild module'
 
+    __slots__ = (
+        "db", "bot", "found", "admin",
+        "casino_channel", "role", "auto",
+        "category", "emb", "logs", "guild"
+    )
+
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -25,21 +31,21 @@ class Guild(commands.Cog):
         self.category: Union[discord.CategoryChannel, int]
         self.emb: discord.Embed
         self.logs = logs
-
+        self.guild: discord.Guild
         print("Guild connected")
 
     @commands.command(aliases=["auto_setup"])
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __cat_create(self, ctx: commands.context.Context) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
-            guild = ctx.message.guild
+            self.guild = ctx.message.guild
             if self.db.checking_for_guild_existence_in_table(ctx.guild.id):
                 self.admin, self.casino_channel, self.role, self.auto, self.category = self.db.get_guild_settings(
                     ctx.guild.id
                 )
                 self.admin = self.bot.get_channel(self.admin)
                 self.casino_channel = self.bot.get_channel(self.casino_channel)
-                self.role = get(guild.roles, id=self.role)
+                self.role = get(self.guild.roles, id=self.role)
                 if self.casino_channel is not None:
                     await self.casino_channel.delete()
                 if self.admin is not None:
@@ -48,7 +54,7 @@ class Guild(commands.Cog):
                     await self.role.delete()
                 if self.auto == 1:
                     self.found = False
-                    for category in guild.categories:
+                    for category in self.guild.categories:
                         if category.id == self.category:
                             self.category = category
                             self.found = True
@@ -56,13 +62,16 @@ class Guild(commands.Cog):
                     if self.found:
                         await self.category.delete()
 
-            self.category = await guild.create_category("DPcoinBOT")
-            self.casino_channel = await guild.create_text_channel(name=f'Casino', category=self.category)
-            self.admin = await guild.create_text_channel(name=f'shop_list', category=self.category)
-            self.role = await guild.create_role(name="Coin Manager", colour=discord.Colour.from_rgb(255, 228, 0))
+            self.category = await self.guild.create_category("DPcoinBOT")
+            self.casino_channel = await self.guild.create_text_channel(name=f'Casino', category=self.category)
+            self.admin = await self.guild.create_text_channel(name=f'shop_list', category=self.category)
+            self.role = await self.guild.create_role(name="Coin Manager", colour=discord.Colour.from_rgb(255, 228, 0))
             self.db.delete_from_server(ctx.guild.id)
-            self.db.insert_into_server(ctx.guild.id, self.role.id, self.admin.id, self.casino_channel.id, self.category.id)
-            await self.admin.set_permissions(guild.default_role, read_messages=False, send_messages=False)
+            self.db.insert_into_server(
+                ctx.guild.id, self.role.id, self.admin.id,
+                self.casino_channel.id, self.category.id
+            )
+            await self.admin.set_permissions(self.guild.default_role, read_messages=False, send_messages=False)
             self.emb = discord.Embed(title="Канал для казино")
             self.emb.add_field(
                 name=f'Развлекайтесь!',

@@ -17,6 +17,13 @@ from botsections.functions.encoding import Encoder
 
 
 class Database(object):
+    __slots__ = (
+        "encoder", "server", "msg", "part2", "part1",
+        "filename", "time", "now2", "minutes", "day",
+        "month", "prises", "valentine", "valentine",
+        "connection", "cursor"
+    )
+
     def __init__(self, filename: str, encoder: Encoder) -> None:
         self.encoder: Encoder = encoder
         self.server: smtplib.SMTP = smtplib.SMTP('smtp.gmail.com: 587')
@@ -1246,7 +1253,7 @@ class Database(object):
             count: int
     ) -> None:
         self.update_user_stats_1(first_arg, ctx.author.id, ctx.author.id)
-        self.update_user_stats_2(second_arg, ctx.author.id, ctx.author.id, ctx.guild.id)
+        self.update_user_stats_2(second_arg, third_arg, ctx.author.id, ctx.guild.id)
         self.update_user_stats_3(third_arg, ctx.author.id, ctx.guild.id)
         self.update_user_stats_4(count, ctx.author.id, ctx.guild.id)
 

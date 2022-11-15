@@ -20,6 +20,12 @@ from botsections.functions.texts import *
 class User(commands.Cog):
     NAME = 'user module'
 
+    __slots__ = (
+        "db", "bot", "name", "color", "all_cash",
+        "level", "counter", "index", "ID",
+        "guild_id", "server", "logs", "js"
+    )
+
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -35,6 +41,7 @@ class User(commands.Cog):
         self.guild_id: int = 0
         self.server: Union[discord.Guild, type(None)]
         self.logs = logs
+        self.js: dict = {}
         print("User connected")
 
     @commands.command(aliases=['slb'])

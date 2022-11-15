@@ -13,6 +13,10 @@ from botsections.functions.helperfunction import logging
 class NewYear(commands.Cog):
     NAME = 'NewYear module'
 
+    __slots__ = (
+        "bot", "db", "logs"
+    )
+
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

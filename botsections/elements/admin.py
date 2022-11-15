@@ -120,7 +120,11 @@ class Admin(commands.Cog):
                         if amount == "all":
                             for member in ctx.guild.members:
                                 if get(member.roles, id=role_.id):
-                                    self.db.take_coins(member.id, ctx.guild.id, self.db.get_cash(member.id, ctx.guild.id))
+                                    self.db.take_coins(
+                                        member.id,
+                                        ctx.guild.id,
+                                        self.db.get_cash(member.id, ctx.guild.id)
+                                    )
                             await ctx.message.add_reaction('✅')
                         else:
                             for member in ctx.guild.members:

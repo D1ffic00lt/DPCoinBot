@@ -1,4 +1,3 @@
-
 import discord
 
 from discord.ext import commands
@@ -11,6 +10,10 @@ from database.db import Database
 
 class Public(commands.Cog):
     NAME = 'public module'
+
+    __slots__ = (
+        "db", "logs", "bot"
+    )
 
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:

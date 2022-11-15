@@ -21,6 +21,12 @@ from botsections.functions.config import settings
 class Debug(commands.Cog):
     NAME = 'debug module'
 
+    __slots__ = (
+        "db", "bot", "js", "data", "part",
+        "msg", "server", "arg", "file_path",
+        "color", "logs"
+    )
+
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         self.encoder = kwargs["encoder"]
