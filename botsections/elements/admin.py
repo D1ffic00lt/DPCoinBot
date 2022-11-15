@@ -14,6 +14,10 @@ __all__ = (
 class Admin(commands.Cog):
     NAME = 'admin module'
 
+    __slots__ = (
+        "db", "bot", "role", "msg", "ind", "logs"
+    )
+
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
