@@ -226,7 +226,3 @@ class Admin(commands.Cog):
             else:
                 self.db.delete_from_item_shop(item_id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
-
-
-if __name__ == "__main__":
-    Admin()

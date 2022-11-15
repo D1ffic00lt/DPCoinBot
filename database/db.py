@@ -21,7 +21,7 @@ class Database(object):
         "encoder", "server", "msg", "part2", "part1",
         "filename", "time", "now2", "minutes", "day",
         "month", "prises", "valentine", "valentine",
-        "connection", "cursor"
+        "connection", "cursor", "wins", "loses"
     )
 
     def __init__(self, filename: str, encoder: Encoder) -> None:
@@ -38,6 +38,8 @@ class Database(object):
         self.month: int = 0
         self.prises: dict = {}
         self.valentine: dict = {}
+        self.wins: int = 0
+        self.loses: int = 0
 
         self.connection: sqlite3.Connection = sqlite3.connect(self.filename, check_same_thread=False)
         self.cursor: sqlite3.Cursor = self.connection.cursor()
@@ -1056,57 +1058,59 @@ class Database(object):
 
             if arg is True:
                 self.insert_into_online_stats(member.id, member.guild.id)
-            minutes = self.get_minutes(member.id, member.guild.id)
-            if minutes >= 1 and str(self.get_voice_1_achievement(member.id, member.guild.id)) == "0":
+            self.minutes = self.get_minutes(member.id, member.guild.id)
+            if self.minutes >= 1 and str(self.get_voice_1_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 500)
                 self.set_voice_1_achievement(member.id, member.guild.id)
                 await member.send(
                     f"На сервере {member.guild} "
                     f"получено достижение «Вроде они добрые...»!\nВам начислено 500 коинов!"
                 )
-            elif minutes >= 10 and str(self.get_voice_10_achievement(member.id, member.guild.id)) == "0":
+            elif self.minutes >= 10 and str(self.get_voice_10_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 700)
                 self.set_voice_10_achievement(member.id, member.guild.id)
                 await member.send(
                     f"На сервере {member.guild} "
                     f"получено достижение «Они добрые!»!\nВам начислено 700 коинов!"
                 )
-            elif minutes >= 100 and str(self.get_voice_100_achievement(member.id, member.guild.id)) == "0":
+            elif self.minutes >= 100 and str(self.get_voice_100_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 1500)
                 self.set_voice_100_achievement(member.id, member.guild.id)
                 await member.send(
                     f"На сервере {member.guild} "
                     f"получено достижение «Отличная компания»!\nВам начислено 1500 коинов!"
                 )
-            elif minutes >= 1000 and str(self.get_voice_1000_achievement(member.id, member.guild.id)) == "0":
+            elif self.minutes >= 1000 and str(self.get_voice_1000_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 3000)
                 self.set_voice_1000_achievement(member.id, member.guild.id)
                 await member.send(
                     f"На сервере {member.guild} "
                     f"получено достижение «А они точно добрые?»!\nВам начислено 3000 коинов!"
                 )
-            elif minutes >= 10000 and str(self.get_voice_10000_achievement(member.id, member.guild.id)) == "0":
+            elif self.minutes >= 10000 and str(self.get_voice_10000_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 7000)
                 self.set_voice_10000_achievement(member.id, member.guild.id)
                 await member.send(
                     f"На сервере {member.guild} "
                     f"получено достижение «СПАСИТЕ»!\nВам начислено 7000 коинов!"
                 )
-            elif minutes >= 100000 and str(self.get_voice_100000_achievement(member.id, member.guild.id)) == "0":
+            elif self.minutes >= 100000 and str(self.get_voice_100000_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 14000)
                 self.set_voice_100000_achievement(member.id, member.guild.id)
                 await member.send(
                     f"На сервере {member.guild} "
                     f"получено достижение «А может и не надо...»!\nВам начислено 14000 коинов!"
                 )
-            elif minutes >= 1000000 and str(self.get_voice_1000000_achievement(member.id, member.guild.id)) == "0":
+            elif self.minutes >= 1000000 and str(self.get_voice_1000000_achievement(member.id, member.guild.id)) == "0":
                 self.add_coins(member.id, member.guild.id, 28000)
                 self.set_voice_1000000_achievement(member.id, member.guild.id)
                 await member.send(
                     f"На сервере {member.guild} "
                     f"получено достижение «Всё-таки они хорошие:)»!\nВам начислено 28000 коинов!"
                 )
-            elif minutes >= 10000000 and str(self.get_voice_10000000_achievement(member.id, member.guild.id)) == "0":
+            elif self.minutes >= 10000000 and str(
+                    self.get_voice_10000000_achievement(member.id, member.guild.id)
+            ) == "0":
                 self.add_coins(member.id, member.guild.id, 56000)
                 self.set_voice_10000000_achievement(member.id, member.guild.id)
                 await member.send(
@@ -1115,9 +1119,9 @@ class Database(object):
                 )
 
     async def achievement(self, ctx: commands.context.Context) -> None:
-        loses = self.get_loses_count(ctx.author.id, ctx.guild.id)
-        wins = self.get_wins_count(ctx.author.id, ctx.guild.id)
-        if self.get_three_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and loses >= 3:
+        self.loses = self.get_loses_count(ctx.author.id, ctx.guild.id)
+        self.wins = self.get_wins_count(ctx.author.id, ctx.guild.id)
+        if self.get_three_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.loses >= 3:
             self.add_coins(ctx.author.id, ctx.guild.id, 400)
             self.set_three_losses_in_row_achievement(ctx.author.id, ctx.guild.id)
             await ctx.author.send(
@@ -1125,7 +1129,7 @@ class Database(object):
                 f"получено достижение «Азартный человек»!\nВам начислено 400 коинов!"
             )
 
-        elif self.get_ten_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and loses >= 10:
+        elif self.get_ten_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.loses >= 10:
             self.add_coins(ctx.author.id, ctx.guild.id, 3000)
             self.set_ten_losses_in_row_achievement(ctx.author.id, ctx.guild.id)
             await ctx.author.send(
@@ -1133,7 +1137,7 @@ class Database(object):
                 f"получено достижение «Сумасшедший»!\nВам начислено 3000 коинов!"
             )
 
-        elif self.get_twenty_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and loses >= 20:
+        elif self.get_twenty_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.loses >= 20:
             self.add_coins(ctx.author.id, ctx.guild.id, 10000)
             self.set_twenty_losses_in_row_achievement(ctx.author.id, ctx.guild.id)
             await ctx.author.send(
@@ -1141,7 +1145,7 @@ class Database(object):
                 f"получено достижение «Бессмертный»!\nВам начислено 10000 коинов!"
             )
 
-        elif self.get_three_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and wins >= 3:
+        elif self.get_three_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.wins >= 3:
             self.add_coins(ctx.author.id, ctx.guild.id, 400)
             self.set_three_wins_in_row_achievement(ctx.author.id, ctx.guild.id)
             await ctx.author.send(
@@ -1149,7 +1153,7 @@ class Database(object):
                 f"получено достижение «Да я богач!»!\nВам начислено 400 коинов!"
             )
 
-        elif self.get_ten_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and wins >= 10:
+        elif self.get_ten_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.wins >= 10:
             self.add_coins(ctx.author.id, ctx.guild.id, 3000)
             self.set_ten_wins_in_row_achievement(ctx.author.id, ctx.guild.id)
             await ctx.author.send(
@@ -1157,7 +1161,7 @@ class Database(object):
                 f"получено достижение «Это вообще законно?»!\nВам начислено 3000 коинов!"
             )
 
-        elif self.get_twenty_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and wins >= 20:
+        elif self.get_twenty_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.wins >= 20:
             self.add_coins(ctx.author.id, ctx.guild.id, 20000)
             self.set_twenty_wins_in_row_achievement(ctx.author.id, ctx.author.id)
             await ctx.author.send(
@@ -1166,9 +1170,9 @@ class Database(object):
             )
 
     async def achievement_member(self, member: discord.Member) -> None:
-        loses = self.get_loses_count(member.id, member.guild.id)
-        wins = self.get_wins_count(member.id, member.guild.id)
-        if self.get_three_losses_in_row_achievement(member.id, member.guild.id) == 0 and loses >= 3:
+        self.loses = self.get_loses_count(member.id, member.guild.id)
+        self.wins = self.get_wins_count(member.id, member.guild.id)
+        if self.get_three_losses_in_row_achievement(member.id, member.guild.id) == 0 and self.loses >= 3:
             self.add_coins(member.id, member.guild.id, 400)
             self.set_three_losses_in_row_achievement(member.id, member.guild.id)
             await member.send(
@@ -1176,7 +1180,7 @@ class Database(object):
                 f"получено достижение «Азартный человек»!\nВам начислено 400 коинов!"
             )
 
-        elif self.get_ten_losses_in_row_achievement(member.id, member.guild.id) == 0 and loses >= 10:
+        elif self.get_ten_losses_in_row_achievement(member.id, member.guild.id) == 0 and self.loses >= 10:
             self.add_coins(member.id, member.guild.id, 3000)
             self.set_ten_losses_in_row_achievement(member.id, member.guild.id)
             await member.send(
@@ -1184,7 +1188,7 @@ class Database(object):
                 f"получено достижение «Сумасшедший»!\nВам начислено 3000 коинов!"
             )
 
-        elif self.get_twenty_losses_in_row_achievement(member.id, member.guild.id) == 0 and loses >= 20:
+        elif self.get_twenty_losses_in_row_achievement(member.id, member.guild.id) == 0 and self.loses >= 20:
             self.add_coins(member.id, member.guild.id, 10000)
             self.set_twenty_losses_in_row_achievement(member.id, member.guild.id)
             await member.send(
@@ -1192,7 +1196,7 @@ class Database(object):
                 f"получено достижение «Бессмертный»!\nВам начислено 10000 коинов!"
             )
 
-        elif self.get_three_wins_in_row_achievement(member.id, member.guild.id) == 0 and wins >= 3:
+        elif self.get_three_wins_in_row_achievement(member.id, member.guild.id) == 0 and self.wins >= 3:
             self.add_coins(member.id, member.guild.id, 400)
             self.set_three_wins_in_row_achievement(member.id, member.guild.id)
             await member.send(
@@ -1200,7 +1204,7 @@ class Database(object):
                 f"получено достижение «Да я богач!»!\nВам начислено 400 коинов!"
             )
 
-        elif self.get_ten_wins_in_row_achievement(member.id, member.guild.id) == 0 and wins >= 10:
+        elif self.get_ten_wins_in_row_achievement(member.id, member.guild.id) == 0 and self.wins >= 10:
             self.add_coins(member.id, member.guild.id, 3000)
             self.set_ten_wins_in_row_achievement(member.id, member.guild.id)
             await member.send(
@@ -1208,7 +1212,7 @@ class Database(object):
                 f"получено достижение «Это вообще законно?»!\nВам начислено 3000 коинов!"
             )
 
-        elif self.get_twenty_wins_in_row_achievement(member.id, member.guild.id) == 0 and wins >= 20:
+        elif self.get_twenty_wins_in_row_achievement(member.id, member.guild.id) == 0 and self.wins >= 20:
             self.add_coins(member.id, member.guild.id, 20000)
             self.set_twenty_wins_in_row_achievement(member.id, member.author.id)
             await member.send(
@@ -1269,18 +1273,12 @@ class Database(object):
 
     async def voice_delete(self, member: discord.Member, arg: bool = True) -> None:
         try:
-            now2 = self.get_time_from_online_stats(member.id, member.guild.id)
+            self.now2 = self.get_time_from_online_stats(member.id, member.guild.id)
         except TypeError:
             pass
         else:
-            lvl = self.get_level(member.id, member.guild.id)
-            if lvl != 1:
-                if lvl != 5:
-                    lvl *= 2
-                else:
-                    lvl *= 4
             self.minutes = self.get_minutes(member.id, member.guild.id)
-            self.add_coins(member.id, member.guild.id, self.minutes * (datetime_to_str(get_time()) - now2))
+            self.add_coins(member.id, member.guild.id, self.minutes * (datetime_to_str(get_time()) - self.now2))
             self.delete_from_online(member.id)
             self.update_minutes_in_voice_channels(self.minutes, member.id, member.guild.id)
             self.month = int(datetime.today().strftime('%m'))

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import random
+
 import discord
 import reladdons
 
 from discord.ext import commands
 from typing import List, Union
+from datetime import datetime
 
 from database.db import Database
 from botsections.functions.helperfunction import (
@@ -20,7 +22,7 @@ class Casino(commands.Cog):
     __slots__ = (
         "db", "bot", "result_bid", "casino", "rust_casino",
         "color", "dropped_coefficient", "line1", "line2",
-        "line3", "texts", "count", "logs"
+        "line3", "texts", "count", "logs", "emb", "num"
     )
 
     @logging
@@ -38,6 +40,10 @@ class Casino(commands.Cog):
         self.line3: List[int]
         self.texts: dict = {}
         self.count: int
+        self.date_now: datetime
+        self.casino_num: int
+        self.emb: discord.Embed
+        self.num: int = 0
         self.logs = logs
         self.logs.write("Casino connected\n")
         print("Casino connected")
@@ -355,7 +361,6 @@ class Casino(commands.Cog):
                     self.casino[ctx.author.id]["color"][0] = casino_numbers_color[
                         self.casino[ctx.author.id]["number"][0]
                     ]
-                    int(self.texts[ctx.author.id])
                     if int(self.texts[ctx.author.id][0]) < 0:
                         pass
                     elif int(self.texts[ctx.author.id][0]) > 36:

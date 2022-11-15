@@ -12,7 +12,7 @@ class ValentinesDay(commands.Cog):
     NAME = 'ValentinesDay module'
 
     __slots__ = (
-        "bot", "db", "logs"
+        "bot", "db", "logs", "prize", "valentine"
     )
 
     @logging
@@ -20,6 +20,8 @@ class ValentinesDay(commands.Cog):
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
         self.db = db
+        self.valentine: int = 0
+        self.prize: int = 0
         self.logs = logs
         self.logs.write("ValentinesDay event connected\n")
         print("ValentinesDay event connected")

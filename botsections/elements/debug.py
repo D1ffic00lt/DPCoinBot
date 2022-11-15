@@ -1,3 +1,4 @@
+import _io
 import os
 import smtplib
 import discord
@@ -24,7 +25,8 @@ class Debug(commands.Cog):
     __slots__ = (
         "db", "bot", "js", "data", "part",
         "msg", "server", "arg", "file_path",
-        "color", "logs"
+        "color", "logs", "read_file",
+        "write_file", "lines"
     )
 
     @logging
@@ -42,9 +44,12 @@ class Debug(commands.Cog):
         self.msg: MIMEMultipart
         self.server: smtplib.SMTP
         self.arg: bool
-        self.file_path: str
+        self.file_path: str = ".intermediate_files/debug_send.txt"
         self.color: discord.Color
         self.logs = logs
+        self.read_file: _io.TextIOWrapper
+        self.write_file: _io.TextIOWrapper
+        self.lines: str
         print("Debug connected")
 
     @commands.command(aliases=["debug"])
@@ -54,21 +59,24 @@ class Debug(commands.Cog):
         if ctx.author.id == 401555829620211723:
             if not os.path.exists(".intermediate_files"):
                 os.mkdir(".intermediate_files")
-            with open(".logs/develop_logs.dpcb", encoding="utf-8", errors="ignore") as read_file, \
-                    open(".intermediate_files/debug_send.txt", "w+", encoding="utf-8", errors="ignore") as write_file:
-                self.lines = read_file.readlines()
+            with open(
+                    ".logs/develop_logs.dpcb", encoding="utf-8", errors="ignore"
+            ) as self.read_file, \
+                    open(
+                        ".intermediate_files/debug_send.txt", "w+", encoding="utf-8", errors="ignore"
+                    ) as self.write_file:
+                self.lines = self.read_file.readlines()
                 if count is None:
                     count = 5
                 for i in range(count, 0, -1):
                     try:
-                        write_file.write(self.lines[-i])
+                        self.write_file.write(self.lines[-i])
                     except IndexError:
                         for j in range(len(self.lines)):
-                            write_file.write(self.lines[j])
+                            self.write_file.write(self.lines[j])
                         break
             await ctx.send(f"**debug logs**\nname:{os.name}\nusername: {os.getlogin()}\ndate: {get_time()}\n",
                            file=File(".intermediate_files/debug_send.txt"))
-            self.file_path = ".intermediate_files/debug_send.txt"
             os.remove(self.file_path)
 
     @commands.command(aliases=['send_base'])  # это лучше не трогать
