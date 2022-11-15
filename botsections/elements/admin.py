@@ -19,7 +19,6 @@ class Admin(commands.Cog):
         self.msg: str
         self.ind: int
         self.logs = logs
-        self.logs.write("Admin connected\n")
         print("Admin connected")
 
     @commands.command(aliases=['give', 'award'])

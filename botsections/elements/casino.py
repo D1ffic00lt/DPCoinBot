@@ -45,7 +45,6 @@ class Casino(commands.Cog):
         self.emb: discord.Embed
         self.num: int = 0
         self.logs = logs
-        self.logs.write("Casino connected\n")
         print("Casino connected")
 
     @commands.command(aliases=['rust_casino'])

@@ -35,7 +35,6 @@ class NewYear(commands.Cog):
         self.present: int = 0
         self.items: tuple = ()
         self.logs = logs
-        self.logs.write("NewYear event connected\n")
         print("NewYear event connected")
 
     @commands.command(aliases=["use"])

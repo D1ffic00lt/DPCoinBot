@@ -23,7 +23,6 @@ class ValentinesDay(commands.Cog):
         self.valentine: int = 0
         self.prize: int = 0
         self.logs = logs
-        self.logs.write("ValentinesDay event connected\n")
         print("ValentinesDay event connected")
 
     @commands.command(aliases=["val_open"])
