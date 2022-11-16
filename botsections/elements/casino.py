@@ -34,20 +34,20 @@ class Casino(commands.Cog):
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot: commands.Bot = bot
-        self.result_bid: int
-        self.casino: List[Union[list, dict]] = []
-        self.rust_casino: List[int] = casino
         self.color: discord.Color
-        self.dropped_coefficient: float
-        self.line1: List[int]
-        self.line2: List[int]
-        self.line3: List[int]
-        self.texts: dict = {}
-        self.count: int
-        self.date_now: datetime
-        self.casino_num: int
         self.emb: discord.Embed
+        self.casino: List[Union[list, dict]] = []
+        self.line1: List[int] = []
+        self.line2: List[int] = []
+        self.line3: List[int] = []
+        self.rust_casino: List[int] = casino
+        self.texts: dict = {}
+        self.dropped_coefficient: float
+        self.casino_num: int = 0
+        self.count: int = 0
         self.num: int = 0
+        self.result_bid: int
+        self.date_now: datetime
         self.logs = logs
         print("Casino connected")
 

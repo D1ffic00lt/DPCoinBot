@@ -28,14 +28,14 @@ class Guild(commands.Cog):
         self.db = db
         self.bot = bot
         self.found: bool
+        self.auto: int
         self.admin: Union[discord.TextChannel, int]
         self.casino_channel: Union[discord.TextChannel, int]
         self.role: Union[discord.Role, int]
-        self.auto: int
         self.category: Union[discord.CategoryChannel, int]
         self.emb: discord.Embed
-        self.logs = logs
         self.guild: discord.Guild
+        self.logs = logs
         print("Guild connected")
 
     @commands.command(aliases=["auto_setup"])

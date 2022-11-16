@@ -30,22 +30,22 @@ class Events(commands.Cog):
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
+        self.text: str = ""
         self.level: int = 0
         self.index: int = 0
-        self.data: dict = {}
         self.month: int = 0
         self.day: int = 0
         self.xp: int = 0
         self.level_in_chat: int = 0
-        self.ban_list: list = []
-        self.bot: commands.Bot = bot
         self.member_guild_afk_channel_id: int = 0
         self.channel_into_which_the_member_entered: int = 0
         self.the_channel_from_which_the_member_came_out: int = 0
-        self.last_message: dict = {}
-        self.text: str = ""
         self.time: Union[datetime, int] = 0
+        self.data: dict = {}
+        self.last_message: dict = {}
+        self.ban_list: list = []
         self.logs = logs
+        self.bot = bot
         print("Events connected")
 
     @commands.Cog.listener()

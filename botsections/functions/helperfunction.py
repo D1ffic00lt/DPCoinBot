@@ -28,12 +28,6 @@ def prepare_mask(size, anti_alias: int = 2):
 
 
 def crop(im, s):
-    """
-    мне стыдно за эту функцию, но она не моя:(
-    :param im:
-    :param s:
-    :return:
-    """
     w, h = im.size
     if w / s[0] - h / s[1] > 0:
         im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
@@ -74,12 +68,6 @@ def get_promo_code(num_chars) -> str:
 
 
 def ignore_exceptions(func: Callable) -> Callable:
-    """
-    decorator
-    :param func:
-    :return:
-    """
-
     def decorator(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -90,12 +78,6 @@ def ignore_exceptions(func: Callable) -> Callable:
 
 
 def logging(func: Callable) -> Callable:
-    """
-    decorator
-    :param func:
-    :return:
-    """
-
     def decorator(*args, **kwargs):
         with open(".logs/develop_logs.dpcb", "+a") as file:
             print(f"[{get_time()}] [INFO]: ", end="", file=file)

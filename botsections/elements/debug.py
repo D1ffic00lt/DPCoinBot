@@ -42,18 +42,18 @@ class Debug(commands.Cog):
 
         self.db = db
         self.bot: commands.Bot = bot
-        self.js: Dict[Any]
-        self.data: List[Union[dict, int]]
         self.part: MIMEBase
         self.msg: MIMEMultipart
         self.server: smtplib.SMTP
+        self.color: discord.Color
+        self.js: Dict[Any]
+        self.data: List[Union[dict, int]]
         self.arg: bool
         self.file_path: str = ".intermediate_files/debug_send.txt"
-        self.color: discord.Color
+        self.lines: str
         self.logs = logs
         self.read_file: _io.TextIOWrapper
         self.write_file: _io.TextIOWrapper
-        self.lines: str
         print("Debug connected")
 
     @commands.command(aliases=["debug"])

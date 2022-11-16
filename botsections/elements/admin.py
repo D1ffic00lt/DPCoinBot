@@ -22,12 +22,12 @@ class Admin(commands.Cog):
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self.role: discord.Role
+        self.logs = logs
         self.db: Database = db
         self.bot = bot
-        self.role: discord.Role
         self.msg: str
         self.ind: int
-        self.logs = logs
         print("Admin connected")
 
     @commands.command(aliases=['give', 'award'])

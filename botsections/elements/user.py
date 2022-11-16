@@ -37,21 +37,19 @@ class User(commands.Cog):
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
+        self.server: Union[discord.Guild, type(None)]
         self.bot: commands.Bot = bot
         self.name: discord.Member
         self.color: discord.Color
+        self.emb: discord.Embed
+        self.img: Image
+        self.image_draw: ImageDraw
         self.all_cash: int
         self.level: int
         self.counter: int = 0
         self.index: int = 0
         self.ID: int = 0
         self.guild_id: int = 0
-        self.server: Union[discord.Guild, type(None)]
-        self.logs = logs
-        self.js: dict = {}
-        self.emb: discord.Embed
-        self.img: Image
-        self.image_draw: ImageDraw
         self.wins: int = 0
         self.loses: int = 0
         self.vm: int = 0
@@ -59,6 +57,8 @@ class User(commands.Cog):
         self.cash: int = 0
         self.code: str = ""
         self.code2: str = ""
+        self.js: dict = {}
+        self.logs = logs
         print("User connected")
 
     @commands.command(aliases=['slb'])

@@ -30,16 +30,16 @@ class Database(object):
         self.msg: MIMEMultipart = MIMEMultipart()
         self.part2: MIMEBase = MIMEBase('application', "octet-stream")
         self.part1: MIMEBase = MIMEBase('application', "octet-stream")
-        self.filename: str = filename
         self.time = None
         self.now2 = None
         self.minutes: int = 0
         self.day: int = 0
         self.month: int = 0
-        self.prises: dict = {}
-        self.valentine: dict = {}
         self.wins: int = 0
         self.loses: int = 0
+        self.prises: dict = {}
+        self.valentine: dict = {}
+        self.filename: str = filename
 
         self.connection: sqlite3.Connection = sqlite3.connect(self.filename, check_same_thread=False)
         self.cursor: sqlite3.Cursor = self.connection.cursor()
@@ -252,11 +252,8 @@ class Database(object):
         return True
 
     def insert_into_users(
-            self,
-            name: str,
-            ID: int,
-            starting_balance: int,
-            guild_id: int
+            self, name: str, ID: int,
+            starting_balance: int, guild_id: int
     ) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -280,11 +277,8 @@ class Database(object):
             )
 
     def insert_into_server(
-            self, guild_id: int,
-            role_id: int,
-            admin_id: int,
-            casino_channel_id: int,
-            category_id: int
+        self, guild_id: int, role_id: int,
+        admin_id: int, casino_channel_id: int, category_id: int
     ) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -428,11 +422,8 @@ class Database(object):
         return self.cursor.execute(f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Levels`")
 
     def get_from_user(
-            self,
-            guild_id: int,
-            *args: str,
-            order_by: str,
-            limit: int = None
+        self, guild_id: int, *args: str,
+        order_by: str, limit: int = None
     ) -> Any:
         if limit is None:
             return self.cursor.execute(
@@ -468,11 +459,8 @@ class Database(object):
         )
 
     def get_item_from_item_shop(
-            self,
-            guild_id: int,
-            item_id: int,
-            *args: str,
-            order_by: str
+        self, guild_id: int, item_id: int,
+        *args: str, order_by: str
     ) -> Any:
         return self.cursor.execute(
             f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `ItemShop` "
@@ -631,10 +619,7 @@ class Database(object):
             )
 
     def add_coins_to_the_bank(
-            self,
-            ID: int,
-            guild_id: int,
-            cash: int,
+        self, ID: int, guild_id: int, cash: int,
     ) -> Cursor:
         with self.connection:
             self.take_coins(ID, guild_id, cash)
@@ -651,10 +636,8 @@ class Database(object):
             )
 
     def take_coins_from_the_bank(
-            self,
-            ID: int,
-            guild_id: int,
-            cash: Union[int, str],
+        self, ID: int,
+        guild_id: int, cash: Union[int, str],
     ) -> Cursor:
         with self.connection:
             self.add_coins(
@@ -792,13 +775,9 @@ class Database(object):
             )
 
     def stats_update_member(
-            self,
-            ID: int,
-            guild_id: int,
-            first_arg: str,
-            second_arg: str,
-            third_arg: str,
-            count: int
+        self, ID: int, guild_id: int,
+        first_arg: str, second_arg: str,
+        third_arg: str, count: int
     ) -> None:
         self.update_user_stats_1(first_arg, ID, guild_id)
         self.update_user_stats_2(second_arg, third_arg, ID, guild_id)
@@ -822,9 +801,8 @@ class Database(object):
         )
 
     def get_active_coinflip(
-            self, first_player_id: int,
-            second_player_id: int,
-            guild_id: int
+        self, first_player_id: int,
+        second_player_id: int, guild_id: int
     ) -> Tuple[Any, Any]:
         return self.cursor.execute(
             "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
@@ -872,10 +850,9 @@ class Database(object):
             )
 
     def insert_into_coinflip(
-            self, first_player_id: int, second_player_id: int,
-            first_player_name: str, second_player_name: str,
-            guild_id: int, guild_name: str,
-            cash: int, date: str
+        self, first_player_id: int, second_player_id: int,
+        first_player_name: str, second_player_name: str,
+        guild_id: int, guild_name: str, cash: int, date: str
     ) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -1221,12 +1198,9 @@ class Database(object):
             )
 
     async def cash_check(
-            self,
-            ctx: commands.context.Context,
-            cash: Union[str, int],
-            max_cash: int = None,
-            min_cash: int = 1,
-            check: bool = False
+        self, ctx: commands.context.Context,
+        cash: Union[str, int], max_cash: int = None,
+        min_cash: int = 1, check: bool = False
     ) -> bool:
         if cash is None:
             await ctx.send(f"""{ctx.author.mention}, Вы не ввели сумму!""")
@@ -1249,12 +1223,9 @@ class Database(object):
         return False
 
     async def stats_update(
-            self,
-            ctx: commands.context.Context,
-            first_arg: str,
-            second_arg: str,
-            third_arg: str,
-            count: int
+        self,  ctx: commands.context.Context,
+        first_arg: str, second_arg: str,
+        third_arg: str, count: int
     ) -> None:
         self.update_user_stats_1(first_arg, ctx.author.id, ctx.author.id)
         self.update_user_stats_2(second_arg, third_arg, ctx.author.id, ctx.guild.id)

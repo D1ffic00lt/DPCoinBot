@@ -29,16 +29,16 @@ class NewYear(commands.Cog):
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
         self.db: Database = db
+        self.emb: discord.Embed
         self.month: int = 0
         self.day: int = 0
         self.index: int = 0
         self.index2: int = 0
-        self.emb: discord.Embed
-        self.xp: Union[int, float] = 0
-        self.level_in_chat: Union[int, float] = 0
         self.prize: int = 0
         self.present: int = 0
         self.items: tuple = ()
+        self.xp: Union[int, float] = 0
+        self.level_in_chat: Union[int, float] = 0
         self.logs = logs
         print("NewYear event connected")
 
