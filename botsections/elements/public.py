@@ -1,16 +1,25 @@
-
 import discord
 
 from discord.ext import commands
 from datetime import datetime
 
 from botsections.functions.helperfunction import logging
+from botsections.functions.config import settings
 from botsections.functions.texts import *
 from database.db import Database
+
+__all__ = (
+    "Public",
+)
 
 
 class Public(commands.Cog):
     NAME = 'public module'
+
+    __slots__ = (
+        "db", "logs", "bot", "row12",
+        "row22", "row32", "month", "day"
+    )
 
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
@@ -18,7 +27,12 @@ class Public(commands.Cog):
         self.db = db
         self.logs = logs
         self.bot: commands.Bot = bot
-
+        self.emb: discord.Embed
+        self.row12: str
+        self.row22: str
+        self.row32: str
+        self.month: int = 0
+        self.day: int = 0
         print("Public connected")
 
     @commands.command(aliases=["info"])
@@ -179,8 +193,9 @@ class Public(commands.Cog):
                                      "2to1/2to2/2to3 - **в 3 раза**\n"
                                      "ch/nch - **в 2 раза**\n"
                                      "Число - **в 35 раз**\n".format(
-                                   settings['prefix'], self.row12, self.row22, self.row32
-                               ))
+                                            settings['prefix'], self.row12, self.row22, self.row32
+                                        )
+                               )
             self.emb.add_field(name=f"Как работает fail?",
                                value=f"Вы ставите на определённый коэффициент, "
                                      f"если программа выдаёт коэффициент выше Вашего"
@@ -242,8 +257,8 @@ class Public(commands.Cog):
                                          'b - поставить на чёрный цвет\n'
                                          'ch - поставить на чётное\n'
                                          'nch - поставить на нечётное\n'.format(
-                                       self.row12, self.row22, self.row32
-                                   ), inline=False)
+                                               self.row12, self.row22, self.row32
+                                           ), inline=False)
                 await ctx.send(embed=self.emb)
 
         elif arg is None:

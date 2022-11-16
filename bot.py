@@ -10,6 +10,10 @@ from database.db import Database
 
 
 class DPcoinBOT(commands.Bot):
+    __slots__ = (
+        "lvl", "db"
+    )
+
     def __init__(self, command_prefix: str, **kwargs) -> None:
         super().__init__(command_prefix, **kwargs)
         self.lvl: int = 0

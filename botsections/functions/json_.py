@@ -7,6 +7,10 @@ from typing import Union
 
 
 class Json(object):
+    __slots__ = (
+        "file", "filename"
+    )
+
     def __init__(self, filename: str) -> None:
         self.file: _io.TextIOWrapper
         self.filename: str = filename

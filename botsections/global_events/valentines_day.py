@@ -7,17 +7,26 @@ from typing import Union
 from database.db import Database
 from botsections.functions.helperfunction import logging
 
+__all__ = (
+    "ValentinesDay",
+)
+
 
 class ValentinesDay(commands.Cog):
     NAME = 'ValentinesDay module'
+
+    __slots__ = (
+        "bot", "db", "logs", "prize", "valentine"
+    )
 
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
         self.db = db
+        self.valentine: int = 0
+        self.prize: int = 0
         self.logs = logs
-        self.logs.write("ValentinesDay event connected\n")
         print("ValentinesDay event connected")
 
     @commands.command(aliases=["val_open"])

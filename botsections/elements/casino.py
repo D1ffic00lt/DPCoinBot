@@ -3,8 +3,9 @@ import random
 import discord
 import reladdons
 
-from discord.ext import commands
 from typing import List, Union
+from discord.ext import commands
+from datetime import datetime
 
 from database.db import Database
 from botsections.functions.helperfunction import (
@@ -12,28 +13,42 @@ from botsections.functions.helperfunction import (
     get_color, divide_the_number, casino2ch, get_time
 )
 from botsections.functions.texts import *
+from botsections.functions.config import settings
+
+__all__ = (
+    "Casino",
+)
 
 
 class Casino(commands.Cog):
     NAME = 'Casino module'
+
+    __slots__ = (
+        "db", "bot", "result_bid", "casino", "rust_casino",
+        "color", "dropped_coefficient", "line1", "line2",
+        "line3", "texts", "count", "logs", "emb", "num"
+    )
 
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot: commands.Bot = bot
-        self.result_bid: int
-        self.casino: List[Union[list, dict]] = []
-        self.rust_casino: List[int] = casino
         self.color: discord.Color
-        self.dropped_coefficient: float
-        self.line1: List[int]
-        self.line2: List[int]
-        self.line3: List[int]
+        self.emb: discord.Embed
+        self.casino: List[Union[list, dict]] = []
+        self.line1: List[int] = []
+        self.line2: List[int] = []
+        self.line3: List[int] = []
+        self.rust_casino: List[int] = casino
         self.texts: dict = {}
-        self.count: int
+        self.dropped_coefficient: float
+        self.casino_num: int = 0
+        self.count: int = 0
+        self.num: int = 0
+        self.result_bid: int
+        self.date_now: datetime
         self.logs = logs
-        self.logs.write("Casino connected\n")
         print("Casino connected")
 
     @commands.command(aliases=['rust_casino'])
@@ -129,12 +144,12 @@ class Casino(commands.Cog):
                                   [" Вам выпал 0.00...🎰" if self.dropped_coefficient == 0 else ""][0],
                             color=self.color,
                             args=[
-                                {
-                                    "name": f':(',
-                                    "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}',
-                                    "inline": False
-                                }
-                            ]
+                                    {
+                                        "name": f':(',
+                                        "value": f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}',
+                                        "inline": False
+                                    }
+                                ]
                         )
                     )
                     await self.db.stats_update(ctx, "FailsCount", "Fails", "LosesCount", -bid)
@@ -349,7 +364,6 @@ class Casino(commands.Cog):
                     self.casino[ctx.author.id]["color"][0] = casino_numbers_color[
                         self.casino[ctx.author.id]["number"][0]
                     ]
-                    int(self.texts[ctx.author.id])
                     if int(self.texts[ctx.author.id][0]) < 0:
                         pass
                     elif int(self.texts[ctx.author.id][0]) > 36:
@@ -367,8 +381,9 @@ class Casino(commands.Cog):
                                 value='Выпало число {}, green\n{}'
                                       ", Вы выиграли **{}** DP коинов!!".format(
                                         self.casino[ctx.author.id]['number'][0],
-                                        ctx.author.mention, divide_the_number(self.count)
-                                    ),
+                                        ctx.author.mention,
+                                        divide_the_number(self.count)
+                                        ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
 

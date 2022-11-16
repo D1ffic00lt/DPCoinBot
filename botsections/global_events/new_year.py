@@ -8,18 +8,38 @@ from typing import Union
 from database.db import Database
 from botsections.functions.texts import *
 from botsections.functions.helperfunction import logging
+from botsections.functions.config import settings
+
+__all__ = (
+    "NewYear",
+)
 
 
 class NewYear(commands.Cog):
     NAME = 'NewYear module'
+
+    __slots__ = (
+        "bot", "db", "logs", "month", "day",
+        "index", "index2", "emb", "xp",
+        "level_in_chat", "items"
+    )
 
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
         self.db: Database = db
+        self.emb: discord.Embed
+        self.month: int = 0
+        self.day: int = 0
+        self.index: int = 0
+        self.index2: int = 0
+        self.prize: int = 0
+        self.present: int = 0
+        self.items: tuple = ()
+        self.xp: Union[int, float] = 0
+        self.level_in_chat: Union[int, float] = 0
         self.logs = logs
-        self.logs.write("NewYear event connected\n")
         print("NewYear event connected")
 
     @commands.command(aliases=["use"])

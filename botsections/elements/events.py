@@ -3,6 +3,7 @@ import random
 
 from datetime import datetime
 from discord.ext import commands
+from typing import Union
 
 from botsections.functions.helperfunction import (
     get_time, logging
@@ -10,33 +11,41 @@ from botsections.functions.helperfunction import (
 from botsections.functions.json_ import Json
 from database.db import Database
 
+__all__ = (
+    "Events",
+)
+
 
 class Events(commands.Cog):
     NAME = 'events module'
 
+    __slots__ = (
+        "time", "day", "month", "db", "level", "index",
+        "data", "xp", "level_in_chat", "ban_list", "bot",
+        "member_guild_afk_channel_id", "channel_into_which_the_member_entered",
+        "the_channel_from_which_the_member_came_out", "last_message", "text", "logs"
+    )
+
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.time = None
-        self.day = None
-        self.month = None
         self.db = db
+        self.text: str = ""
         self.level: int = 0
         self.index: int = 0
-        self.data: dict = {}
-        self.month: int
-        self.day: int
+        self.month: int = 0
+        self.day: int = 0
         self.xp: int = 0
         self.level_in_chat: int = 0
-        self.ban_list: list = []
-        self.bot: commands.Bot = bot
         self.member_guild_afk_channel_id: int = 0
         self.channel_into_which_the_member_entered: int = 0
         self.the_channel_from_which_the_member_came_out: int = 0
+        self.time: Union[datetime, int] = 0
+        self.data: dict = {}
         self.last_message: dict = {}
-        self.text: str = ""
-        self.time: datetime
+        self.ban_list: list = []
         self.logs = logs
+        self.bot = bot
         print("Events connected")
 
     @commands.Cog.listener()

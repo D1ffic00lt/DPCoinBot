@@ -1,10 +1,11 @@
 import os
+import _io
 import smtplib
 import discord
 
-from typing import Any, Union, List, Dict
 from discord import File
 from discord.ext import commands
+from typing import Any, Union, List, Dict
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -14,12 +15,23 @@ from botsections.functions.helperfunction import (
     get_time, write_log, logging
 )
 from botsections.functions.json_ import Json
-from database.db import Database
 from botsections.functions.config import settings
+from database.db import Database
+
+__all__ = (
+    "Debug",
+)
 
 
 class Debug(commands.Cog):
     NAME = 'debug module'
+
+    __slots__ = (
+        "db", "bot", "js", "data", "part",
+        "msg", "server", "arg", "file_path",
+        "color", "logs", "read_file",
+        "write_file", "lines"
+    )
 
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
@@ -30,15 +42,18 @@ class Debug(commands.Cog):
 
         self.db = db
         self.bot: commands.Bot = bot
-        self.js: Dict[Any]
-        self.data: List[Union[dict, int]]
         self.part: MIMEBase
         self.msg: MIMEMultipart
         self.server: smtplib.SMTP
-        self.arg: bool
-        self.file_path: str
         self.color: discord.Color
+        self.js: Dict[Any]
+        self.data: List[Union[dict, int]]
+        self.arg: bool
+        self.file_path: str = ".intermediate_files/debug_send.txt"
+        self.lines: str
         self.logs = logs
+        self.read_file: _io.TextIOWrapper
+        self.write_file: _io.TextIOWrapper
         print("Debug connected")
 
     @commands.command(aliases=["debug"])
@@ -48,21 +63,24 @@ class Debug(commands.Cog):
         if ctx.author.id == 401555829620211723:
             if not os.path.exists(".intermediate_files"):
                 os.mkdir(".intermediate_files")
-            with open(".logs/develop_logs.dpcb", encoding="utf-8", errors="ignore") as read_file, \
-                    open(".intermediate_files/debug_send.txt", "w+", encoding="utf-8", errors="ignore") as write_file:
-                self.lines = read_file.readlines()
+            with open(
+                    ".logs/develop_logs.dpcb", encoding="utf-8", errors="ignore"
+            ) as self.read_file, \
+                    open(
+                        ".intermediate_files/debug_send.txt", "w+", encoding="utf-8", errors="ignore"
+                    ) as self.write_file:
+                self.lines = self.read_file.readlines()
                 if count is None:
                     count = 5
                 for i in range(count, 0, -1):
                     try:
-                        write_file.write(self.lines[-i])
+                        self.write_file.write(self.lines[-i])
                     except IndexError:
                         for j in range(len(self.lines)):
-                            write_file.write(self.lines[j])
+                            self.write_file.write(self.lines[j])
                         break
             await ctx.send(f"**debug logs**\nname:{os.name}\nusername: {os.getlogin()}\ndate: {get_time()}\n",
                            file=File(".intermediate_files/debug_send.txt"))
-            self.file_path = ".intermediate_files/debug_send.txt"
             os.remove(self.file_path)
 
     @commands.command(aliases=['send_base'])  # это лучше не трогать

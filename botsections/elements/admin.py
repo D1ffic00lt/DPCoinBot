@@ -6,20 +6,28 @@ from discord.utils import get
 from botsections.functions.helperfunction import logging
 from database.db import Database
 
+__all__ = (
+    "Admin",
+)
+
 
 class Admin(commands.Cog):
     NAME = 'admin module'
 
+    __slots__ = (
+        "db", "bot", "role",
+        "msg", "ind", "logs"
+    )
+
     @logging
     def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self.role: discord.Role
+        self.logs = logs
         self.db: Database = db
         self.bot = bot
-        self.role: discord.Role
         self.msg: str
         self.ind: int
-        self.logs = logs
-        self.logs.write("Admin connected\n")
         print("Admin connected")
 
     @commands.command(aliases=['give', 'award'])
@@ -120,7 +128,11 @@ class Admin(commands.Cog):
                         if amount == "all":
                             for member in ctx.guild.members:
                                 if get(member.roles, id=role_.id):
-                                    self.db.take_coins(member.id, ctx.guild.id, self.db.get_cash(member.id, ctx.guild.id))
+                                    self.db.take_coins(
+                                        member.id,
+                                        ctx.guild.id,
+                                        self.db.get_cash(member.id, ctx.guild.id)
+                                    )
                             await ctx.message.add_reaction('✅')
                         else:
                             for member in ctx.guild.members:
@@ -222,7 +234,3 @@ class Admin(commands.Cog):
             else:
                 self.db.delete_from_item_shop(item_id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
-
-
-if __name__ == "__main__":
-    Admin()
