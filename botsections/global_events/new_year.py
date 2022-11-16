@@ -8,6 +8,7 @@ from typing import Union
 from database.db import Database
 from botsections.functions.texts import *
 from botsections.functions.helperfunction import logging
+from botsections.functions.config import settings
 
 __all__ = (
     "NewYear",

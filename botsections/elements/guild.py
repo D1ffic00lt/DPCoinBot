@@ -1,12 +1,12 @@
 import discord
 
+from typing import Union
 from discord.ext import commands
 from discord.utils import get
-from typing import Union
 
 from botsections.functions.texts import need_settings
-from database.db import Database
 from botsections.functions.helperfunction import divide_the_number, logging
+from database.db import Database
 
 __all__ = (
     "Guild",

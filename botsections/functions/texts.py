@@ -2,6 +2,15 @@
 from botsections.functions.config import settings
 from botsections.functions.version import __version__
 
+__all__ = (
+    "foo", "discord_foo",
+    "levels", "new_year",
+    "casino_numbers_color",
+    "roll_types", "row1",
+    "row2", "row3", "need_settings",
+    "setup_value", "auto_setup", "casino"
+)
+
 foo: str = f'Обновление!\nВерсия {__version__}\n\nДобавлено:\n\n- Выдача и снятие коинов по роли(give-role, ' \
            f'take-role)\nТеперь можно снимать и начислять коины ' \
            f'не только конкретным пользователям, но и ролям!\n\n- Банк ' \

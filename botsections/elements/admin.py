@@ -15,7 +15,8 @@ class Admin(commands.Cog):
     NAME = 'admin module'
 
     __slots__ = (
-        "db", "bot", "role", "msg", "ind", "logs"
+        "db", "bot", "role",
+        "msg", "ind", "logs"
     )
 
     @logging

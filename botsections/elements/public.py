@@ -4,6 +4,7 @@ from discord.ext import commands
 from datetime import datetime
 
 from botsections.functions.helperfunction import logging
+from botsections.functions.config import settings
 from botsections.functions.texts import *
 from database.db import Database
 

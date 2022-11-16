@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import random
-
 import discord
 import reladdons
 
-from discord.ext import commands
 from typing import List, Union
+from discord.ext import commands
 from datetime import datetime
 
 from database.db import Database
@@ -14,6 +13,7 @@ from botsections.functions.helperfunction import (
     get_color, divide_the_number, casino2ch, get_time
 )
 from botsections.functions.texts import *
+from botsections.functions.config import settings
 
 __all__ = (
     "Casino",

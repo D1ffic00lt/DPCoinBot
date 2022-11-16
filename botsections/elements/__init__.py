@@ -7,5 +7,6 @@ from botsections.elements.public import *
 from botsections.elements.user import *
 
 __all__ = (
-    "Admin", "Casino", "Debug", "Events", "Guild", "Public", "User"
+    "Admin", "Casino", "Debug",
+    "Events", "Guild", "Public", "User"
 )
