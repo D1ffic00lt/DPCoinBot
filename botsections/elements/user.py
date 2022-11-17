@@ -10,7 +10,7 @@ from typing import Union
 from botsections.functions.helperfunction import (
     divide_the_number, create_emb,
     get_color, prepare_mask, crop,
-    logging, get_promo_code, get_time
+    get_promo_code, get_time, write_log
 )
 from botsections.functions.json_ import Json
 from botsections.functions.texts import *
@@ -27,14 +27,13 @@ class User(commands.Cog):
     __slots__ = (
         "db", "bot", "name", "color", "all_cash",
         "level", "counter", "index", "ID",
-        "guild_id", "server", "logs", "js",
+        "guild_id", "server", "js",
         "emb", "img", "image_draw", "wins",
         "loses", "vm", "messages", "cash",
         "code", "code2"
     )
 
-    @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.server: Union[discord.Guild, type(None)]
@@ -58,8 +57,8 @@ class User(commands.Cog):
         self.code: str = ""
         self.code2: str = ""
         self.js: dict = {}
-        self.logs = logs
-        print("User connected")
+        print(f"[{get_time()}] [INFO]: User connected")
+        write_log(f"[{get_time()}] [INFO]: User connected")
 
     @commands.command(aliases=['slb'])
     @commands.cooldown(1, 5, commands.BucketType.user)

@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from datetime import datetime
 
-from botsections.functions.helperfunction import logging
+from botsections.functions.helperfunction import get_time, write_log
 from botsections.functions.config import settings
 from botsections.functions.texts import *
 from database.db import Database
@@ -17,15 +17,13 @@ class Public(commands.Cog):
     NAME = 'public module'
 
     __slots__ = (
-        "db", "logs", "bot", "row12",
+        "db", "bot", "row12",
         "row22", "row32", "month", "day"
     )
 
-    @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
-        self.logs = logs
         self.bot: commands.Bot = bot
         self.emb: discord.Embed
         self.row12: str
@@ -33,7 +31,8 @@ class Public(commands.Cog):
         self.row32: str
         self.month: int = 0
         self.day: int = 0
-        print("Public connected")
+        print(f"[{get_time()}] [INFO]: Public connected")
+        write_log(f"[{get_time()}] [INFO]: Public connected")
 
     @commands.command(aliases=["info"])
     @commands.cooldown(1, 10, commands.BucketType.user)

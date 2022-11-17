@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 
-from botsections.functions.helperfunction import logging
+from botsections.functions.helperfunction import get_time, write_log
 from database.db import Database
 
 __all__ = (
@@ -16,19 +16,18 @@ class Admin(commands.Cog):
 
     __slots__ = (
         "db", "bot", "role",
-        "msg", "ind", "logs"
+        "msg", "ind"
     )
 
-    @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.role: discord.Role
-        self.logs = logs
         self.db: Database = db
         self.bot = bot
         self.msg: str
         self.ind: int
-        print("Admin connected")
+        print(f"[{get_time()}] [INFO]: Admin connected")
+        write_log(f"[{get_time()}] [INFO]: Admin connected")
 
     @commands.command(aliases=['give', 'award'])
     @commands.cooldown(1, 5, commands.BucketType.user)

@@ -8,7 +8,7 @@ __all__ = (
     "casino_numbers_color",
     "roll_types", "row1",
     "row2", "row3", "need_settings",
-    "setup_value", "auto_setup", "casino"
+    "setup_value", "auto_setup", "casino_rust"
 )
 
 foo: str = f'Обновление!\nВерсия {__version__}\n\nДобавлено:\n\n- Выдача и снятие коинов по роли(give-role, ' \
@@ -184,4 +184,4 @@ auto_setup = {
     ]
 }
 
-casino: list = [20, 3, 5, 1, 3, 1, 10, 1, 3, 5, 1, 5, 3, 10, 1, 3, 5, 1, 3, 1, 1]
+casino_rust: list = [20, 3, 5, 1, 3, 1, 10, 1, 3, 5, 1, 5, 3, 10, 1, 3, 5, 1, 3, 1, 1]
