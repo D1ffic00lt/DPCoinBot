@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord.utils import get
 
 from botsections.functions.texts import need_settings
-from botsections.functions.helperfunction import divide_the_number, logging
+from botsections.functions.helperfunction import divide_the_number, get_time, write_log
 from database.db import Database
 
 __all__ = (
@@ -19,11 +19,10 @@ class Guild(commands.Cog):
     __slots__ = (
         "db", "bot", "found", "admin",
         "casino_channel", "role", "auto",
-        "category", "emb", "logs", "guild"
+        "category", "emb", "guild"
     )
 
-    @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot = bot
@@ -35,8 +34,8 @@ class Guild(commands.Cog):
         self.category: Union[discord.CategoryChannel, int]
         self.emb: discord.Embed
         self.guild: discord.Guild
-        self.logs = logs
-        print("Guild connected")
+        print(f"[{get_time()}] [INFO]: Guild connected")
+        write_log(f"[{get_time()}] [INFO]: Guild connected")
 
     @commands.command(aliases=["auto_setup"])
     @commands.cooldown(1, 4, commands.BucketType.user)

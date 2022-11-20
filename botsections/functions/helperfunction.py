@@ -18,7 +18,7 @@ def write_log(text: str):
     if not os.path.exists(".logs"):
         os.mkdir(".logs")
     with open(".logs/develop_logs.dpcb", "a+", encoding="utf-8", errors="ignore") as file:
-        file.write(text)
+        file.write(text + "\n")
 
 
 def prepare_mask(size, anti_alias: int = 2):

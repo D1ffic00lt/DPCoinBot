@@ -6,7 +6,7 @@ from discord.ext import commands
 from typing import Union
 
 from botsections.functions.helperfunction import (
-    get_time, logging
+    get_time, write_log
 )
 from botsections.functions.json_ import Json
 from database.db import Database
@@ -23,11 +23,10 @@ class Events(commands.Cog):
         "time", "day", "month", "db", "level", "index",
         "data", "xp", "level_in_chat", "ban_list", "bot",
         "member_guild_afk_channel_id", "channel_into_which_the_member_entered",
-        "the_channel_from_which_the_member_came_out", "last_message", "text", "logs"
+        "the_channel_from_which_the_member_came_out", "last_message", "text"
     )
 
-    @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.text: str = ""
@@ -44,9 +43,9 @@ class Events(commands.Cog):
         self.data: dict = {}
         self.last_message: dict = {}
         self.ban_list: list = []
-        self.logs = logs
         self.bot = bot
-        print("Events connected")
+        print(f"[{get_time()}] [INFO]: Events connected")
+        write_log(f"[{get_time()}] [INFO]: Events connected")
 
     @commands.Cog.listener()
     async def on_voice_state_update(
@@ -169,8 +168,8 @@ class Events(commands.Cog):
                     elif self.index == 2 and message.author is not None and message.guild is not None:
                         self.db.add_reputation(message.author.id, message.guild.id, 1)
 
-    @logging
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         self.db.server_add(self.bot)
-        print(f"{member.id} add to the database")
+        print(f"[{get_time()}] [INFO]: {member.id} add to the database")
+        write_log(f"[{get_time()}] [INFO]: {member.id} add to the database")

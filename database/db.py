@@ -67,8 +67,8 @@ class Database(object):
             ThreeSevensCount             INT DEFAULT 0 NOT NULL, 
             ThreeSevensWinsCount         INT DEFAULT 0 NOT NULL, 
             ThreeSevensLosesCount        INT DEFAULT 0 NOT NULL,
-            AllWins                      INT DEFAULT 0 NOT NULL,
-            AllLoses                     INT DEFAULT 0 NOT NULL,
+            AllWinsCount                 INT DEFAULT 0 NOT NULL,
+            AllLosesCount                INT DEFAULT 0 NOT NULL,
             EntireAmountOfWinnings       BIGINT DEFAULT 0 NOT NULL,
             MinutesInVoiceChannels       INT DEFAULT 0 NOT NULL,
             Xp                           BIGINT DEFAULT 0 NOT NULL,
@@ -749,7 +749,7 @@ class Database(object):
         with self.connection:
             return self.cursor.execute(
                 f"UPDATE `Users` SET `{arg}` = `{arg}` + 1 WHERE `ID` = ? AND `GuildID` = ?",
-                (arg, arg, ID, guild_id)
+                (ID, guild_id)
             )
 
     def update_user_stats_2(self, first_arg: str, second_arg: str, ID: int, guild_id: int) -> Cursor:
@@ -770,7 +770,7 @@ class Database(object):
     def update_user_stats_4(self, count: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "UPDATE `Users` SET Count = Count + ? WHERE `ID` = ? AND `GuildID` = ?",
+                "UPDATE `Users` SET EntireAmountOfWinnings = EntireAmountOfWinnings + ? WHERE `ID` = ? AND `GuildID` = ?",
                 (count, ID, guild_id)
             )
 

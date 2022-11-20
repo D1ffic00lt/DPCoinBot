@@ -12,7 +12,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from botsections.functions.helperfunction import (
-    get_time, write_log, logging
+    get_time, write_log
 )
 from botsections.functions.json_ import Json
 from botsections.functions.config import settings
@@ -29,12 +29,11 @@ class Debug(commands.Cog):
     __slots__ = (
         "db", "bot", "js", "data", "part",
         "msg", "server", "arg", "file_path",
-        "color", "logs", "read_file",
+        "color", "read_file",
         "write_file", "lines"
     )
 
-    @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
         self.encoder = kwargs["encoder"]
         del kwargs["encoder"]
 
@@ -51,10 +50,10 @@ class Debug(commands.Cog):
         self.arg: bool
         self.file_path: str = ".intermediate_files/debug_send.txt"
         self.lines: str
-        self.logs = logs
         self.read_file: _io.TextIOWrapper
         self.write_file: _io.TextIOWrapper
-        print("Debug connected")
+        print(f"[{get_time()}] [INFO]: Debug connected")
+        write_log(f"[{get_time()}] [INFO]: Debug connected")
 
     @commands.command(aliases=["debug"])
     async def __debug_logs(

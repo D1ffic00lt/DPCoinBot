@@ -5,7 +5,7 @@ from discord.ext import commands
 from typing import Union
 
 from database.db import Database
-from botsections.functions.helperfunction import logging
+from botsections.functions.helperfunction import get_time, write_log
 
 __all__ = (
     "ValentinesDay",
@@ -16,18 +16,17 @@ class ValentinesDay(commands.Cog):
     NAME = 'ValentinesDay module'
 
     __slots__ = (
-        "bot", "db", "logs", "prize", "valentine"
+        "bot", "db", "prize", "valentine"
     )
 
-    @logging
-    def __init__(self, bot: commands.Bot, db: Database, logs, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
         self.db = db
         self.valentine: int = 0
         self.prize: int = 0
-        self.logs = logs
-        print("ValentinesDay event connected")
+        print(f"[{get_time()}] [INFO]: ValentinesDay event connected")
+        write_log(f"[{get_time()}] [INFO]: ValentinesDay event connected")
 
     @commands.command(aliases=["val_open"])
     @commands.cooldown(1, 4, commands.BucketType.user)

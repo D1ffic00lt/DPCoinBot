@@ -14,10 +14,9 @@ from botsections.functions.version import __version__
 from botsections.functions.helperfunction import get_time, write_log
 from botsections.functions.encoding import Encoder
 
-write_log("")
-logs = open(".logs/develop_logs.dpcb", "+a")
 
-print(f"[{get_time()}]: [INFO]: Program started", file=logs)
+print(f"[{get_time()}] [INFO]: Program started")
+write_log(f"[{get_time()}]: [INFO]: Program started")
 
 nest_asyncio.apply()
 
@@ -38,15 +37,18 @@ async def main() -> None:
     with open(".json/key.dpcb", "rb") as file:
         encoder = Encoder(file.read())
 
-    print("[{}] [INFO]: Encoder connected", file=logs)
+    print(f"[{get_time()}] [INFO]: Encoder connected")
+    write_log(f"[{get_time()}] [INFO]: Encoder connected")
     db = Database("database/server.db", encoder=encoder)
-    print(f"[{get_time()}] [INFO]: Database connected", file=logs)
+    print(f"[{get_time()}] [INFO]: Database connected")
+    write_log(f"[{get_time()}] [INFO]: Database connected")
     BOT: DPcoinBOT = DPcoinBOT(
         command_prefix=settings["prefix"],
         intents=discord.Intents.all(),
         db=db
     )
-    print("[{}] [INFO]: version: {}".format(get_time(), __version__), file=logs)
+    print("[{}] [INFO]: version: {}".format(get_time(), __version__))
+    write_log("[{}] [INFO]: version: {}".format(get_time(), __version__))
 
     await BOT.add_cog(Casino(BOT, db))
     await BOT.add_cog(Debug(BOT, db, encoder=encoder))
@@ -59,7 +61,6 @@ async def main() -> None:
     await BOT.add_cog(ValentinesDay(BOT, db))
 
     BOT.run(encoder.decrypt(settings["token"]))
-    logs.close()
 
 if __name__ == '__main__':
     runner = run(main())
