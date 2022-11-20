@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from botsections.functions.config import settings
-from botsections.functions.helperfunction import logging
+from botsections.functions.helperfunction import get_time, write_log
 from database.db import Database
 
 
@@ -20,7 +20,6 @@ class DPcoinBOT(commands.Bot):
         self.db: Database = kwargs["db"]
         self.remove_command('help')
 
-    @logging
     async def on_ready(self) -> None:
         await self.change_presence(
             status=discord.Status.online,
@@ -36,4 +35,5 @@ class DPcoinBOT(commands.Bot):
             self.db.connection.commit()
 
         self.db.clear_coinflip()
-        print("Bot connected")
+        print(f"[{get_time()}] [INFO]: Bot connected")
+        write_log(f"[{get_time()}] [INFO]: Bot connected")
