@@ -566,7 +566,7 @@ class User(commands.Cog):
         Image.open(
             io.BytesIO(
                 requests.get(
-                    str(ctx.author.avatar_url)[:-10], stream=True
+                    str(ctx.author.guild_avatar.url)[:-10], stream=True
                 ).content
             )
         ).convert("RGBA").resize(
