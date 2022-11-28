@@ -438,6 +438,13 @@ class Database(object):
                 (guild_id,)
             )
 
+    def get_card(self, ID: int, guild_id: int):
+        return self.cursor.execute(
+            "SELECT `AllWinsCount`, `AllLosesCount`, `MinutesInVoiceChannels`, `MessagesCount` FROM `Users`"
+            "WHERE `GuildID` = ? AND `ID` = ?",
+            (guild_id, ID)
+        ).fetchall()
+
     def get_from_shop(self, guild_id: int, *args: str, order_by: str, role_id: int = None) -> Any:
         if role_id is None:
             return self.cursor.execute(
@@ -770,7 +777,8 @@ class Database(object):
     def update_user_stats_4(self, count: int, ID: int, guild_id: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                "UPDATE `Users` SET EntireAmountOfWinnings = EntireAmountOfWinnings + ? WHERE `ID` = ? AND `GuildID` = ?",
+                "UPDATE `Users` SET EntireAmountOfWinnings = EntireAmountOfWinnings + ? "
+                "WHERE `ID` = ? AND `GuildID` = ?",
                 (count, ID, guild_id)
             )
 

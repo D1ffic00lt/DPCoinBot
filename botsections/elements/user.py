@@ -29,8 +29,8 @@ class User(commands.Cog):
         "level", "counter", "index", "ID",
         "guild_id", "server", "js",
         "emb", "img", "image_draw", "wins",
-        "loses", "vm", "messages", "cash",
-        "code", "code2"
+        "loses", "minutes_id_voice", "messages", "cash",
+        "code", "code2", "response", "avatar"
     )
 
     def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
@@ -51,7 +51,7 @@ class User(commands.Cog):
         self.guild_id: int = 0
         self.wins: int = 0
         self.loses: int = 0
-        self.vm: int = 0
+        self.minutes_in_voice: int = 0
         self.messages: int = 0
         self.cash: int = 0
         self.code: str = ""
@@ -563,46 +563,31 @@ class User(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __card(self, ctx: commands.context.Context) -> None:
         self.img = Image.new("RGBA", (500, 300), "#323642")
-        Image.open(
-            io.BytesIO(
-                requests.get(
-                    str(ctx.author.guild_avatar.url)[:-10], stream=True
-                ).content
-            )
-        ).convert("RGBA").resize(
-            (100, 100), Image.ANTIALIAS
-        ).save(f".intermediate_files/avatar{ctx.author.id}.png")
-        crop(
-            Image.open(f'.intermediate_files/avatar{ctx.author.id}.png'),
-            (100, 100)
-        ).putalpha(
-            prepare_mask(
-                (100, 100), 4
-            )
-        ).save(f'.intermediate_files/out_avatar{ctx.author.id}.png')
+        self.response = requests.get(str(ctx.author.guild_avatar.url)[:-10], stream=True)
+        self.response = Image.open(io.BytesIO(self.response.content))
+        self.response = self.response.convert("RGBA")
+        self.response = self.response.resize((100, 100), Image.ANTIALIAS)
+        self.response.save(f".intermediate_files/avatar{ctx.author.id}.png")
+
+        self.avatar = Image.open(f'.intermediate_files/avatar{ctx.author.id}.png')
+        self.avatar = crop(self.avatar, (100, 100))
+        self.avatar.putalpha(prepare_mask((100, 100), 4))
+        self.avatar.save(f'.intermediate_files/out_avatar{ctx.author.id}.png')
 
         self.img.alpha_composite(
-            Image.open(
-                f'.intermediate_files/out_avatar{ctx.author.id}.png',
-            ).convert("RGBA").resize(
-                (100, 100), Image.ANTIALIAS
-            ), (15, 15)
+            self.response, (15, 15)
         )
 
         self.image_draw = ImageDraw.Draw(self.img)
         self.wins = 0
         self.loses = 0
-        self.vm = 0  # честно, не помню, что это такое, так что просто vm
+        self.minutes_in_voice = 0
         self.messages = 0
 
-        for i in self.db.get_from_user(
-                ctx.author.id, str(ctx.guild.id),
-                "AllWins", "AllLoses", "MinutesInVoiceChannels", "MessagesCount",
-                order_by="AllWins"
-        ):
+        for i in self.db.get_card(ctx.author.id, ctx.guild.id):
             self.wins += i[0]
             self.loses += i[1]
-            self.vm += i[2]
+            self.minutes_in_voice += i[2]
             self.messages += i[3]
 
         self.image_draw.text(
@@ -627,7 +612,7 @@ class User(commands.Cog):
         )
         self.image_draw.text(
             (15, 195),
-            f"Minutes in voice: {divide_the_number(self.vm)}",
+            f"Minutes in voice: {divide_the_number(self.minutes_in_voice)}",
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
         self.image_draw.text(
@@ -639,22 +624,22 @@ class User(commands.Cog):
         self.verification,  self.developer, self.coder = \
             self.db.get_from_card(ctx.author.id, "Verification", "Developer", "Coder")
         if int(self.verification) == 1:
-            self.image = Image.open(".intermediate_files/images/green_galka.png")
+            self.image = Image.open("files/green_galka.png")
             self.image = self.image.convert("RGBA")
             self.image = self.image.resize((30, 30), Image.ANTIALIAS)
             self.images.append(self.image)
         elif int(self.verification) == 2:
-            self.image = Image.open(".intermediate_files/images/galka.png")
+            self.image = Image.open("files/galka.png")
             self.image = self.image.convert("RGBA")
             self.image = self.image.resize((30, 30), Image.ANTIALIAS)
             self.images.append(self.image)
         if int(self.developer) == 1:
-            self.image = Image.open(".intermediate_files/images/developer.png")
+            self.image = Image.open("files/developer.png")
             self.image = self.image.convert("RGBA")
             self.image = self.image.resize((30, 30), Image.ANTIALIAS)
             self.images.append(self.image)
         if int(self.coder) == 1:
-            self.image = Image.open(".intermediate_files/images/cmd.png")
+            self.image = Image.open("files/cmd.png")
             self.image = self.image.convert("RGBA")
             self.image = self.image.resize((30, 30), Image.ANTIALIAS)
             self.images.append(self.image)
