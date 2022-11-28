@@ -20,6 +20,7 @@ settings = {
     'id': b'gAAAAABjZM_yhaE17Ml7_uWwsp3qcOqf1u2g5_y47mhEmjmdCrhOosd7VAFk'
           b'wOJdfnRfd7GOl_H_D7ACEAQ0SU7x1O2Sa5VGjWByEWYEnW_ZpIrokGXNvkg=',
     'prefix': '&',
+    # 'prefix': "//",
     "password": b'gAAAAABjZNBwHXsuUCEWpnJssOOMYkmNta-WdHOYWh3DsjoD3uvAJ4JQql-p'
                 b'lYCCMh-tur2yJA6hWk9h1zBJiprZU0TetMMD3ZNcx7RdJHfARWJXCSq-lCY=',
     "sender_email": b'gAAAAABjZNADXnn912gRHsi-VJdTOdwdURimJ3gLB_HhARaxStglvAm6hoNH'
