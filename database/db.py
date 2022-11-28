@@ -489,7 +489,7 @@ class Database(object):
 
     def get_from_card(self, ID: int, *args: str) -> Any:
         return self.cursor.execute(
-            f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Server` WHERE `ID` = ?",
+            f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Card` WHERE `ID` = ?",
             (ID,)
         ).fetchone()
 
