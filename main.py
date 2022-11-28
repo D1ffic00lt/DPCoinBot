@@ -27,7 +27,7 @@ async def main() -> None:
     if not Json.check_file_exists(".json/ban_list.json"):
         Json(".json/ban_list.json").json_dump([])
     if not os.path.exists(".json/key.dpcb"):    # тут его как-то с сервера получать надо
-        raise FileExistsError("not found key.txt")
+        raise FileExistsError("not found key.dpcb")
     if not os.path.exists(".intermediate_files"):
         os.mkdir(".intermediate_files")
         os.mkdir(".intermediate_files/images")
