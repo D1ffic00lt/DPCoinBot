@@ -526,8 +526,8 @@ class Database(object):
     def update_card(self, ID: int, type_of_card: str, mode: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                f'UPDATE `Card` SET {type_of_card} = ? WHERE `ID` =?',
-                (type_of_card, mode, ID)
+                f'UPDATE `Card` SET `{type_of_card}` = ? WHERE `ID` = ?',
+                (mode, ID)
             )
 
     def check_user(self, ID: int) -> bool:
@@ -1331,7 +1331,7 @@ class Database(object):
         self.part1 = MIMEBase('application', "octet-stream")
 
         self.part1.set_payload(open(self.filename, "rb").read())
-        self.part2.set_payload(open("../logs/develop_logs.dpcb", "rb").read())
+        self.part2.set_payload(open(".logs/develop_logs.dpcb", "rb").read())
 
         encoders.encode_base64(self.part1)
         encoders.encode_base64(self.part2)

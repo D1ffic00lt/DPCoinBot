@@ -73,10 +73,10 @@ class Debug(commands.Cog):
                     count = 5
                 for i in range(count, 0, -1):
                     try:
-                        self.write_file.write(self.lines[-i])
+                        self.write_file.write(f"[{get_time()}] [INFO]: " + self.lines[-i])
                     except IndexError:
                         for j in range(len(self.lines)):
-                            self.write_file.write(self.lines[j])
+                            self.write_file.write(f"[{get_time()}] [INFO]: " + self.lines[j])
                         break
             await ctx.send(f"**debug logs**\nname:{os.name}\nusername: {os.getlogin()}\ndate: {get_time()}\n",
                            file=File(".intermediate_files/debug_send.txt"))
@@ -185,18 +185,18 @@ class Debug(commands.Cog):
                 self.data.append(server_id)
                 Json(".json/ban_list.json").json_dump(self.data)
 
-    # @commands.Cog.listener()
-    # async def on_command_error(
-    #         self, ctx: commands.context.Context, error: Exception
-    # ) -> None:
-    #     if isinstance(error, commands.CommandOnCooldown):
-    #         pass
-    #     elif isinstance(error, commands.CommandNotFound):
-    #         pass
-    #     else:
-    #         print(error)
-    #         try:
-    #             write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
-    #                       f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
-    #         except AttributeError:
-    #             pass
+    @commands.Cog.listener()
+    async def on_command_error(
+            self, ctx: commands.context.Context, error: Exception
+    ) -> None:
+        if isinstance(error, commands.CommandOnCooldown):
+            pass
+        elif isinstance(error, commands.CommandNotFound):
+            pass
+        else:
+            print(error)
+            try:
+                write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
+                          f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
+            except AttributeError:
+                pass
