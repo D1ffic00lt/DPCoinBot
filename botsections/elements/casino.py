@@ -3,7 +3,7 @@ import random
 import discord
 import reladdons
 
-from typing import List, Union
+from typing import List, Dict
 from discord.ext import commands
 from datetime import datetime
 
@@ -35,7 +35,7 @@ class Casino(commands.Cog):
         self.bot: commands.Bot = bot
         self.color: discord.Color
         self.emb: discord.Embed
-        self.casino: List[Union[list, dict]] = []
+        self.casino: Dict[int, Dict[str, list]] = {}
         self.line1: List[int] = []
         self.line2: List[int] = []
         self.line3: List[int] = []
@@ -369,13 +369,13 @@ class Casino(commands.Cog):
                                 name=f'Поздравляем!',
                                 value='Выпало число {}, green\n{}'
                                       ", Вы выиграли **{}** DP коинов!!".format(
-                                    self.casino[ctx.author.id]['number'][0],
-                                    ctx.author.mention,
-                                    divide_the_number(self.count)
-                                ),
+                                            self.casino[ctx.author.id]['number'][0],
+                                            ctx.author.mention,
+                                            divide_the_number(self.count)
+                                        ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif int(self.texts[ctx.author.id]) == self.casino[ctx.author.id]["number"][0]:
                             self.count *= 35
@@ -384,23 +384,27 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
                         else:
                             self.emb = discord.Embed(title="🎰Вы проиграли:(🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Сочувствую...',
                                 value="Выпало число {}, {}"
-                                      "\n{}, Вы  проиграли:(".format(self.casino[ctx.author.id]['number'][0],
-                                                                     *self.casino[ctx.author.id]['color'],
-                                                                     ctx.author.mention),
+                                      "\n{}, Вы  проиграли:(".format(
+                                            self.casino[ctx.author.id]['number'][0],
+                                            self.casino[ctx.author.id]['color'][0],
+                                            ctx.author.mention
+                                        ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
                             self.count = -self.count
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "LosesCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "LosesCount", self.count)
                 except ValueError:
                     if self.texts[ctx.author.id] in roll_types:
                         self.db.take_coins(ctx.author.id, ctx.guild.id, self.count)
@@ -411,11 +415,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif self.texts[ctx.author.id] == "2nd12" and \
                                 24 >= self.casino[ctx.author.id]["number"][0] > 12:
@@ -426,12 +432,12 @@ class Casino(commands.Cog):
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
                                     self.casino[ctx.author.id]["number"][0],
-                                    *self.casino[ctx.author.id]["color"],
+                                    self.casino[ctx.author.id]["color"][0],
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif self.texts[ctx.author.id] == "3rd12" and self.casino[ctx.author.id]["number"][0] > 24:
                             self.count *= 3
@@ -440,11 +446,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif self.texts[ctx.author.id] == "1to18" and \
                                 0 != self.casino[ctx.author.id]["number"][0] <= 18:
@@ -454,11 +462,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif self.texts[ctx.author.id] == "19to36" and \
                                 18 < self.casino[ctx.author.id]["number"][0] <= 36:
@@ -468,11 +478,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif self.texts[ctx.author.id] == "2to1" and self.casino[ctx.author.id]["number"][0] in row1:
                             self.count *= 3
@@ -481,11 +493,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif self.texts[ctx.author.id] == "2to2" and self.casino[ctx.author.id]["number"][0] in row2:
                             self.count *= 3
@@ -494,11 +508,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif self.texts[ctx.author.id] == "2to3" and self.casino[ctx.author.id]["number"][0] in row3:
                             self.count *= 3
@@ -507,11 +523,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'🎰Поздравляем!🎰',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif self.texts[ctx.author.id] == "b" and self.casino[ctx.author.id]["color"][0] == "black":
                             self.count *= 2
@@ -520,11 +538,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'🎰Поздравляем!🎰',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
 
                         elif self.texts[ctx.author.id] == "r" and self.casino[ctx.author.id]["color"][0] == "red":
                             self.count *= 2
@@ -533,11 +553,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'Поздравляем!',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
                         elif self.texts[ctx.author.id] == "ch" and self.casino[ctx.author.id]["number"][0] % 2 == 0:
                             self.count *= 2
                             self.db.add_coins(ctx.author.id, ctx.guild.id, self.count)
@@ -545,11 +567,13 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'🎰Поздравляем!🎰',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
                         elif self.texts[ctx.author.id] == "nch" and self.casino[ctx.author.id]["number"][0] % 2 == 1:
                             self.count *= 2
                             self.db.add_coins(ctx.author.id, ctx.guild.id, self.count)
@@ -557,19 +581,23 @@ class Casino(commands.Cog):
                             self.emb.add_field(
                                 name=f'🎰Поздравляем!🎰',
                                 value="Выпало число {}, {}\n{}, Вы выиграли **{}** DP коинов!".format(
-                                    self.casino[ctx.author.id]["number"][0], *self.casino[ctx.author.id]["color"],
-                                    ctx.author.mention, divide_the_number(self.count)),
+                                    self.casino[ctx.author.id]["number"][0],
+                                    self.casino[ctx.author.id]["color"][0],
+                                    ctx.author.mention, divide_the_number(self.count)
+                                ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
-                            await self.db.stats_update(ctx, "RollsCounts", "Rolls", "WinsCount", self.count)
+                            await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", self.count)
                         else:
                             self.emb = discord.Embed(title="🎰Вы проиграли:(🎰", colour=self.color)
                             self.emb.add_field(
                                 name=f'Сочувствую...',
                                 value="Выпало число {}, {}"
-                                      "\n{}, Вы проиграли:(".format(self.casino[ctx.author.id]['number'][0],
-                                                                    *self.casino[ctx.author.id]['color'],
-                                                                    ctx.author.mention),
+                                      "\n{}, Вы проиграли:(".format(
+                                            self.casino[ctx.author.id]['number'][0],
+                                            self.casino[ctx.author.id]['color'][0],
+                                            ctx.author.mention
+                                        ),
                                 inline=False)
                             await ctx.send(embed=self.emb)
                             await self.db.stats_update(ctx, "RollsCount", "Rolls", "WinsCount", -self.count)

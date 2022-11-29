@@ -1331,7 +1331,7 @@ class Database(object):
         self.part1 = MIMEBase('application', "octet-stream")
 
         self.part1.set_payload(open(self.filename, "rb").read())
-        self.part2.set_payload(open("../logs/develop_logs.dpcb", "rb").read())
+        self.part2.set_payload(open(".logs/develop_logs.dpcb", "rb").read())
 
         encoders.encode_base64(self.part1)
         encoders.encode_base64(self.part2)
