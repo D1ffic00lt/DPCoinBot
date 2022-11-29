@@ -526,8 +526,8 @@ class Database(object):
     def update_card(self, ID: int, type_of_card: str, mode: int) -> Cursor:
         with self.connection:
             return self.cursor.execute(
-                f'UPDATE `Card` SET {type_of_card} = ? WHERE `ID` =?',
-                (type_of_card, mode, ID)
+                f'UPDATE `Card` SET `{type_of_card}` = ? WHERE `ID` = ?',
+                (mode, ID)
             )
 
     def check_user(self, ID: int) -> bool:
