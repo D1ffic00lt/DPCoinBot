@@ -121,8 +121,8 @@ class Casino(commands.Cog):
                 await ctx.send(f"{ctx.author.mention}, Вы не можете поставить ставку меньше 10")
             elif coefficient is None:
                 await ctx.send(f"{ctx.author.mention}, Вы не ввели коэффициент")
-            elif coefficient < 0.04:
-                await ctx.send(f"{ctx.author.mention}, Вы не можете поставить на коэффициент ниже 0.04")
+            elif coefficient < 0.07:
+                await ctx.send(f"{ctx.author.mention}, Вы не можете поставить на коэффициент ниже 0.07")
             elif coefficient > 10:
                 await ctx.send(f"{ctx.author.mention}, Вы не можете поставить на коэффициент больше 10")
             elif self.db.get_cash(ctx.author.id, ctx.guild.id) < bid:
