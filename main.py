@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import warnings
 import discord
 import nest_asyncio
 
@@ -14,6 +15,7 @@ from botsections.functions.version import __version__
 from botsections.functions.helperfunction import get_time, write_log
 from botsections.functions.encoding import Encoder
 
+warnings.filterwarnings("ignore")
 
 print(f"[{get_time()}] [INFO]: Program started")
 write_log(f"[{get_time()}]: [INFO]: Program started")
