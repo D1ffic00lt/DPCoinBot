@@ -221,12 +221,12 @@ class User(commands.Cog):
                     )
                 )
             except TypeError:
-                print(f"[{get_time()}] [ERROR]: TypeError: user.py 199")
+                print(f"[{get_time()}] [ERROR]: TypeError: user.py 224 cash")
         else:
             await ctx.send(
                 embed=create_emb(
                     title="Баланс",
-                    description=f"Баланс пользователя ```{member.mention}``` составляет "
+                    description=f"Баланс пользователя ```{member}``` составляет "
                                 f"```{divide_the_number(self.db.get_cash(member.id, ctx.guild.id))}``` DP коинов"
                 )
             )
