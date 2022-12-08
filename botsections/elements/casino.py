@@ -109,7 +109,7 @@ class Casino(commands.Cog):
                            )
 
     @commands.command(aliases=['fail'])
-    @commands.cooldown(1, 4, commands.BucketType.user)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def __fail(
             self, ctx: commands.context.Context,
             bid: int = None, coefficient: float = None
@@ -121,8 +121,8 @@ class Casino(commands.Cog):
                 await ctx.send(f"{ctx.author.mention}, Вы не можете поставить ставку меньше 10")
             elif coefficient is None:
                 await ctx.send(f"{ctx.author.mention}, Вы не ввели коэффициент")
-            elif coefficient < 0.04:
-                await ctx.send(f"{ctx.author.mention}, Вы не можете поставить на коэффициент ниже 0.04")
+            elif coefficient < 0.07:
+                await ctx.send(f"{ctx.author.mention}, Вы не можете поставить на коэффициент ниже 0.07")
             elif coefficient > 10:
                 await ctx.send(f"{ctx.author.mention}, Вы не можете поставить на коэффициент больше 10")
             elif self.db.get_cash(ctx.author.id, ctx.guild.id) < bid:
@@ -131,7 +131,7 @@ class Casino(commands.Cog):
                 self.db.take_coins(ctx.author.id, ctx.guild.id, bid)
                 self.dropped_coefficient = fail_rand(ctx.author.id)[0]
                 self.color = get_color(ctx.author.roles)
-                if self.dropped_coefficient > coefficient:
+                if self.dropped_coefficient < coefficient:
                     self.emb = discord.Embed(
                         title="🎰Вы проиграли!🎰" +
                               [" Вам выпал 0.00...🎰" if self.dropped_coefficient == 0 else ""][0],
@@ -157,21 +157,21 @@ class Casino(commands.Cog):
                                 pass
                     await self.db.stats_update(ctx, "FailsCount", "Fails", "LosesCount", -bid)
                 else:
-                    self.db.add_coins(ctx.author.id, ctx.guild.id, int(bid * coefficient))
+                    self.db.add_coins(ctx.author.id, ctx.guild.id, bid + int(bid * coefficient))
                     self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                     self.emb.add_field(
                         name=f'🎰Поздравляем!🎰',
                         value=f'Выпало число `{self.dropped_coefficient}`\n{ctx.author}, Вы выиграли '
-                              f'**{divide_the_number(int(bid * coefficient))}** DP коинов!',
+                              f'**{divide_the_number(bid + int(bid * coefficient))}** DP коинов!',
                         inline=False
                     )
                     await ctx.send(embed=self.emb)
-                    await self.db.stats_update(ctx, "FailsCount", "Fails", "WinsCount", int(bid * coefficient))
+                    await self.db.stats_update(ctx, "FailsCount", "Fails", "WinsCount", bid + int(bid * coefficient))
         else:
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=['777'])
-    @commands.cooldown(1, 4, commands.BucketType.user)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino777(self, ctx: commands.context.Context, bid: int = None) -> None:
         if ctx.author.id != 0:
             return
@@ -264,7 +264,7 @@ class Casino(commands.Cog):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=['coinflip'])
-    @commands.cooldown(1, 3, commands.BucketType.user)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino_2(self, ctx: commands.context.Context, count: int = None, member: discord.Member = None):
         self.date_now = get_time()
         self.color = get_color(ctx.author.roles)
@@ -333,7 +333,7 @@ class Casino(commands.Cog):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=["roll"])
-    @commands.cooldown(1, 4, commands.BucketType.user)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def __roll(self, ctx: commands.context.Context, count: int = None, *args):
         self.color = get_color(ctx.author.roles)
         self.count = count
@@ -608,7 +608,7 @@ class Casino(commands.Cog):
             await ctx.send(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
     @commands.command(aliases=['del_games'])
-    @commands.cooldown(1, 4, commands.BucketType.user)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def __del_games(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
             self.db.delete_from_coinflip(ctx.author.id, ctx.guild.id, ctx.guild.id)
@@ -621,7 +621,7 @@ class Casino(commands.Cog):
                 await ctx.send("Ты чё ку-ку? Тебе так нельзя.")
 
     @commands.command(aliases=['reject'])
-    @commands.cooldown(1, 4, commands.BucketType.user)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def __reject(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
             await ctx.send("Вы не ввели человека")
@@ -635,7 +635,7 @@ class Casino(commands.Cog):
             await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['games'])
-    @commands.cooldown(1, 3, commands.BucketType.user)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def __games(self, ctx: commands.context.Context):
         if not self.db.check_coinflip_games(ctx.author.id, ctx.guild.id):
             self.emb = discord.Embed(title="Активные коинфлипы")
@@ -656,7 +656,7 @@ class Casino(commands.Cog):
             await ctx.send("У Вас нет активных игр")
 
     @commands.command(aliases=['accept'])
-    @commands.cooldown(1, 4, commands.BucketType.user)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def __c_accept(self, ctx: commands.context.Context, member: discord.Member = None):
         if member is None:
             await ctx.send("Вы не ввели человека")

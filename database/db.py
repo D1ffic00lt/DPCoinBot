@@ -1181,30 +1181,6 @@ class Database(object):
                 f"получено достижение «Бессмертный»!\nВам начислено 10000 коинов!"
             )
 
-        elif self.get_three_wins_in_row_achievement(member.id, member.guild.id) == 0 and self.wins >= 3:
-            self.add_coins(member.id, member.guild.id, 400)
-            self.set_three_wins_in_row_achievement(member.id, member.guild.id)
-            await member.send(
-                f"На сервере {member.guild} "
-                f"получено достижение «Да я богач!»!\nВам начислено 400 коинов!"
-            )
-
-        elif self.get_ten_wins_in_row_achievement(member.id, member.guild.id) == 0 and self.wins >= 10:
-            self.add_coins(member.id, member.guild.id, 3000)
-            self.set_ten_wins_in_row_achievement(member.id, member.guild.id)
-            await member.send(
-                f"На сервере {member.guild} "
-                f"получено достижение «Это вообще законно?»!\nВам начислено 3000 коинов!"
-            )
-
-        elif self.get_twenty_wins_in_row_achievement(member.id, member.guild.id) == 0 and self.wins >= 20:
-            self.add_coins(member.id, member.guild.id, 20000)
-            self.set_twenty_wins_in_row_achievement(member.id, member.author.id)
-            await member.send(
-                f"На сервере {member.guild} "
-                f"получено достижение «Кажется меня не любят...»!\nВам начислено 20000 коинов!"
-            )
-
     async def cash_check(
         self, ctx: commands.context.Context,
         cash: Union[str, int], max_cash: int = None,
@@ -1257,7 +1233,7 @@ class Database(object):
             pass
         else:
             self.minutes = self.get_minutes(member.id, member.guild.id)
-            self.add_coins(member.id, member.guild.id, self.minutes * (datetime_to_str(get_time()) - self.now2))
+            self.add_coins(member.id, member.guild.id, self.minutes * int(datetime_to_str(get_time()) - self.now2))
             self.delete_from_online(member.id)
             self.update_minutes_in_voice_channels(self.minutes, member.id, member.guild.id)
             self.month = int(datetime.today().strftime('%m'))
@@ -1340,7 +1316,7 @@ class Database(object):
             'Content-Disposition', "attachment; filename= %s" % os.path.basename(self.filename)
         )
         self.part2.add_header(
-            'Content-Disposition', "attachment; filename= %s" % os.path.basename("../logs/develop_logs.dpcb")
+            'Content-Disposition', "attachment; filename= %s" % os.path.basename(".logs/develop_logs.dpcb")
         )
 
         self.msg['From'] = self.encoder.decrypt(settings["sender_email"])
