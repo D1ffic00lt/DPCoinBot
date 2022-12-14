@@ -365,16 +365,16 @@ class User(commands.Cog):
                 )
         self.emb.add_field(name="**Как купить роль?**",
                            value=f'''```diff\n- {settings["prefix"]}buy <Упоминание роли>\n```''')
-        self.db.get_from_item_shop(ctx.guild.id, "ItemID", "ItemName", "ItemCost", order_by="Cost")
+        self.db.get_from_item_shop(ctx.guild.id, "ItemID", "ItemName", "ItemCost", order_by="ItemCost")
         if self.db.get_from_item_shop(
                 ctx.guild.id,
                 "ItemID",
                 "ItemName",
                 "ItemCost",
-                order_by="Cost"
+                order_by="ItemCost"
         ).fetchone() is not None:
             self.emb.add_field(name='**Другое:**\n', value="Сообщение о покупке придет администрации!", inline=False)
-            for row in self.db.get_from_item_shop(ctx.guild.id, "ItemID", "ItemName", "ItemCost", order_by="Cost"):
+            for row in self.db.get_from_item_shop(ctx.guild.id, "ItemID", "ItemName", "ItemCost", order_by="ItemCost"):
                 self.emb.add_field(
                     name=f'**{row[1]}**',
                     value=f'Стоимость: **{row[2]} DP коинов**\n'
@@ -393,18 +393,18 @@ class User(commands.Cog):
         if item is None:
             await ctx.send(f"""{ctx.author}, укажите то, что Вы хотите приобрести""")
         else:
-            self.db.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="Cost")
-            if self.db.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="Cost").fetchone() is None:
+            self.db.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="ItemCost")
+            if self.db.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="ItemCost").fetchone() is None:
                 await ctx.send(f"""{ctx.author}, такого товара не существует!""")
             elif self.db.get_item_from_item_shop(
-                    ctx.guild.id, item, "*", order_by="Cost"
+                    ctx.guild.id, item, "*", order_by="ItemCost"
             ).fetchone()[0] > self.db.get_cash(ctx.author.id, ctx.guild.id):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
             else:
                 self.db.take_coins(
                     ctx.author.id,
                     ctx.guild.id,
-                    self.db.get_item_from_item_shop(ctx.guild.id, item, "Cost", order_by="Cost")
+                    self.db.get_item_from_item_shop(ctx.guild.id, item, "ItemCost", order_by="ItemCost")
                 )
                 await ctx.message.add_reaction('✅')
                 channel = self.bot.get_channel(self.db.get_from_server(ctx.guild.id, "ChannelID"))
@@ -419,10 +419,12 @@ class User(commands.Cog):
         else:
             if role in ctx.author.roles:
                 await ctx.send(f"""{ctx.author}, у Вас уже есть эта роль!""")
-            elif self.db.get_from_shop(ctx.author.id, str(ctx.guild.id), "Cost", order_by="Cost").fetchone() is None:
+            elif self.db.get_from_shop(
+                    ctx.author.id, str(ctx.guild.id), "RoleCost", order_by="RoleCost"
+            ).fetchone() is None:
                 pass
             elif self.db.get_from_shop(
-                    ctx.author.id, str(ctx.guild.id), "Cost", order_by="Cost"
+                    ctx.author.id, str(ctx.guild.id), "RoleCost", order_by="RoleCost"
             ).fetchone()[0] > self.db.get_cash(ctx.author.id, ctx.guild.id):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно средств для покупки этой роли!""")
             else:
@@ -692,7 +694,7 @@ class User(commands.Cog):
             if role in member.roles:
                 await ctx.send(f"""{ctx.author}, у Вас уже есть эта роль!""")
 
-            elif self.db.get_from_shop(ctx.guild.id, "RoleCost", order_by="price", role_id=role.id).fetchone()[0] > \
+            elif self.db.get_from_shop(ctx.guild.id, "RoleCost", order_by="RoleCost", role_id=role.id).fetchone()[0] > \
                     self.db.get_cash(ctx.author.id, ctx.guild.id):
                 await ctx.send(f"""{ctx.author}, у Вас недостаточно денег для покупки этой роли!""")
             else:
@@ -701,7 +703,7 @@ class User(commands.Cog):
                     ctx.author.id,
                     ctx.guild.id,
                     self.db.get_from_shop(
-                        ctx.guild.id, "RoleCost", order_by="price", role_id=role.id
+                        ctx.guild.id, "RoleCost", order_by="RoleCost", role_id=role.id
                                        ).fetchone()[0]
                 )
                 await ctx.message.add_reaction('✅')

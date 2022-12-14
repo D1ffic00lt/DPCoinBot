@@ -185,18 +185,18 @@ class Debug(commands.Cog):
                 self.data.append(server_id)
                 Json(".json/ban_list.json").json_dump(self.data)
 
-    @commands.Cog.listener()
-    async def on_command_error(
-            self, ctx: commands.context.Context, error: Exception
-    ) -> None:
-        if isinstance(error, commands.CommandOnCooldown):
-            pass
-        elif isinstance(error, commands.CommandNotFound):
-            pass
-        else:
-            print(error)
-            try:
-                write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
-                          f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
-            except AttributeError:
-                pass
+    # @commands.Cog.listener()
+    # async def on_command_error(
+    #         self, ctx: commands.context.Context, error: Exception
+    # ) -> None:
+    #     if isinstance(error, commands.CommandOnCooldown):
+    #         pass
+    #     elif isinstance(error, commands.CommandNotFound):
+    #         pass
+    #     else:
+    #         print(error)
+    #         try:
+    #             write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
+    #                       f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
+    #         except AttributeError:
+    #             pass
