@@ -384,7 +384,7 @@ class UserSlash(commands.Cog):
                 self.db.add_coins(member.id, inter.guild.id, cash)
             await inter.response.send_message('✅')
 
-    @app_commands.command(name="+rep")
+    @app_commands.command(name="add_rep")
     @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __good_rep(
@@ -398,7 +398,7 @@ class UserSlash(commands.Cog):
             self.db.add_reputation(inter.user.id, inter.guild.id, 1)
             await inter.response.send_message('✅')
 
-    @app_commands.command(name="-rep")
+    @app_commands.command(name="remove_rep")
     @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __bad_rep(
@@ -420,7 +420,7 @@ class UserSlash(commands.Cog):
         self.guild_id = inter.guild.id if member is None else member.guild.id
         await inter.response.send_message(
             embed=create_emb(
-                title="Статистика {}".format(inter.user),
+                title="Статистика {}".format(inter.user if member is None else member),
                 args=[
                     {
                         "name": f'Coinflips - {self.db.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}',
@@ -454,8 +454,8 @@ class UserSlash(commands.Cog):
                     },
                     {
                         "name": 'Побед/Поражений всего',
-                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "AllWins")}\n '
-                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "AllLoses")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "AllWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "AllLosesCount")}',
                         "inline": True
                     },
                     {
@@ -645,28 +645,23 @@ class UserSlash(commands.Cog):
     @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __promo_codes(self, inter: discord.Interaction) -> None:
-        if inter.guild is None:
-            if not self.db.checking_for_promo_code_existence_in_table_by_id(inter.user.id):
-                await inter.user.send(f"{inter.user.mention}, у Вас нет промокодов!")
-            else:
-                self.emb = discord.Embed(title="Промокоды")
-                for codes in self.db.get_from_promo_codes("", ["Code", "GuildID", "Cash"], ID=inter.user.id):
-                    for guild in self.bot.guilds:
-                        if guild.id == codes[1]:
-                            self.server = guild
-                            break
-                    if self.server is not None:
-                        self.emb.add_field(
-                            name=f"{self.server} - {divide_the_number(codes[2])}",
-                            value=f"{codes[0]}",
-                            inline=False
-                        )
-                await inter.user.send(embed=self.emb)
+        if not self.db.checking_for_promo_code_existence_in_table_by_id(inter.user.id):
+            await inter.user.send(f"{inter.user.mention}, у Вас нет промокодов!")
         else:
-            await inter.response.send_message(
-                f"{inter.user.mention}, эту команду можно использовать только в личных сообщениях бота!",
-                ephemeral=True
-            )
+            self.emb = discord.Embed(title="Промокоды")
+            for codes in self.db.get_from_promo_codes("", ["Code", "GuildID", "Cash"], ID=inter.user.id):
+                for guild in self.bot.guilds:
+                    if guild.id == codes[1]:
+                        self.server = guild
+                        break
+                if self.server is not None:
+                    self.emb.add_field(
+                        name=f"{self.server} - {divide_the_number(codes[2])}",
+                        value=f"{codes[0]}",
+                        inline=False
+                    )
+            await inter.user.send(embed=self.emb)
+            await inter.response.send_message('✅')
 
     @app_commands.command(name="promo_create")
     @app_commands.guilds(493970394374471680)

@@ -382,7 +382,7 @@ class User(commands.Cog):
                     self.db.add_coins(member.id, ctx.guild.id, cash)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["+rep"])
+    @commands.command(aliases=["add_rep"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __good_rep(
             self, ctx: commands.context.Context, member: discord.Member = None
@@ -396,7 +396,7 @@ class User(commands.Cog):
                 self.db.add_reputation(ctx.author.id, ctx.guild.id, 1)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["-rep"])
+    @commands.command(aliases=["remove_rep"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __bad_rep(
             self, ctx: commands.context.Context, member: discord.Member = None
@@ -417,7 +417,7 @@ class User(commands.Cog):
         self.guild_id = ctx.guild.id if member is None else member.guild.id
         await ctx.send(
             embed=create_emb(
-                title="Статистика {}".format(ctx.author),
+                title="Статистика {}".format(ctx.author if member is None else member),
                 args=[
                     {
                         "name": f'Coinflips - {self.db.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}',
@@ -451,8 +451,8 @@ class User(commands.Cog):
                     },
                     {
                         "name": 'Побед/Поражений всего',
-                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "AllWins")}\n '
-                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "AllLoses")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "AllWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "AllLosesCount")}',
                         "inline": True
                     },
                     {
