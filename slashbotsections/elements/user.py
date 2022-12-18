@@ -325,7 +325,7 @@ class UserSlash(commands.Cog):
             )
             channel = self.bot.get_channel(self.db.get_from_server(inter.guild.id, "ChannelID"))
             await channel.send(f"Покупка {inter.user.mention} товар номер {item}")
-            await inter.response.send_message("✅ Администрация скоро выдаст Вам товар! ✅", ephemeral=True)
+            await inter.response.send_message("✅ Администрация скоро выдаст Вам товар! ✅")
 
     @app_commands.command(name="buy")
     @app_commands.guilds(493970394374471680)
@@ -361,4 +361,49 @@ class UserSlash(commands.Cog):
                         role_id=role.id
                     )
                 )
-                await inter.response.send_message('✅', ephemeral=True)
+                await inter.response.send_message('✅')
+
+    @app_commands.command(name="send")
+    @app_commands.guilds(493970394374471680)
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __send(
+            self, inter: discord.Interaction,
+            member: discord.Member, cash: int
+    ) -> None:
+        if await self.db.cash_check(inter, cash, check=True):
+            if member.id == inter.user.id:
+                await inter.response.send_message(
+                    f"""{inter.user}, Вы не можете перевести деньги себе""", ephemeral=True
+                )
+            else:
+                self.db.take_coins(inter.user.id, inter.guild.id, cash)
+                self.db.add_coins(member.id, inter.guild.id, cash)
+            await inter.response.send_message('✅')
+
+    @app_commands.command(name="+rep")
+    @app_commands.guilds(493970394374471680)
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __good_rep(
+            self, inter: discord.Interaction, member: discord.Member
+    ) -> None:
+        if member.id == inter.user.id:
+            await inter.response.send_message(
+                f"{inter.user}, Вы не можете повысить репутацию самому себе", ephemeral=True
+            )
+        else:
+            self.db.add_reputation(inter.user.id, inter.guild.id, 1)
+            await inter.response.send_message('✅')
+
+    @app_commands.command(name="-rep")
+    @app_commands.guilds(493970394374471680)
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __bad_rep(
+            self, inter: discord.Interaction, member: discord.Member
+    ) -> None:
+        if member.id == inter.user.id:
+            await inter.response.send_message(
+                f"{inter.user}, Вы не можете понизить репутацию самому себе", ephemeral=True
+                 )
+        else:
+            self.db.add_reputation(inter.user.id, inter.guild.id, -1)
+            await inter.response.send_message('✅')
