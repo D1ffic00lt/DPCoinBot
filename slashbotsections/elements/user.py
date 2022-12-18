@@ -1,11 +1,15 @@
+import io
 import os
 import discord
+import requests
 
 from discord.ext import commands
 from discord import app_commands
+from PIL import Image, ImageFont, ImageDraw
 
 from botsections.functions.config import settings
-from botsections.functions.helperfunction import get_time, write_log, create_emb, divide_the_number, get_color
+from botsections.functions.helperfunction import get_time, write_log, create_emb, divide_the_number, get_color, crop, \
+    prepare_mask
 from botsections.functions.json_ import Json
 from database.db import Database
 
@@ -407,3 +411,179 @@ class UserSlash(commands.Cog):
         else:
             self.db.add_reputation(inter.user.id, inter.guild.id, -1)
             await inter.response.send_message('✅')
+
+    @app_commands.command(name="stats")
+    @app_commands.guilds(493970394374471680)
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __stats(self, inter: discord.Interaction, member: discord.Member = None) -> None:
+        self.ID = inter.user.id if member is None else member.id
+        self.guild_id = inter.guild.id if member is None else member.guild.id
+        await inter.response.send_message(
+            embed=create_emb(
+                title="Статистика {}".format(inter.user),
+                args=[
+                    {
+                        "name": f'Coinflips - {self.db.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "CoinFlipsLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": f'Rust casinos - {self.db.get_stat(self.ID, self.guild_id, "RustCasinosCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "RustCasinoWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "RustCasinoLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": f'Rolls - {self.db.get_stat(self.ID, self.guild_id, "RollsCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "RollsWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "RollsLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": f'Fails - {self.db.get_stat(self.ID, self.guild_id, "FailsCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "FailsWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "FailsLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": f'777s - {self.db.get_stat(self.ID, self.guild_id, "ThreeSevensCount")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "ThreeSevensWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "ThreeSevensLosesCount")}',
+                        "inline": True
+                    },
+                    {
+                        "name": 'Побед/Поражений всего',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "AllWins")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "AllLoses")}',
+                        "inline": True
+                    },
+                    {
+                        "name": 'Выиграно всего',
+                        "value": divide_the_number(
+                            self.db.get_stat(
+                                self.ID,
+                                self.guild_id,
+                                "EntireAmountOfWinnings"
+                            )
+                        ),
+                        "inline": True
+                    },
+                    {
+                        "name": 'Минут в голосовых каналах',
+                        "value": f'{self.db.get_stat(self.ID, self.guild_id, "MinutesInVoiceChannels")} минут',
+                        "inline": True
+                    },
+                    {
+                        "name": 'Сообщений в чате',
+                        "value": f'{self.db.get_stat(self.ID, self.guild_id, "MessagesCount")} сообщений в чате',
+                        "inline": True
+                    },
+                    {
+                        "name": f'{self.db.get_stat(self.ID, self.guild_id, "ChatLevel")} левел в чате',
+                        "value": '{} опыта до следующего левела, {} опыта всего',
+                        "inline": True
+                    }
+                ]
+            )
+        )
+
+    @app_commands.command(name="card")
+    @app_commands.guilds(493970394374471680)
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __card(self, inter: discord.Interaction) -> None:
+        self.img = Image.new("RGBA", (500, 300), "#323642")
+        self.response = requests.get(str(inter.user.guild_avatar.url)[:-10], stream=True)
+        self.response = Image.open(io.BytesIO(self.response.content))
+        self.response = self.response.convert("RGBA")
+        self.response = self.response.resize((100, 100), Image.ANTIALIAS)
+        self.response.save(f".intermediate_files/avatar{inter.user.id}.png")
+
+        self.avatar = Image.open(f'.intermediate_files/avatar{inter.user.id}.png')
+        self.avatar = crop(self.avatar, (100, 100))
+        self.avatar.putalpha(prepare_mask((100, 100), 4))
+        self.avatar.save(f'.intermediate_files/out_avatar{inter.user.id}.png')
+
+        self.img.alpha_composite(
+            self.response, (15, 15)
+        )
+
+        self.image_draw = ImageDraw.Draw(self.img)
+        self.wins = 0
+        self.loses = 0
+        self.minutes_in_voice = 0
+        self.messages = 0
+
+        for i in self.db.get_card(inter.user.id, inter.guild.id):
+            self.wins += i[0]
+            self.loses += i[1]
+            self.minutes_in_voice += i[2]
+            self.messages += i[3]
+
+        self.image_draw.text(
+            (130, 15),
+            f"{inter.user.name}#{inter.user.discriminator}",
+            font=ImageFont.truetype('calibri.ttf', size=30)
+        )
+        self.image_draw.text(
+            (130, 45),
+            f"ID: {inter.user.id}",
+            font=ImageFont.truetype("calibri.ttf", size=20)
+        )
+        self.image_draw.text(
+            (15, 125),
+            f"Wins: {self.wins}",
+            font=ImageFont.truetype("calibrib.ttf", size=25)
+        )
+        self.image_draw.text(
+            (15, 160),
+            f"Loses: {divide_the_number(self.loses)}",
+            font=ImageFont.truetype("calibrib.ttf", size=25)
+        )
+        self.image_draw.text(
+            (15, 195),
+            f"Minutes in voice: {divide_the_number(self.minutes_in_voice)}",
+            font=ImageFont.truetype("calibrib.ttf", size=25)
+        )
+        self.image_draw.text(
+            (15, 230),
+            f"Messages: {divide_the_number(self.messages)}",
+            font=ImageFont.truetype("calibrib.ttf", size=25)
+        )
+        self.images = []
+        self.verification,  self.developer, self.coder = \
+            self.db.get_from_card(inter.user.id, "Verification", "Developer", "Coder")
+        if int(self.verification) == 1:
+            self.image = Image.open("files/green_galka.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        elif int(self.verification) == 2:
+            self.image = Image.open("files/galka.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        if int(self.developer) == 1:
+            self.image = Image.open("files/developer.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        if int(self.coder) == 1:
+            self.image = Image.open("files/cmd.png")
+            self.image = self.image.convert("RGBA")
+            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
+            self.images.append(self.image)
+        if len(self.images) != 0:
+            self.x = 128
+            for i in range(len(self.images)):
+                self.img.alpha_composite(self.images[i], (self.x, 70))
+                self.x += 35
+
+        self.img.save(f'.intermediate_files/user_card{inter.user.id}.png')
+
+        await inter.response.send_message(
+            file=discord.File(fp=f'.intermediate_files/user_card{inter.user.id}.png')
+        )
+        os.remove(f".intermediate_files/user_card{inter.user.id}.png")
+        os.remove(f".intermediate_files/avatar{inter.user.id}.png")
+        os.remove(f".intermediate_files/out_avatar{inter.user.id}.png")
