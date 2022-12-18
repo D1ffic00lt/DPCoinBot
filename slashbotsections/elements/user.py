@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
+from botsections.functions.config import settings
 from botsections.functions.helperfunction import get_time, write_log, create_emb, divide_the_number, get_color
 from botsections.functions.json_ import Json
 from database.db import Database
@@ -79,8 +80,8 @@ class UserSlash(commands.Cog):
                     description=f"Баланс пользователя ```{inter.user}``` составляет "
                                 f"```{divide_the_number(self.db.get_cash(inter.user.id, inter.guild.id))}```"
                                 f" DP коинов\n\nБаланс в банке составляет"
-                                f"```{divide_the_number(self.db.get_cash(inter.user.id, inter.guild.id, bank=True))}``` "
-                                f"DP коинов\n\nВсего коинов - `"
+                                f"```{divide_the_number(self.db.get_cash(inter.user.id, inter.guild.id, bank=True))}```"
+                                f" DP коинов\n\nВсего коинов - `"
                                 f"""{divide_the_number(
                                     self.db.get_cash(
                                         inter.user.id,
@@ -264,3 +265,100 @@ class UserSlash(commands.Cog):
                     inline=False
                 )
             await inter.response.send_message(embed=self.emb)
+
+    @app_commands.command(name="shop")
+    @app_commands.guilds(493970394374471680)
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __shop(self, inter: discord.Interaction):
+        self.emb = discord.Embed(title="Магазин ролей")
+        for row in self.db.get_from_shop(inter.guild.id, "RoleID", "RoleCost", order_by="RoleCost"):
+            if inter.guild.get_role(row[0]) is not None:
+                self.emb.add_field(
+                    name=f'Роль {inter.guild.get_role(row[0]).mention}',
+                    value=f'Стоимость: **{row[1]} DP коинов**',
+                    inline=False
+                )
+        self.emb.add_field(
+            name="**Как купить роль?**",
+            value=f'''```diff\n- {settings["prefix"]}buy <Упоминание роли>\n```'''
+        )
+        self.db.get_from_item_shop(inter.guild.id, "ItemID", "ItemName", "ItemCost", order_by="ItemCost")
+        if self.db.get_from_item_shop(
+                inter.guild.id,
+                "ItemID",
+                "ItemName",
+                "ItemCost",
+                order_by="ItemCost"
+        ).fetchone() is not None:
+            self.emb.add_field(name='**Другое:**\n', value="Сообщение о покупке придет администрации!", inline=False)
+            for row in self.db.get_from_item_shop(
+                    inter.guild.id, "ItemID", "ItemName", "ItemCost", order_by="ItemCost"
+            ):
+                self.emb.add_field(
+                    name=f'**{row[1]}**',
+                    value=f'Стоимость: **{row[2]} DP коинов**\n'
+                          f'Чтобы купить {settings["prefix"]}buy_item {row[0]}',
+                    inline=False
+                )
+
+        self.emb.add_field(
+            name="**Чтобы купить роль:**",
+            value=f"```diff\n- {settings['prefix']}buy @роль, которую Вы хотите купить\n```")
+        await inter.response.send_message(embed=self.emb)
+
+    @app_commands.command(name="buy_item")
+    @app_commands.guilds(493970394374471680)
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __buy_item(self, inter: discord.Interaction, item: int):
+        self.db.get_item_from_item_shop(inter.guild.id, item, "*", order_by="ItemCost")
+        if self.db.get_item_from_item_shop(inter.guild.id, item, "*", order_by="ItemCost").fetchone() is None:
+            await inter.response.send_message(f"""{inter.user}, такого товара не существует!""", ephemeral=True)
+        elif self.db.get_item_from_item_shop(
+                inter.guild.id, item, "*", order_by="ItemCost"
+        ).fetchone()[0] > self.db.get_cash(inter.user.id, inter.guild.id):
+            await inter.response.send_message(f"""{inter.user}, у Вас недостаточно средств!""", ephemeral=True)
+        else:
+            self.db.take_coins(
+                inter.user.id,
+                inter.guild.id,
+                self.db.get_item_from_item_shop(inter.guild.id, item, "ItemCost", order_by="ItemCost")
+            )
+            channel = self.bot.get_channel(self.db.get_from_server(inter.guild.id, "ChannelID"))
+            await channel.send(f"Покупка {inter.user.mention} товар номер {item}")
+            await inter.response.send_message("✅ Администрация скоро выдаст Вам товар! ✅", ephemeral=True)
+
+    @app_commands.command(name="buy")
+    @app_commands.guilds(493970394374471680)
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def __buy(self, inter: discord.Interaction, role: discord.Role):
+        if role is None:
+            await inter.response.send_message(
+                f"{inter.user}, укажите роль, которую Вы хотите приобрести", ephemeral=True
+            )
+        else:
+            if role in inter.user.roles:
+                await inter.response.send(f"{inter.user}, у Вас уже есть эта роль!", ephemeral=True)
+            elif self.db.get_from_shop(
+                    inter.user.id, str(inter.guild.id), "RoleCost", order_by="RoleCost"
+            ).fetchone() is None:
+                pass
+            elif self.db.get_from_shop(
+                    inter.user.id, str(inter.guild.id), "RoleCost", order_by="RoleCost"
+            ).fetchone()[0] > self.db.get_cash(inter.user.id, inter.guild.id):
+                await inter.response.send_message(
+                    f"{inter.user}, у Вас недостаточно средств для покупки этой роли!",
+                    ephemeral=True
+                )
+            else:
+                await inter.user.add_roles(role)
+                self.db.take_coins(
+                    inter.user.id,
+                    inter.guild.id,
+                    self.db.get_from_shop(
+                        inter.guild.id,
+                        "RoleCost",
+                        order_by="RoleCost",
+                        role_id=role.id
+                    )
+                )
+                await inter.response.send_message('✅', ephemeral=True)
