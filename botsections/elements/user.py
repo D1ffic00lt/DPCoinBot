@@ -51,6 +51,9 @@ class User(commands.Cog):
         self.wins: int = 0
         self.loses: int = 0
         self.minutes_in_voice: int = 0
+        self.lvl: int = 0
+        self.all_xp: int = 0
+        self.xp: int = 0
         self.messages: int = 0
         self.cash: int = 0
         self.code: str = ""
@@ -415,6 +418,9 @@ class User(commands.Cog):
     async def __stats(self, ctx: commands.context.Context, member: discord.Member = None) -> None:
         self.ID = ctx.author.id if member is None else member.id
         self.guild_id = ctx.guild.id if member is None else member.guild.id
+        self.lvl = self.db.get_stat(self.ID, self.guild_id, "ChatLevel")
+        self.all_xp = self.db.get_user_xp(ctx.author.id if member is None else member.id, ctx.guild.id)
+        self.xp = self.db.get_xp(self.lvl + 1) - self.all_xp
         await ctx.send(
             embed=create_emb(
                 title="Статистика {}".format(ctx.author if member is None else member),
@@ -477,8 +483,9 @@ class User(commands.Cog):
                         "inline": True
                     },
                     {
-                        "name": f'{self.db.get_stat(self.ID, self.guild_id, "ChatLevel")} левел в чате',
-                        "value": '{} опыта до следующего левела, {} опыта всего',
+                        "name": f'{self.lvl} левел в чате',
+                        "value": f'{divide_the_number(self.xp)} опыта до следующего левела, '
+                                 f'{divide_the_number(self.all_xp)} опыта всего',
                         "inline": True
                     }
                 ]

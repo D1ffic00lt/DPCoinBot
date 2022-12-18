@@ -427,6 +427,12 @@ class Database(object):
     def get_from_levels(self, *args: str) -> Any:
         return self.cursor.execute(f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Levels`")
 
+    def get_user_xp(self, ID: int, guild_id: int) -> int:
+        return self.cursor.execute(
+            f"SELECT `Xp` FROM `Users` WHERE ID = ? AND GuildID = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
+
     def get_from_user(
         self, guild_id: int, *args: str,
         order_by: str, limit: int = None

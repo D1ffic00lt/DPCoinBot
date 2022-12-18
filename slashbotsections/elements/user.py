@@ -1,5 +1,7 @@
 import io
 import os
+from typing import Union
+
 import discord
 import requests
 
@@ -22,13 +24,42 @@ class UserSlash(commands.Cog):
     NAME = 'user slash module'
 
     __slots__ = (
-        "db", "bot",
+        "db", "bot", "name", "color", "all_cash",
+        "level", "counter", "index", "ID",
+        "guild_id", "server", "js",
+        "emb", "img", "image_draw", "wins",
+        "loses", "minutes_id_voice", "messages", "cash",
+        "code", "code2", "response", "avatar"
     )
 
     def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot: commands.Bot = bot
+        self.server: Union[discord.Guild, type(None)]
+        self.bot: commands.Bot = bot
+        self.name: discord.Member
+        self.color: discord.Color
+        self.emb: discord.Embed
+        self.img: Image
+        self.image_draw: ImageDraw
+        self.all_cash: int
+        self.level: int
+        self.counter: int = 0
+        self.index: int = 0
+        self.ID: int = 0
+        self.guild_id: int = 0
+        self.wins: int = 0
+        self.loses: int = 0
+        self.minutes_in_voice: int = 0
+        self.lvl: int = 0
+        self.all_xp: int = 0
+        self.xp: int = 0
+        self.messages: int = 0
+        self.cash: int = 0
+        self.code: str = ""
+        self.code2: str = ""
+        self.js: dict = {}
         print(f"[{get_time()}] [INFO]: User (slash) connected")
         write_log(f"[{get_time()}] [INFO]: User (slash) connected")
 
@@ -418,6 +449,10 @@ class UserSlash(commands.Cog):
     async def __stats(self, inter: discord.Interaction, member: discord.Member = None) -> None:
         self.ID = inter.user.id if member is None else member.id
         self.guild_id = inter.guild.id if member is None else member.guild.id
+        self.lvl = self.db.get_stat(self.ID, self.guild_id, "ChatLevel")
+        self.all_xp = self.db.get_user_xp(inter.user.id if member is None else member.id, inter.guild.id)
+        self.xp = self.db.get_xp(self.lvl + 1) - self.all_xp
+
         await inter.response.send_message(
             embed=create_emb(
                 title="Статистика {}".format(inter.user if member is None else member),
@@ -480,8 +515,9 @@ class UserSlash(commands.Cog):
                         "inline": True
                     },
                     {
-                        "name": f'{self.db.get_stat(self.ID, self.guild_id, "ChatLevel")} левел в чате',
-                        "value": '{} опыта до следующего левела, {} опыта всего',
+                        "name": f'{self.lvl} левел в чате',
+                        "value": f'{divide_the_number(self.xp)} опыта до следующего левела, '
+                                 f'{divide_the_number(self.all_xp)} опыта всего',
                         "inline": True
                     }
                 ]
