@@ -185,18 +185,30 @@ class Debug(commands.Cog):
                 self.data.append(server_id)
                 Json(".json/ban_list.json").json_dump(self.data)
 
-    # @commands.Cog.listener()
-    # async def on_command_error(
-    #         self, ctx: commands.context.Context, error: Exception
-    # ) -> None:
-    #     if isinstance(error, commands.CommandOnCooldown):
-    #         pass
-    #     elif isinstance(error, commands.CommandNotFound):
-    #         pass
-    #     else:
-    #         print(error)
-    #         try:
-    #             write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
-    #                       f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
-    #         except AttributeError:
-    #             pass
+    @commands.command()
+    async def sync(self, ctx: commands.context.Context, type_: str = "local"):
+        if ctx.author.id == 401555829620211723:
+            if type_ == "global":
+                fmt = await ctx.bot.tree.sync()
+                await ctx.send(f"Synced {len(fmt)} (global)")
+            else:
+                fmt = await ctx.bot.tree.sync(guild=ctx.guild)
+                await ctx.send(f"Synced {len(fmt)}")
+        else:
+            await ctx.message.add_reaction('❌')
+
+    @commands.Cog.listener()
+    async def on_command_error(
+            self, ctx: commands.context.Context, error: Exception
+    ) -> None:
+        if isinstance(error, commands.CommandOnCooldown):
+            pass
+        elif isinstance(error, commands.CommandNotFound):
+            pass
+        else:
+            print(error)
+            try:
+                write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
+                          f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")
+            except AttributeError:
+                pass

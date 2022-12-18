@@ -21,6 +21,7 @@ class DPcoinBOT(commands.Bot):
         self.remove_command('help')
 
     async def on_ready(self) -> None:
+        await self.wait_until_ready()
         await self.change_presence(
             status=discord.Status.online,
             activity=discord.Game(f"{settings['prefix']}help")

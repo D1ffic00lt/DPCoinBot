@@ -162,18 +162,18 @@ class NewYear(commands.Cog):
                 if count is None:
                     self.prize = random.randint(100, 3500)
                     self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
-                    self.db.add_present(ctx.author.id, ctx.guild.id, -1)
+                    self.db.take_present(1, ctx.author.id, ctx.guild.id)
                     await ctx.send(f"{ctx.author.mention}, из подарка выпало {self.prize} коинов! Поздравляем!")
                 elif count == "all":
                     self.prize = sum(random.randint(100, 3500) for _ in range(self.present))
                     self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                     await ctx.send(f"{ctx.author.mention}, из подарков выпало {self.prize} коинов! Поздравляем!")
-                    self.db.add_present(ctx.author.id, ctx.guild.id, -self.present)
+                    self.db.take_present(self.present, ctx.author.id, ctx.guild.id)
                 else:
                     try:
                         self.prize = sum(random.randint(100, 3500) for _ in range(int(count)))
                         self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
-                        self.db.add_present(ctx.author.id, ctx.guild.id, -count)
+                        self.db.take_present(count, ctx.author.id, ctx.guild.id)
                         await ctx.send(f"{ctx.author.mention}, из подарков выпало {self.prize} коинов! Поздравляем!")
                     except TypeError:
                         pass
