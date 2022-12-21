@@ -1,9 +1,11 @@
 *.DS_Store
 *.db
 *.dpcb
-.idea/
-*__pycache__/
+*__pycache__
+
+.idea
 .json
 .logs
 .intermediate_files
+
 files/gg.png

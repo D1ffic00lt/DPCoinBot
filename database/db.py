@@ -1238,7 +1238,6 @@ class Database(object):
                     if isinstance(ctx, commands.context.Context):
                         await ctx.send(self.message)
                     else:
-
                         await ctx.response.send_message(self.message, ephemeral=True)
                 else:
                     return True
