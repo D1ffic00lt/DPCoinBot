@@ -10,8 +10,11 @@ from discord import app_commands
 from PIL import Image, ImageFont, ImageDraw
 
 from botsections.functions.config import settings
-from botsections.functions.helperfunction import get_time, write_log, create_emb, divide_the_number, get_color, crop, \
+from botsections.functions.helperfunction import (
+    get_time, write_log, create_emb,
+    divide_the_number, get_color, crop,
     prepare_mask, get_promo_code
+)
 from botsections.functions.json_ import Json
 from database.db import Database
 
@@ -107,7 +110,6 @@ class UserSlash(commands.Cog):
             action: app_commands.Choice[str] = None,
             cash: int = None
     ) -> None:
-        print(action, cash)
         if action is None:
             await inter.response.send_message(
                 embed=create_emb(

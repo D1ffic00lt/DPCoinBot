@@ -2,8 +2,6 @@
 import datetime
 import smtplib
 import sqlite3
-
-import discord
 import numpy as np
 
 from email import encoders

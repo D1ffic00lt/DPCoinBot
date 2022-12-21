@@ -62,7 +62,7 @@ class User(commands.Cog):
         print(f"[{get_time()}] [INFO]: User connected")
         write_log(f"[{get_time()}] [INFO]: User connected")
 
-    @commands.command(aliases=['slb'])
+    @commands.command(aliases=["slb"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __slb(self, ctx: commands.context.Context) -> None:
         self.all_cash = 0
