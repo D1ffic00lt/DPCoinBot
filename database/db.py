@@ -23,7 +23,8 @@ class Database(object):
         "filename", "time", "now2", "minutes", "day",
         "month", "prises", "valentine", "valentine",
         "connection", "cursor", "wins", "loses",
-        "message", "mention", "author_id"
+        "message", "mention", "author_id",
+        "check_str_cash"
     )
 
     def __init__(self, filename: str, encoder: Encoder) -> None:
@@ -32,6 +33,7 @@ class Database(object):
         self.msg: MIMEMultipart = MIMEMultipart()
         self.part2: MIMEBase = MIMEBase('application', "octet-stream")
         self.part1: MIMEBase = MIMEBase('application', "octet-stream")
+        self.check_str_cash = lambda cash, user_cash: int(cash) > user_cash if cash.isdigit() else False
         self.time = None
         self.now2 = None
         self.minutes: int = 0
@@ -1211,7 +1213,7 @@ class Database(object):
                 await ctx.send(self.message)
             else:
                 await ctx.response.send_message(self.message, ephemeral=True)
-        elif check and cash > self.get_cash(self.author_id, ctx.guild.id):
+        elif check and self.check_str_cash(cash, self.get_cash(self.author_id, ctx.guild.id)):
             self.message = f"{self.mention}, у Вас недостаточно средств!"
             if isinstance(ctx, commands.context.Context):
                 await ctx.send(self.message)
@@ -1228,18 +1230,15 @@ class Database(object):
                         await ctx.send(self.message)
                     else:
                         await ctx.response.send_message(self.message, ephemeral=True)
-                else:
-                    return True
+                return True
             elif max_cash is None:
                 if int(cash) < min_cash and ctx.author.id != 401555829620211723:
                     self.message = f'{self.mention}, нельзя ввести число меньше {divide_the_number(min_cash)}!'
                     if isinstance(ctx, commands.context.Context):
                         await ctx.send(self.message)
                     else:
-
                         await ctx.response.send_message(self.message, ephemeral=True)
-                else:
-                    return True
+                return True
         return False
 
     async def stats_update(

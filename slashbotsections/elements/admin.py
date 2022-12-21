@@ -42,7 +42,7 @@ class AdminSlash(commands.Cog):
                     await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
             else:
-                self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
+                self.role = discord.utils.get(inter.guild.roles, id=self.administrator_role_id)
                 if self.role not in inter.user.roles:
                     await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
@@ -61,7 +61,7 @@ class AdminSlash(commands.Cog):
                     await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
             else:
-                self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
+                self.role = discord.utils.get(inter.guild.roles, id=self.administrator_role_id)
                 if self.role not in inter.user.roles:
                     await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
@@ -85,7 +85,7 @@ class AdminSlash(commands.Cog):
                     await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
             else:
-                self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
+                self.role = discord.utils.get(inter.guild.roles, id=self.administrator_role_id)
                 if self.role not in inter.user.roles:
                     await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
@@ -106,7 +106,7 @@ class AdminSlash(commands.Cog):
                     await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
             else:
-                self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
+                self.role = discord.utils.get(inter.guild.roles, id=self.administrator_role_id)
                 if self.role not in inter.user.roles:
                     await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
