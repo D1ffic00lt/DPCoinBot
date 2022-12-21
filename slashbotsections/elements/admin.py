@@ -27,6 +27,7 @@ class AdminSlash(commands.Cog):
         self.bot = bot
         self.msg: str
         self.ind: int
+        self.administrator_role_id: int
         print(f"[{get_time()}] [INFO]: AdminSlash connected")
         write_log(f"[{get_time()}] [INFO]: AdminSlash connected")
 
@@ -34,119 +35,98 @@ class AdminSlash(commands.Cog):
     @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give(self, inter: discord.Interaction, member: discord.Member, cash: int) -> None:
-        if isinstance(self.db.get_administrator_role_id(inter.guild.id), bool):
-            if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
-                if await self.db.cash_check(inter, cash, max_cash=1000000):
-                    self.db.add_coins(member.id, inter.guild.id, cash)
-                    await inter.response.send_message('✅')
+        self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
+        if inter.user.id != 401555829620211723:
+            if isinstance(self.administrator_role_id, bool):
+                if not inter.user.guild_permissions.administrator:
+                    await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
+                    return
             else:
-                await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
-        else:
-            self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
-            if self.role in inter.user.roles or inter.user.id == 401555829620211723:
-                if await self.db.cash_check(inter, cash, max_cash=1000000):
-                    self.db.add_coins(member.id, inter.guild.id, cash)
-                    await inter.response.send_message('✅')
-            else:
-                await inter.response.send_message("У Вас недостаточно прав для использования данной команды!",
-                                                  ephemeral=True)
+                self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
+                if self.role not in inter.user.roles:
+                    await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
+                    return
+        if await self.db.cash_check(inter, cash, max_cash=1000000):
+            self.db.add_coins(member.id, inter.guild.id, cash)
+            await inter.response.send_message('✅')
 
     @app_commands.command(name="take")
     @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __take(self, inter: discord.Interaction, member: discord.Member, cash: int) -> None:
-        if isinstance(self.db.get_administrator_role_id(inter.guild.id), bool):
-            if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
-                if await self.db.cash_check(inter, cash, max_cash=1000000):
-                    if cash == "all":
-                        self.db.take_coins(member.id, inter.guild.id, self.db.get_cash(member.id, inter.guild.id))
-                    else:
-                        self.db.take_coins(member.id, inter.guild.id, cash)
-                    await inter.response.send_message('✅')
+    async def __take(self, inter: discord.Interaction, member: discord.Member, cash: str) -> None:
+        self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
+        if inter.user.id != 401555829620211723:
+            if isinstance(self.administrator_role_id, bool):
+                if not inter.user.guild_permissions.administrator:
+                    await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
+                    return
             else:
-                await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
-        else:
-            self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
-            if self.role in inter.user.roles or inter.user.id == 401555829620211723:
-                if await self.db.cash_check(inter, cash, max_cash=1000000):
-                    if cash == "all":
-                        self.db.take_coins(member.id, inter.guild.id, self.db.get_cash(member.id, inter.guild.id))
-                    else:
-                        self.db.take_coins(member.id, inter.guild.id, cash)
-                    await inter.response.send_message('✅')
+                self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
+                if self.role not in inter.user.roles:
+                    await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
+                    return
+        if await self.db.cash_check(inter, cash, max_cash=1000000):
+            if cash != "all" and not cash.isdigit():
+                return
+            elif cash == "all":
+                self.db.take_coins(member.id, inter.guild.id, self.db.get_cash(member.id, inter.guild.id))
             else:
-                await inter.response.send_message("У Вас недостаточно прав для использования данной команды!",
-                                                  ephemeral=True)
+                self.db.take_coins(member.id, inter.guild.id, int(cash))
+            await inter.response.send_message('✅')
 
     @app_commands.command(name="give-role")
     @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give_role(self, inter: discord.Interaction, role: discord.Role, cash: int) -> None:
-        if isinstance(self.db.get_administrator_role_id(inter.guild.id), bool):
-            if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
-                if await self.db.cash_check(inter, cash, max_cash=1000000):
-                    for member in inter.guild.members:
-                        if get(member.roles, id=role.id):
-                            self.db.add_coins(member.id, inter.guild.id, cash)
-                    await inter.response.send_message('✅')
-
+        self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
+        if inter.user.id != 401555829620211723:
+            if isinstance(self.administrator_role_id, bool):
+                if not inter.user.guild_permissions.administrator:
+                    await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
+                    return
             else:
-                await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
-        else:
-            self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
-            if self.role in inter.user.roles or inter.user.id == 401555829620211723:
-                if await self.db.cash_check(inter, cash, max_cash=1000000):
-                    for member in inter.guild.members:
-                        if get(member.roles, id=role.id):
-                            self.db.add_coins(member.id, inter.guild.id, cash)
-                    await inter.response.send_message('✅')
-            else:
-                await inter.response.send_message("У Вас недостаточно прав для использования данной команды!",
-                                                  ephemeral=True)
+                self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
+                if self.role not in inter.user.roles:
+                    await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
+                    return
+        if await self.db.cash_check(inter, cash, max_cash=1000000):
+            for member in inter.guild.members:
+                if get(member.roles, id=role.id):
+                    self.db.add_coins(member.id, inter.guild.id, cash)
+            await inter.response.send_message('✅')
 
     @app_commands.command(name="take-role")
     @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __take_role(self, inter: discord.Interaction, role: discord.Role, cash) -> None:
-        if isinstance(self.db.get_administrator_role_id(inter.guild.id), bool):
-            if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
-                if await self.db.cash_check(inter, cash, max_cash=1000000):
-                    if cash == "all":
-                        for member in inter.guild.members:
-                            if get(member.roles, id=role.id):
-                                self.db.take_coins(
-                                    member.id,
-                                    inter.guild.id,
-                                    self.db.get_cash(member.id, inter.guild.id)
-                                )
-                        await inter.response.send_message('✅')
-                    else:
-                        for member in inter.guild.members:
-                            if get(member.roles, id=role.id):
-                                self.db.take_coins(member.id, inter.guild.id, cash)
-                        await inter.response.send_message('✅')
+    async def __take_role(self, inter: discord.Interaction, role: discord.Role, cash: str) -> None:
+        self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
+        if inter.user.id != 401555829620211723:
+            if isinstance(self.administrator_role_id, bool):
+                if not inter.user.guild_permissions.administrator:
+                    await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
+                    return
             else:
-                await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
-        else:
-            self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
-            if self.role in inter.user.roles or inter.user.id == 401555829620211723:
-                if await self.db.cash_check(inter, cash, max_cash=1000000):
-                    if cash == "all":
-                        for member in inter.guild.members:
-                            if get(member.roles, id=role.id):
-                                self.db.take_coins(
-                                    member.id, inter.guild.id,
-                                    self.db.get_cash(member.id, inter.guild.id)
-                                )
-                        await inter.response.send_message('✅')
-                    else:
-                        for member in inter.guild.members:
-                            if get(member.roles, id=role.id):
-                                self.db.take_coins(member.id, inter.guild.id, cash)
-                        await inter.response.send_message('✅')
+                self.role = discord.utils.get(inter.guild.roles, id=self.db.get_administrator_role_id(inter.guild.id))
+                if self.role not in inter.user.roles:
+                    await inter.response.send_message("У Вас нет прав для использования этой команды", ephemeral=True)
+                    return
+        if await self.db.cash_check(inter, cash, max_cash=1000000):
+            if cash == "all":
+                for member in inter.guild.members:
+                    if get(member.roles, id=role.id):
+                        self.db.take_coins(
+                            member.id,
+                            inter.guild.id,
+                            self.db.get_cash(member.id, inter.guild.id)
+                        )
+                await inter.response.send_message('✅')
+            elif not cash.isdigit():
+                return
             else:
-                await inter.response.send_message("У Вас недостаточно прав для использования данной команды!",
-                                                  ephemeral=True)
+                for member in inter.guild.members:
+                    if get(member.roles, id=role.id):
+                        self.db.take_coins(member.id, inter.guild.id, int(cash))
+                await inter.response.send_message('✅')
 
     @app_commands.command(name="remove-shop")
     @app_commands.guilds(493970394374471680)
@@ -162,11 +142,15 @@ class AdminSlash(commands.Cog):
     async def __add_shop(self, inter: discord.Interaction, role: discord.Role, price: int) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
             if price < 1:
-                await inter.response.send_message(f"""{inter.user}, ах ты проказник! Введите цену дольше 1""",
-                                                  ephemeral=True)
+                await inter.response.send_message(
+                    f"""{inter.user}, ах ты проказник! Введите цену дольше 1""",
+                    ephemeral=True
+                )
             elif price > 100000:
-                await inter.response.send_message(f'{inter.user}, нельзя начислить больше 1.000.000 DP коинов!',
-                                                  ephemeral=True)
+                await inter.response.send_message(
+                    f'{inter.user}, нельзя начислить больше 1.000.000 DP коинов!',
+                    ephemeral=True
+                )
             else:
                 self.db.insert_into_shop(role.id, inter.guild.id, price)
                 await inter.response.send_message('✅')
@@ -200,8 +184,8 @@ class AdminSlash(commands.Cog):
                     )
                 else:
                     self.ind = max([
-                            i[0] for i in self.db.get_from_item_shop(
-                                inter.guild.id, "ItemID", order_by="ItemID").fetchall()
+                        i[0] for i in self.db.get_from_item_shop(
+                            inter.guild.id, "ItemID", order_by="ItemID").fetchall()
                     ])
                     self.db.insert_into_item_shop(self.ind + 1, str(self.msg), inter.guild.id, price)
                     await inter.response.send_message('✅')
