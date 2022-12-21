@@ -1230,15 +1230,18 @@ class Database(object):
                         await ctx.send(self.message)
                     else:
                         await ctx.response.send_message(self.message, ephemeral=True)
-                return True
+                else:
+                    return True
             elif max_cash is None:
                 if int(cash) < min_cash and ctx.author.id != 401555829620211723:
                     self.message = f'{self.mention}, нельзя ввести число меньше {divide_the_number(min_cash)}!'
                     if isinstance(ctx, commands.context.Context):
                         await ctx.send(self.message)
                     else:
+
                         await ctx.response.send_message(self.message, ephemeral=True)
-                return True
+                else:
+                    return True
         return False
 
     async def stats_update(
