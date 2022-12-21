@@ -2,6 +2,7 @@
 import datetime
 import smtplib
 import sqlite3
+import numpy as np
 
 from email import encoders
 from email.mime.base import MIMEBase
@@ -21,7 +22,9 @@ class Database(object):
         "encoder", "server", "msg", "part2", "part1",
         "filename", "time", "now2", "minutes", "day",
         "month", "prises", "valentine", "valentine",
-        "connection", "cursor", "wins", "loses"
+        "connection", "cursor", "wins", "loses",
+        "message", "mention", "author_id",
+        "check_str_cash"
     )
 
     def __init__(self, filename: str, encoder: Encoder) -> None:
@@ -30,6 +33,7 @@ class Database(object):
         self.msg: MIMEMultipart = MIMEMultipart()
         self.part2: MIMEBase = MIMEBase('application', "octet-stream")
         self.part1: MIMEBase = MIMEBase('application', "octet-stream")
+        self.check_str_cash = lambda cash, user_cash: int(cash) > user_cash if cash.isdigit() else False
         self.time = None
         self.now2 = None
         self.minutes: int = 0
@@ -37,10 +41,12 @@ class Database(object):
         self.month: int = 0
         self.wins: int = 0
         self.loses: int = 0
+        self.author_id: int = 0
         self.prises: dict = {}
         self.valentine: dict = {}
         self.filename: str = filename
-
+        self.message: str = ""
+        self.mention: str = ""
         self.connection: sqlite3.Connection = sqlite3.connect(self.filename, check_same_thread=False)
         self.cursor: sqlite3.Cursor = self.connection.cursor()
 
@@ -421,6 +427,12 @@ class Database(object):
     def get_from_levels(self, *args: str) -> Any:
         return self.cursor.execute(f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `Levels`")
 
+    def get_user_xp(self, ID: int, guild_id: int) -> int:
+        return self.cursor.execute(
+            f"SELECT `Xp` FROM `Users` WHERE ID = ? AND GuildID = ?",
+            (ID, guild_id)
+        ).fetchone()[0]
+
     def get_from_user(
         self, guild_id: int, *args: str,
         order_by: str, limit: int = None
@@ -570,6 +582,13 @@ class Database(object):
         with self.connection:
             return self.cursor.execute(
                 "UPDATE `Inventory` SET `NewYearPrises` = `NewYearPrises` + ? WHERE `ID` = ? AND `GuildID` = ?",
+                (prises, ID, guild_id)
+            )
+
+    def take_present(self, prises: int, ID: int, guild_id: int) -> Cursor:
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE `Inventory` SET `NewYearPrises` = `NewYearPrises` - ? WHERE `ID` = ? AND `GuildID` = ?",
                 (prises, ID, guild_id)
             )
 
@@ -1182,26 +1201,44 @@ class Database(object):
             )
 
     async def cash_check(
-        self, ctx: commands.context.Context,
+        self, ctx: Union[commands.context.Context, discord.Interaction],
         cash: Union[str, int], max_cash: int = None,
         min_cash: int = 1, check: bool = False
     ) -> bool:
+        self.mention = ctx.author.mention if isinstance(ctx, commands.context.Context) else ctx.user.mention
+        self.author_id = ctx.author.id if isinstance(ctx, commands.context.Context) else ctx.user.id
         if cash is None:
-            await ctx.send(f"""{ctx.author.mention}, Вы не ввели сумму!""")
-        elif check and cash > self.get_cash(ctx.author.id, ctx.guild.id):
-            await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно средств!""")
+            self.message = f"{self.mention}, Вы не ввели сумму!"
+            if isinstance(ctx, commands.context.Context):
+                await ctx.send(self.message)
+            else:
+                await ctx.response.send_message(self.message, ephemeral=True)
+        elif check and self.check_str_cash(cash, self.get_cash(self.author_id, ctx.guild.id)):
+            self.message = f"{self.mention}, у Вас недостаточно средств!"
+            if isinstance(ctx, commands.context.Context):
+                await ctx.send(self.message)
+            else:
+                await ctx.response.send_message(self.message, ephemeral=True)
         else:
             if cash == "all":
                 return True
             elif max_cash is not None:
-                if (int(cash) < min_cash or int(cash) > max_cash) and ctx.author.id != 401555829620211723:
-                    await ctx.send(f'{ctx.author.mention}, нельзя ввести число меньше '
-                                   f'{divide_the_number(min_cash)} и больше {divide_the_number(max_cash)}!')
+                if (int(cash) < min_cash or int(cash) > max_cash) and self.author_id != 401555829620211723:
+                    self.message = f'{self.mention}, нельзя ввести число меньше ' \
+                                   f'{divide_the_number(min_cash)} и больше {divide_the_number(max_cash)}!'
+                    if isinstance(ctx, commands.context.Context):
+                        await ctx.send(self.message)
+                    else:
+                        await ctx.response.send_message(self.message, ephemeral=True)
                 else:
                     return True
             elif max_cash is None:
                 if int(cash) < min_cash and ctx.author.id != 401555829620211723:
-                    await ctx.send(f'{ctx.author.mention}, нельзя ввести число меньше {divide_the_number(min_cash)}!')
+                    self.message = f'{self.mention}, нельзя ввести число меньше {divide_the_number(min_cash)}!'
+                    if isinstance(ctx, commands.context.Context):
+                        await ctx.send(self.message)
+                    else:
+                        await ctx.response.send_message(self.message, ephemeral=True)
                 else:
                     return True
         return False
@@ -1233,7 +1270,10 @@ class Database(object):
             pass
         else:
             self.minutes = self.get_minutes(member.id, member.guild.id)
-            self.add_coins(member.id, member.guild.id, self.minutes * int(datetime_to_str(get_time()) - self.now2))
+            self.add_coins(
+                member.id, member.guild.id,
+                self.minutes * (datetime_to_str(get_time()) - self.now2).total_seconds() // 60
+            )
             self.delete_from_online(member.id)
             self.update_minutes_in_voice_channels(self.minutes, member.id, member.guild.id)
             self.month = int(datetime.today().strftime('%m'))
@@ -1242,12 +1282,8 @@ class Database(object):
                 if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                     self.prises[member.id] = 0
                     for i in range(self.minutes):
-                        if random.randint(1, 3) == 3:
-                            if random.randint(1, 3) == 3:
-                                if random.randint(1, 3) == 3:
-                                    if random.randint(1, 3) == 1:
-                                        if random.randint(1, 3) == 3:
-                                            self.prises[member.id] += 1
+                        if len(set(np.random.randint(1, 6, 5))) == 3 and len(set(np.random.randint(1, 6, 5))) == 3:
+                            self.prises[member.id] += 1
                     if self.prises[member.id] != 0:
                         self.add_present(self.prises[member.id], member.id, member.guild.id)
                         try:
@@ -1262,10 +1298,8 @@ class Database(object):
             if self.month == 2 and self.day == 14:
                 self.valentine[member.id] = 0
                 for i in range(self.minutes):
-                    if random.randint(0, 4) == 1:
-                        if random.randint(0, 4) == 2:
-                            if random.randint(0, 4) == 3:
-                                self.valentine[member.id] += 1
+                    if len(set(np.random.randint(1, 6, 5))) == 3 and len(set(np.random.randint(1, 6, 5))) == 3:
+                        self.valentine[member.id] += 1
                 if self.valentine[member.id] != 0:
                     self.add_valentines(self.valentine[member.id], member.id, member.guild.id)
                     try:

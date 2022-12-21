@@ -13,7 +13,6 @@ from botsections.functions.helperfunction import (
     get_promo_code, get_time, write_log
 )
 from botsections.functions.json_ import Json
-from botsections.functions.texts import *
 from botsections.functions.config import settings
 from database.db import Database
 __all__ = (
@@ -52,6 +51,9 @@ class User(commands.Cog):
         self.wins: int = 0
         self.loses: int = 0
         self.minutes_in_voice: int = 0
+        self.lvl: int = 0
+        self.all_xp: int = 0
+        self.xp: int = 0
         self.messages: int = 0
         self.cash: int = 0
         self.code: str = ""
@@ -60,7 +62,7 @@ class User(commands.Cog):
         print(f"[{get_time()}] [INFO]: User connected")
         write_log(f"[{get_time()}] [INFO]: User connected")
 
-    @commands.command(aliases=['slb'])
+    @commands.command(aliases=["slb"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __slb(self, ctx: commands.context.Context) -> None:
         self.all_cash = 0
@@ -277,81 +279,6 @@ class User(commands.Cog):
                     self.db.take_coins_from_the_bank(ctx.author.id, ctx.guild.id, cash)
                     await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=['levels'])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __levels_shop(self, ctx: commands.context.Context):
-        await ctx.send(embed=create_emb(
-            title="Всё о левелах!",
-            args=[
-                {
-                    "name": f'Level 1',
-                    "value": levels["level1"],
-                    "inline": False
-                },
-                {
-                    "name": f'Level 2',
-                    "value": levels["level2"],
-                    "inline": False
-                },
-                {
-                    "name": f'Level 3',
-                    "value": levels["level3"],
-                    "inline": False
-                },
-                {
-                    "name": f'Level 4',
-                    "value": levels["level4"],
-                    "inline": False
-                },
-                {
-                    "name": f'Level 5',
-                    "value": levels["level5"],
-                    "inline": False
-                },
-                {
-                    "name": f'**Как поднять левел?**',
-                    "value": levels["LevelUp"],
-                    "inline": False
-                }
-            ]
-        )
-        )
-
-    @commands.command(aliases=['lvl_up'])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __level_up(self, ctx: commands.context.Context):
-        self.level = self.db.get_level(ctx.author.id, ctx.guild.id)
-        if self.level == 5:
-            await ctx.send("У Вас максимальный левел!")
-        elif self.level == 1:
-            if 50000 > self.db.get_cash(ctx.author.id, ctx.guild.id):
-                await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
-            else:
-                self.db.take_coins(ctx.author.id, ctx.guild.id, 50000)
-                self.db.add_level(ctx.author.id, ctx.guild.id)
-                await ctx.message.add_reaction('✅')
-        elif self.level == 2:
-            if 100000 > self.db.get_cash(ctx.author.id, ctx.guild.id):
-                await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
-            else:
-                self.db.take_coins(ctx.author.id, ctx.guild.id, 100000)
-                self.db.add_level(ctx.author.id, ctx.guild.id)
-                await ctx.message.add_reaction('✅')
-        elif self.level == 3:
-            if 200000 > self.db.get_cash(ctx.author.id, ctx.guild.id):
-                await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
-            else:
-                self.db.take_coins(ctx.author.id, ctx.guild.id, 200000)
-                self.db.add_level(ctx.author.id, ctx.guild.id)
-                await ctx.message.add_reaction('✅')
-        elif self.level == 4:
-            if 400000 > self.db.get_cash(ctx.author.id, ctx.guild.id):
-                await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
-            else:
-                self.db.take_coins(ctx.author.id, ctx.guild.id, 400000)
-                self.db.add_level(ctx.author.id, ctx.guild.id)
-                await ctx.message.add_reaction('✅')
-
     @commands.command(aliases=['shop'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __shop(self, ctx: commands.context.Context):
@@ -458,7 +385,7 @@ class User(commands.Cog):
                     self.db.add_coins(member.id, ctx.guild.id, cash)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["+rep"])
+    @commands.command(aliases=["add_rep"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __good_rep(
             self, ctx: commands.context.Context, member: discord.Member = None
@@ -472,7 +399,7 @@ class User(commands.Cog):
                 self.db.add_reputation(ctx.author.id, ctx.guild.id, 1)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["-rep"])
+    @commands.command(aliases=["remove_rep"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __bad_rep(
             self, ctx: commands.context.Context, member: discord.Member = None
@@ -491,9 +418,12 @@ class User(commands.Cog):
     async def __stats(self, ctx: commands.context.Context, member: discord.Member = None) -> None:
         self.ID = ctx.author.id if member is None else member.id
         self.guild_id = ctx.guild.id if member is None else member.guild.id
+        self.lvl = self.db.get_stat(self.ID, self.guild_id, "ChatLevel")
+        self.all_xp = self.db.get_user_xp(ctx.author.id if member is None else member.id, ctx.guild.id)
+        self.xp = self.db.get_xp(self.lvl + 1) - self.all_xp
         await ctx.send(
             embed=create_emb(
-                title="Статистика {}".format(ctx.author),
+                title="Статистика {}".format(ctx.author if member is None else member),
                 args=[
                     {
                         "name": f'Coinflips - {self.db.get_stat(self.ID, self.guild_id, "CoinFlipsCount")}',
@@ -527,8 +457,8 @@ class User(commands.Cog):
                     },
                     {
                         "name": 'Побед/Поражений всего',
-                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "AllWins")}\n '
-                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "AllLoses")}',
+                        "value": f'Wins - {self.db.get_stat(self.ID, self.guild_id, "AllWinsCount")}\n '
+                                 f'Loses - {self.db.get_stat(self.ID, self.guild_id, "AllLosesCount")}',
                         "inline": True
                     },
                     {
@@ -553,8 +483,9 @@ class User(commands.Cog):
                         "inline": True
                     },
                     {
-                        "name": f'{self.db.get_stat(self.ID, self.guild_id, "ChatLevel")} левел в чате',
-                        "value": '{} опыта до следующего левела, {} опыта всего',
+                        "name": f'{self.lvl} левел в чате',
+                        "value": f'{divide_the_number(self.xp)} опыта до следующего левела, '
+                                 f'{divide_the_number(self.all_xp)} опыта всего',
                         "inline": True
                     }
                 ]

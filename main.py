@@ -14,16 +14,21 @@ from botsections.functions.json_ import Json
 from botsections.functions.version import __version__
 from botsections.functions.helperfunction import get_time, write_log
 from botsections.functions.encoding import Encoder
+from slashbotsections import *
 
 warnings.filterwarnings("ignore")
 
 print(f"[{get_time()}] [INFO]: Program started")
-write_log(f"[{get_time()}]: [INFO]: Program started")
+write_log(f"[{get_time()}] [INFO]: Program started")
 
 nest_asyncio.apply()
 
 
 async def main() -> None:
+    intents = discord.Intents.all()
+    intents.members = True
+    intents.message_content = True
+
     if not os.path.exists(".json"):
         os.mkdir(".json")
     if not Json.check_file_exists(".json/ban_list.json"):
@@ -46,8 +51,8 @@ async def main() -> None:
     write_log(f"[{get_time()}] [INFO]: Database connected")
     BOT: DPcoinBOT = DPcoinBOT(
         command_prefix=settings["prefix"],
-        intents=discord.Intents.all(),
-        db=db
+        intents=intents,
+        db=db, case_insensitive=True
     )
     print("[{}] [INFO]: version: {}".format(get_time(), __version__))
     write_log("[{}] [INFO]: version: {}".format(get_time(), __version__))
@@ -61,6 +66,7 @@ async def main() -> None:
     await BOT.add_cog(Public(BOT, db))
     await BOT.add_cog(NewYear(BOT, db))
     await BOT.add_cog(ValentinesDay(BOT, db))
+    await BOT.add_cog(UserSlash(BOT, db))
 
     BOT.run(encoder.decrypt(settings["token"]))
 
