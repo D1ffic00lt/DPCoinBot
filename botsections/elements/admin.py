@@ -38,18 +38,18 @@ class Admin(commands.Cog):
         if ctx.author.id != 401555829620211723:
             if isinstance(self.administrator_role_id, bool):
                 if not ctx.author.guild_permissions.administrator:
-                    await ctx.send("У Вас нет прав для использования этой команды")
+                    await ctx.reply("У Вас нет прав для использования этой команды")
                     return
             else:
                 self.role = discord.utils.get(ctx.guild.roles, id=self.administrator_role_id)
                 if self.role not in ctx.author.roles:
-                    await ctx.send("У Вас нет прав для использования этой команды", ephemeral=True)
+                    await ctx.reply("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
         if member is None:
-            await ctx.send(f'{ctx.author.mention}, укажите пользователя!')
+            await ctx.reply(f'{ctx.author.mention}, укажите пользователя!')
             return
         if amount is None:
-            await ctx.send(f'{ctx.author.mention}, укажите сумму!')
+            await ctx.reply(f'{ctx.author.mention}, укажите сумму!')
             return
 
         if await self.db.cash_check(ctx, amount, max_cash=1000000):
@@ -65,18 +65,18 @@ class Admin(commands.Cog):
         if ctx.author.id != 401555829620211723:
             if isinstance(self.administrator_role_id, bool):
                 if not ctx.author.guild_permissions.administrator:
-                    await ctx.send("У Вас нет прав для использования этой команды")
+                    await ctx.reply("У Вас нет прав для использования этой команды")
                     return
             else:
                 self.role = discord.utils.get(ctx.guild.roles, id=self.administrator_role_id)
                 if self.role not in ctx.author.roles:
-                    await ctx.send("У Вас нет прав для использования этой команды", ephemeral=True)
+                    await ctx.reply("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
         if member is None:
-            await ctx.send(f'{ctx.author}, укажите пользователя!')
+            await ctx.reply(f'{ctx.author}, укажите пользователя!')
             return
         if amount is None:
-            await ctx.send(f'{ctx.author}, укажите сумму!')
+            await ctx.reply(f'{ctx.author}, укажите сумму!')
             return
         if await self.db.cash_check(ctx, amount, max_cash=1000000):
             if amount == "all":
@@ -92,18 +92,18 @@ class Admin(commands.Cog):
         if ctx.author.id != 401555829620211723:
             if isinstance(self.administrator_role_id, bool):
                 if not ctx.author.guild_permissions.administrator:
-                    await ctx.send("У Вас нет прав для использования этой команды")
+                    await ctx.reply("У Вас нет прав для использования этой команды")
                     return
             else:
                 self.role = discord.utils.get(ctx.guild.roles, id=self.administrator_role_id)
                 if self.role not in ctx.author.roles:
-                    await ctx.send("У Вас нет прав для использования этой команды", ephemeral=True)
+                    await ctx.reply("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
             if role_ is None:
-                await ctx.send(f'{ctx.author}, укажите роль!')
+                await ctx.reply(f'{ctx.author}, укажите роль!')
                 return
             if amount is None:
-                await ctx.send(f'{ctx.author}, укажите сумму!')
+                await ctx.reply(f'{ctx.author}, укажите сумму!')
                 return
             if await self.db.cash_check(ctx, amount, max_cash=1000000):
                 for member in ctx.guild.members:
@@ -120,18 +120,18 @@ class Admin(commands.Cog):
         if ctx.author.id != 401555829620211723:
             if isinstance(self.administrator_role_id, bool):
                 if not ctx.author.guild_permissions.administrator:
-                    await ctx.send("У Вас нет прав для использования этой команды")
+                    await ctx.reply("У Вас нет прав для использования этой команды")
                     return
             else:
                 self.role = discord.utils.get(ctx.guild.roles, id=self.administrator_role_id)
                 if self.role not in ctx.author.roles:
-                    await ctx.send("У Вас нет прав для использования этой команды", ephemeral=True)
+                    await ctx.reply("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
         if role_ is None:
-            await ctx.send(f'{ctx.author}, укажите роль!')
+            await ctx.reply(f'{ctx.author}, укажите роль!')
             return
         if amount is None:
-            await ctx.send(f"{ctx.author.mention}, укажите сумму!")
+            await ctx.reply(f"{ctx.author.mention}, укажите сумму!")
             return
         if await self.db.cash_check(ctx, amount, max_cash=1000000):
             if amount == "all":
@@ -154,7 +154,7 @@ class Admin(commands.Cog):
     async def __remove_shop(self, ctx: commands.context.Context, role: discord.Role = None) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             if role is None:
-                await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите удалить из магазина""")
+                await ctx.reply(f"""{ctx.author}, укажите роль, которую Вы хотите удалить из магазина""")
             else:
                 self.db.delete_from_shop(role.id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
@@ -164,14 +164,14 @@ class Admin(commands.Cog):
     async def __add_shop(self, ctx: commands.context.Context, role: discord.Role = None, cost: int = None) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             if role is None:
-                await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите добавить в магазин""")
+                await ctx.reply(f"""{ctx.author}, укажите роль, которую Вы хотите добавить в магазин""")
             else:
                 if cost is None:
-                    await ctx.send(f"""{ctx.author}, введите цену роли""")
+                    await ctx.reply(f"""{ctx.author}, введите цену роли""")
                 elif cost < 1:
-                    await ctx.send(f"""{ctx.author}, ах ты проказник! Введите цену дольше 1""")
+                    await ctx.reply(f"""{ctx.author}, ах ты проказник! Введите цену дольше 1""")
                 elif cost > 100000:
-                    await ctx.send(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
+                    await ctx.reply(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
                 else:
                     self.db.insert_into_shop(role.id, ctx.guild.id, cost)
                     await ctx.message.add_reaction('✅')
@@ -182,25 +182,25 @@ class Admin(commands.Cog):
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             self.msg = item
             if self.msg is None:
-                await ctx.send(f"""{ctx.author}, укажите то, что Вы хотите добавить в магазин""")
+                await ctx.reply(f"""{ctx.author}, укажите то, что Вы хотите добавить в магазин""")
             else:
                 if self.db.get_from_item_shop(ctx.guild.id, "ItemID", order_by="ItemID").fetchone() is None:
                     if cost is None:
-                        await ctx.send(f"""{ctx.author}, введите цену""")
+                        await ctx.reply(f"""{ctx.author}, введите цену""")
                     elif cost < 1:
-                        await ctx.send(f"""{ctx.author}, ах ты проказник! Введите цену дольше 1""")
+                        await ctx.reply(f"""{ctx.author}, ах ты проказник! Введите цену дольше 1""")
                     elif cost > 1000000:
-                        await ctx.send(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
+                        await ctx.reply(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
                     else:
                         self.db.insert_into_item_shop(1, str(self.msg), ctx.guild.id, cost)
                         await ctx.message.add_reaction('✅')
                 else:
                     if cost is None:
-                        await ctx.send(f"""{ctx.author}, введите цену""")
+                        await ctx.reply(f"""{ctx.author}, введите цену""")
                     elif cost < 1:
-                        await ctx.send(f"""{ctx.author}, ах ты проказник! Введите цену дольше 1""")
+                        await ctx.reply(f"""{ctx.author}, ах ты проказник! Введите цену дольше 1""")
                     elif cost > 1000000:
-                        await ctx.send(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
+                        await ctx.reply(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
                     else:
                         self.ind = max(
                             [
@@ -219,7 +219,7 @@ class Admin(commands.Cog):
     async def __remove_item_shop(self, ctx: commands.context.Context, item_id: int = None) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
             if item_id is None:
-                await ctx.send(f"""{ctx.author}, укажите номер того, что Вы хотите удалить из магазина""")
+                await ctx.reply(f"""{ctx.author}, укажите номер того, что Вы хотите удалить из магазина""")
             else:
                 self.db.delete_from_item_shop(item_id, ctx.guild.id)
                 await ctx.message.add_reaction('✅')
