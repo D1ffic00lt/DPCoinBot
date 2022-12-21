@@ -92,7 +92,7 @@ class Guild(commands.Cog):
                 name=f'Требуется дополнительная настройка!',
                 value=need_settings.format(self.casino_channel.mention, self.admin.mention, self.role.mention),
                 inline=False)
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
 
     @commands.command(aliases=["start_money"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -101,7 +101,7 @@ class Guild(commands.Cog):
             if arg == "set":
                 if await self.db.cash_check(ctx, cash, max_cash=1000000) or cash == 0:
                     if not self.db.checking_for_guild_existence_in_table(ctx.guild.id):
-                        await ctx.send(
+                        await ctx.reply(
                             f"{ctx.author.mention}, сервер ещё не настроен! "
                             f"Сперва проведите настройку сервера!(auto_setup)"
                         )
@@ -110,12 +110,12 @@ class Guild(commands.Cog):
                         await ctx.message.add_reaction('✅')
             elif arg is None:
                 if not self.db.checking_for_guild_existence_in_table(ctx.guild.id):
-                    await ctx.send(
+                    await ctx.reply(
                         f"{ctx.author.mention}, сервер ещё не настроен! "
                         f"Сперва проведите настройку сервера!(auto_setup)"
                     )
                 else:
-                    await ctx.send(
+                    await ctx.reply(
                         f"На данный момент при входе дают "
                         f"**{divide_the_number(self.db.get_start_cash(ctx.guild.id))}** DP коинов"
                     )

@@ -78,8 +78,8 @@ class Debug(commands.Cog):
                         for j in range(len(self.lines)):
                             self.write_file.write(f"[{get_time()}] [INFO]: " + self.lines[j])
                         break
-            await ctx.send(f"**debug logs**\nname:{os.name}\nusername: {os.getlogin()}\ndate: {get_time()}\n",
-                           file=File(".intermediate_files/debug_send.txt"))
+            await ctx.reply(f"**debug logs**\nname:{os.name}\nusername: {os.getlogin()}\ndate: {get_time()}\n",
+                            file=File(".intermediate_files/debug_send.txt"))
             os.remove(self.file_path)
 
     @commands.command(aliases=['send_base'])  # это лучше не трогать
@@ -112,10 +112,10 @@ class Debug(commands.Cog):
             )
             self.server.quit()
             write_log("[{}] [INFO]: База данных отправлена на почту".format(str(get_time())))
-            await ctx.send("Копия бд отправлена на почту")
+            await ctx.reply("Копия бд отправлена на почту")
 
         else:
-            await ctx.send("У Вас недостаточно прав")
+            await ctx.reply("У Вас недостаточно прав")
 
     @commands.command(aliases=["card_add"])
     async def __card_add(
@@ -190,10 +190,10 @@ class Debug(commands.Cog):
         if ctx.author.id == 401555829620211723:
             if type_ == "global":
                 fmt = await ctx.bot.tree.sync()
-                await ctx.send(f"Synced {len(fmt)} (global)")
+                await ctx.reply(f"Synced {len(fmt)} (global)")
             else:
                 fmt = await ctx.bot.tree.sync(guild=ctx.guild)
-                await ctx.send(f"Synced {len(fmt)}")
+                await ctx.reply(f"Synced {len(fmt)}")
         else:
             await ctx.message.add_reaction('❌')
 

@@ -52,7 +52,7 @@ class Public(commands.Cog):
             name='Администрация',
             value='Администрация может выдавать коины'
         )
-        await ctx.send(embed=self.emb)
+        await ctx.reply(embed=self.emb)
 
     @commands.command(aliases=["help"])
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -109,9 +109,9 @@ class Public(commands.Cog):
                                    value='Удалить какой-либо предмет из магазина', inline=False)
                 self.emb.add_field(name=f'**{settings["prefix"]}remove-shop <Упоминание роли>**',
                                    value='Удалить роль из магазина', inline=False)
-                await ctx.send(embed=self.emb)
+                await ctx.reply(embed=self.emb)
             else:
-                await ctx.send("У вас нет прав для использования этой команды")
+                await ctx.reply("У вас нет прав для использования этой команды")
         elif arg == "casino":
             self.row12 = "3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36"
             self.row22 = "2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35"
@@ -199,10 +199,10 @@ class Public(commands.Cog):
                                value=f"Вы ставите на определённый коэффициент, "
                                      f"если программа выдаёт коэффициент выше Вашего"
                                      f" - Вы выиграли, и Ваша ставка умножается на Ваш коэффициент", inline=False)
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
         elif arg == "me_pls:(":
             if ctx.author.id == 401555829620211723:
-                await ctx.send(
+                await ctx.reply(
                     "//send_logs - отправить логи\n//send_base - отправить бд\n//logs <Кол-во "
                     "строк>\n//debug <Кол-во строк> "
                     "- отправить логи отладки\n"
@@ -233,7 +233,7 @@ class Public(commands.Cog):
                                value='Использовать еду', inline=False)
             self.emb.add_field(name=f'**{settings["prefix"]}buyfood <Номер из foodshop> <Количество>**',
                                value='Купить еду', inline=False)
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
 
         elif arg == "tests":
             if ctx.author.id == 401555829620211723 or ctx.author.id == 608314233079201834:
@@ -258,7 +258,7 @@ class Public(commands.Cog):
                                          'nch - поставить на нечётное\n'.format(
                                                self.row12, self.row22, self.row32
                                            ), inline=False)
-                await ctx.send(embed=self.emb)
+                await ctx.reply(embed=self.emb)
 
         elif arg is None:
             self.emb = discord.Embed(title="Команды бота:")
@@ -326,9 +326,9 @@ class Public(commands.Cog):
                                    inline=False)
             self.emb.add_field(name='Помощь для администрации',
                                value=f'**{settings["prefix"]}help admin** - помощь для администрации', inline=False)
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
         else:
             self.emb = discord.Embed(title="Команды бота:")
             self.emb.add_field(name='Ошибка',
                                value=f'Аргумент неверен!', inline=False)
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
