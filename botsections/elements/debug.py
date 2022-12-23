@@ -29,7 +29,8 @@ class Debug(commands.Cog):
     __slots__ = (
         "db", "bot", "js", "data", "part",
         "msg", "server", "arg", "file_path",
-        "color", "read_file", "write_file", "lines"
+        "color", "read_file",
+        "write_file", "lines"
     )
 
     def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
