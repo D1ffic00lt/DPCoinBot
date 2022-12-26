@@ -105,8 +105,9 @@ class Casino(commands.Cog):
                             f"{ctx.author.mention}, Вы должны поставить либо 1, либо 3, либо 5, либо 10, либо 20!"
                         )
         else:
-            await ctx.reply(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!"
-                           )
+            await ctx.reply(
+                f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!"
+                       )
 
     @commands.command(aliases=['fail'])
     @commands.cooldown(1, 2, commands.BucketType.user)
@@ -628,8 +629,9 @@ class Casino(commands.Cog):
         elif member.id == ctx.author.id:
             await ctx.reply("Вы не можете ввести себя")
         elif not self.db.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
-            await ctx.reply(f"Такой игры не существует, посмотреть все ваши активные игры - "
-                           f"{settings['prefix']}games")
+            await ctx.reply(
+                f"Такой игры не существует, посмотреть все ваши активные игры - {settings['prefix']}games"
+            )
         else:
             self.db.delete_from_coinflip(ctx.author.id, member.id, ctx.guild.id)
             await ctx.message.add_reaction('✅')
@@ -661,8 +663,9 @@ class Casino(commands.Cog):
         if member is None:
             await ctx.reply("Вы не ввели человека")
         elif not self.db.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
-            await ctx.reply(f"Такой игры не существует, посмотреть все ваши активные игры - "
-                           f"{settings['prefix']}games")
+            await ctx.reply(
+                f"Такой игры не существует, посмотреть все ваши активные игры - {settings['prefix']}games"
+            )
         elif reladdons.long.minutes(self.db.get_from_coinflip(ctx.author.id, member.id, ctx.guild.id, "Date")) > 5:
             await ctx.reply(f"Время истекло:(")
             self.db.delete_from_coinflip(ctx.author.id, member.id, ctx.guild.id)

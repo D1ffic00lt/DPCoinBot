@@ -21,8 +21,8 @@ settings = {
           b'wOJdfnRfd7GOl_H_D7ACEAQ0SU7x1O2Sa5VGjWByEWYEnW_ZpIrokGXNvkg=',
     'prefix': '&',
     # 'prefix': "//",
-    "password": b'gAAAAABjZNBwHXsuUCEWpnJssOOMYkmNta-WdHOYWh3DsjoD3uvAJ4JQql-p'
-                b'lYCCMh-tur2yJA6hWk9h1zBJiprZU0TetMMD3ZNcx7RdJHfARWJXCSq-lCY=',
+    "password": b'gAAAAABjpvtkXaAppy7hhAXi4EbQKVWa_X3llw-Y5ueNFms4TTbZgA5LrLISc2Ef'
+                b'5puRMqaWaA9Av9tzvTsx9Bgxz8aNGvptBonOqn0F1WqZViYnS7oswOI=',
     "sender_email": b'gAAAAABjZNADXnn912gRHsi-VJdTOdwdURimJ3gLB_HhARaxStglvAm6hoNH'
                     b'8_q-1e-FZLpUpzH65t4moKjkYLAGCBi0meIAmoNYdNpcfcb9FTfQ6lHQCOQ=',
     "to_send_email": b'gAAAAABjZNASo0D8yoYUkxlIyJncwUg-rb_N6qubnhuuj4Q9TtLn6aEqjwyQ'
