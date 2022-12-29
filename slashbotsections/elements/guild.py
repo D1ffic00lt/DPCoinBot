@@ -3,17 +3,18 @@ import discord
 from typing import Union
 from discord.ext import commands
 from discord.utils import get
+from discord import app_commands
 
 from botsections.functions.texts import need_settings
 from botsections.functions.helperfunction import divide_the_number, get_time, write_log
 from database.db import Database
 
 __all__ = (
-    "Guild",
+    "GuildSlash",
 )
 
 
-class Guild(commands.Cog):
+class GuildSlash(commands.Cog):
     NAME = 'guild module'
 
     __slots__ = (
@@ -37,14 +38,15 @@ class Guild(commands.Cog):
         print(f"[{get_time()}] [INFO]: Guild connected")
         write_log(f"[{get_time()}] [INFO]: Guild connected")
 
-    @commands.command(aliases=["auto_setup"])
+    @app_commands.command(name="auto_setup")
+    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __cat_create(self, ctx: commands.context.Context) -> None:
-        if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
-            self.guild = ctx.message.guild
-            if self.db.checking_for_guild_existence_in_table(ctx.guild.id):
+    async def __cat_create(self, inter: discord.Interaction) -> None:
+        if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
+            self.guild = inter.message.guild
+            if self.db.checking_for_guild_existence_in_table(inter.guild.id):
                 self.admin, self.casino_channel, self.role, self.auto, self.category = self.db.get_guild_settings(
-                    ctx.guild.id
+                    inter.guild.id
                 )
                 self.admin = self.bot.get_channel(self.admin)
                 self.casino_channel = self.bot.get_channel(self.casino_channel)
@@ -69,9 +71,9 @@ class Guild(commands.Cog):
             self.casino_channel = await self.guild.create_text_channel(name=f'Casino', category=self.category)
             self.admin = await self.guild.create_text_channel(name=f'shop_list', category=self.category)
             self.role = await self.guild.create_role(name="Coin Manager", colour=discord.Colour.from_rgb(255, 228, 0))
-            self.db.delete_from_server(ctx.guild.id)
+            self.db.delete_from_server(inter.guild.id)
             self.db.insert_into_server(
-                ctx.guild.id, self.role.id, self.admin.id,
+                inter.guild.id, self.role.id, self.admin.id,
                 self.casino_channel.id, self.category.id
             )
             await self.admin.set_permissions(self.guild.default_role, read_messages=False, send_messages=False)
@@ -92,30 +94,38 @@ class Guild(commands.Cog):
                 name=f'Требуется дополнительная настройка!',
                 value=need_settings.format(self.casino_channel.mention, self.admin.mention, self.role.mention),
                 inline=False)
-            await ctx.reply(embed=self.emb)
+            await inter.response.send_message(embed=self.emb)
 
-    @commands.command(aliases=["start_money"])
+    @app_commands.command(name="start_money")
+    @app_commands.guilds(493970394374471680)
+    @app_commands.choices(action=[
+        app_commands.Choice(name="Получить", value="get"),
+        app_commands.Choice(name="Установить", value="set")
+    ])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __start_money(self, ctx: commands.context.Context, arg: str = None, cash: int = None) -> None:
-        if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
+    async def __start_money(self, inter: discord.Interaction, arg: str = None, cash: int = None) -> None:
+        if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
             if arg == "set":
-                if await self.db.cash_check(ctx, cash, max_cash=1000000) or cash == 0:
-                    if not self.db.checking_for_guild_existence_in_table(ctx.guild.id):
-                        await ctx.reply(
-                            f"{ctx.author.mention}, сервер ещё не настроен! "
-                            f"Сперва проведите настройку сервера!(auto_setup)"
+                if await self.db.cash_check(inter, cash, max_cash=1000000) or cash == 0:
+                    if not self.db.checking_for_guild_existence_in_table(inter.guild.id):
+                        await inter.response.send_message(
+                            f"{inter.user.mention}, сервер ещё не настроен! "
+                            f"Сперва проведите настройку сервера!(auto_setup)",
+                            ephemeral=True
                         )
                     else:
-                        self.db.set_start_cash(cash, ctx.guild.id)
-                        await ctx.message.add_reaction('✅')
-            elif arg is None:
-                if not self.db.checking_for_guild_existence_in_table(ctx.guild.id):
-                    await ctx.reply(
-                        f"{ctx.author.mention}, сервер ещё не настроен! "
-                        f"Сперва проведите настройку сервера!(auto_setup)"
+                        self.db.set_start_cash(cash, inter.guild.id)
+                        await inter.message.add_reaction('✅')
+            else:
+                if not self.db.checking_for_guild_existence_in_table(inter.guild.id):
+                    await inter.response.send_message(
+                        f"{inter.user.mention}, сервер ещё не настроен! "
+                        f"Сперва проведите настройку сервера!(auto_setup)",
+                        ephemeral=True
                     )
                 else:
-                    await ctx.reply(
+                    await inter.response.send_message(
                         f"На данный момент при входе дают "
-                        f"**{divide_the_number(self.db.get_start_cash(ctx.guild.id))}** DP коинов"
+                        f"**{divide_the_number(self.db.get_start_cash(inter.guild.id))}** DP коинов",
+                        ephemeral=True
                     )

@@ -39,6 +39,7 @@ class NewYearSlash(commands.Cog):
         self.items: tuple = ()
         self.xp: Union[int, float] = 0
         self.level_in_chat: Union[int, float] = 0
+
         print(f"[{get_time()}] [INFO]: NewYearSlash event connected")
         write_log(f"[{get_time()}] [INFO]: NewYearSlash event connected")
 

@@ -66,7 +66,11 @@ async def main() -> None:
     await BOT.add_cog(Public(BOT, db))
     await BOT.add_cog(NewYear(BOT, db))
     await BOT.add_cog(ValentinesDay(BOT, db))
+
     await BOT.add_cog(UserSlash(BOT, db))
+    await BOT.add_cog(AdminSlash(BOT, db))
+    await BOT.add_cog(ValentinesDaySlash(BOT, db))
+    await BOT.add_cog(NewYearSlash(BOT, db))
 
     BOT.run(encoder.decrypt(settings["token"]))
 

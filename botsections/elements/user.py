@@ -86,7 +86,7 @@ class User(commands.Cog):
                         else:
                             self.all_cash += row[1]
                         break
-        await ctx.send(
+        await ctx.reply(
             embed=create_emb(
                 title="Общий баланс сервера:",
                 color=self.color,
@@ -141,7 +141,7 @@ class User(commands.Cog):
                         else:
                             continue
 
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
         elif type_ == "chat":
             self.emb = discord.Embed(title="Топ 10 сервера по левелу")
             for row in self.db.get_from_user(ctx.guild.id, "Name", "ChatLevel", "ID", "Xp", order_by="Xp"):
@@ -164,7 +164,7 @@ class User(commands.Cog):
                             self.index += 1
                             break
 
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
         elif type_ == "voice":
             self.emb = discord.Embed(title="Топ 10 сервера по времени в голосовых каналах")
             for row in self.db.get_from_user(
@@ -193,7 +193,7 @@ class User(commands.Cog):
                             self.index += 1
                             break
 
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
         elif type_ == "rep":
             self.emb = discord.Embed(title="Топ 10 сервера")
             self.counter = 0
@@ -204,7 +204,7 @@ class User(commands.Cog):
                     value=f'Репутация: {row[1]}',
                     inline=False
                 )
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
 
     @commands.command(aliases=["cash"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -214,7 +214,7 @@ class User(commands.Cog):
     ) -> None:
         if member is None:
             try:
-                await ctx.send(
+                await ctx.reply(
                     embed=create_emb(
                         title="Баланс",
                         description=f"Баланс пользователя ```{ctx.author}``` составляет "
@@ -225,7 +225,7 @@ class User(commands.Cog):
             except TypeError:
                 print(f"[{get_time()}] [ERROR]: TypeError: user.py 224 cash")
         else:
-            await ctx.send(
+            await ctx.reply(
                 embed=create_emb(
                     title="Баланс",
                     description=f"Баланс пользователя ```{member}``` составляет "
@@ -240,7 +240,7 @@ class User(commands.Cog):
             action: str = None, cash: Union[int, str] = None
     ) -> None:
         if action is None:
-            await ctx.send(
+            await ctx.reply(
                 embed=create_emb(
                     title="Баланс",
                     description=f"Баланс пользователя ```{ctx.author}``` составляет "
@@ -272,9 +272,9 @@ class User(commands.Cog):
                 self.db.take_coins_from_the_bank(ctx.author.id, ctx.guild.id, "all")
             else:
                 if cash is None:
-                    await ctx.send(f"""{ctx.author.mention}, Вы не ввели сумму!""")
+                    await ctx.reply(f"""{ctx.author.mention}, Вы не ввели сумму!""")
                 elif cash > self.db.get_cash(ctx.author.id, ctx.guild.id, bank=True):
-                    await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно средств!""")
+                    await ctx.reply(f"""{ctx.author.mention}, у Вас недостаточно средств!""")
                 if await self.db.cash_check(ctx, cash):
                     self.db.take_coins_from_the_bank(ctx.author.id, ctx.guild.id, cash)
                     await ctx.message.add_reaction('✅')
@@ -312,21 +312,21 @@ class User(commands.Cog):
         self.emb.add_field(
             name="**Чтобы купить роль:**",
             value=f"```diff\n- {settings['prefix']}buy @роль, которую Вы хотите купить\n```")
-        await ctx.send(embed=self.emb)
+        await ctx.reply(embed=self.emb)
 
     @commands.command(aliases=["buy_item"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __buy_item(self, ctx: commands.context.Context, item: int = None):
         if item is None:
-            await ctx.send(f"""{ctx.author}, укажите то, что Вы хотите приобрести""")
+            await ctx.reply(f"""{ctx.author}, укажите то, что Вы хотите приобрести""")
         else:
             self.db.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="ItemCost")
             if self.db.get_item_from_item_shop(ctx.guild.id, item, "*", order_by="ItemCost").fetchone() is None:
-                await ctx.send(f"""{ctx.author}, такого товара не существует!""")
+                await ctx.reply(f"""{ctx.author}, такого товара не существует!""")
             elif self.db.get_item_from_item_shop(
                     ctx.guild.id, item, "*", order_by="ItemCost"
             ).fetchone()[0] > self.db.get_cash(ctx.author.id, ctx.guild.id):
-                await ctx.send(f"""{ctx.author}, у Вас недостаточно средств!""")
+                await ctx.reply(f"""{ctx.author}, у Вас недостаточно средств!""")
             else:
                 self.db.take_coins(
                     ctx.author.id,
@@ -336,16 +336,16 @@ class User(commands.Cog):
                 await ctx.message.add_reaction('✅')
                 channel = self.bot.get_channel(self.db.get_from_server(ctx.guild.id, "ChannelID"))
                 await channel.send(f"Покупка {ctx.author.mention} товар номер {item}")
-                await ctx.send("Администрация скоро выдаст Вам товар")
+                await ctx.reply("Администрация скоро выдаст Вам товар")
 
     @commands.command(aliases=["buy", "buy-role"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __buy(self, ctx: commands.context.Context, role: discord.Role = None):
         if role is None:
-            await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
+            await ctx.reply(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
         else:
             if role in ctx.author.roles:
-                await ctx.send(f"""{ctx.author}, у Вас уже есть эта роль!""")
+                await ctx.reply(f"""{ctx.author}, у Вас уже есть эта роль!""")
             elif self.db.get_from_shop(
                     ctx.author.id, str(ctx.guild.id), "RoleCost", order_by="RoleCost"
             ).fetchone() is None:
@@ -353,7 +353,7 @@ class User(commands.Cog):
             elif self.db.get_from_shop(
                     ctx.author.id, str(ctx.guild.id), "RoleCost", order_by="RoleCost"
             ).fetchone()[0] > self.db.get_cash(ctx.author.id, ctx.guild.id):
-                await ctx.send(f"""{ctx.author}, у Вас недостаточно средств для покупки этой роли!""")
+                await ctx.reply(f"""{ctx.author}, у Вас недостаточно средств для покупки этой роли!""")
             else:
                 await ctx.author.add_roles(role)
                 self.db.take_coins(
@@ -375,11 +375,11 @@ class User(commands.Cog):
             member: discord.Member = None, cash: int = None
     ) -> None:
         if member is None:
-            await ctx.send(f"""{ctx.author}, укажите пользователя, которому Вы хотите перевести коины""")
+            await ctx.reply(f"""{ctx.author}, укажите пользователя, которому Вы хотите перевести коины""")
         else:
             if await self.db.cash_check(ctx, cash, check=True):
                 if member.id == ctx.author.id:
-                    await ctx.send(f"""{ctx.author}, Вы не можете перевести деньги себе""")
+                    await ctx.reply(f"""{ctx.author}, Вы не можете перевести деньги себе""")
                 else:
                     self.db.take_coins(ctx.author.id, ctx.guild.id, cash)
                     self.db.add_coins(member.id, ctx.guild.id, cash)
@@ -391,10 +391,10 @@ class User(commands.Cog):
             self, ctx: commands.context.Context, member: discord.Member = None
     ) -> None:
         if member is None:
-            await ctx.send(f"{ctx.author}, Вы не указали пользователя!")
+            await ctx.reply(f"{ctx.author}, Вы не указали пользователя!")
         else:
             if member.id == ctx.author.id:
-                await ctx.send(f"{ctx.author}, Вы не можете повысить репутацию самому себе")
+                await ctx.reply(f"{ctx.author}, Вы не можете повысить репутацию самому себе")
             else:
                 self.db.add_reputation(ctx.author.id, ctx.guild.id, 1)
                 await ctx.message.add_reaction('✅')
@@ -405,10 +405,10 @@ class User(commands.Cog):
             self, ctx: commands.context.Context, member: discord.Member = None
     ) -> None:
         if member is None:
-            await ctx.send(f"{ctx.author}, Вы не указали пользователя!")
+            await ctx.reply(f"{ctx.author}, Вы не указали пользователя!")
         else:
             if member.id == ctx.author.id:
-                await ctx.send(f"{ctx.author}, Вы не можете понизить репутацию самому себе")
+                await ctx.reply(f"{ctx.author}, Вы не можете понизить репутацию самому себе")
             else:
                 self.db.add_reputation(ctx.author.id, ctx.guild.id, -1)
                 await ctx.message.add_reaction('✅')
@@ -421,7 +421,7 @@ class User(commands.Cog):
         self.lvl = self.db.get_stat(self.ID, self.guild_id, "ChatLevel")
         self.all_xp = self.db.get_user_xp(ctx.author.id if member is None else member.id, ctx.guild.id)
         self.xp = self.db.get_xp(self.lvl + 1) - self.all_xp
-        await ctx.send(
+        await ctx.reply(
             embed=create_emb(
                 title="Статистика {}".format(ctx.author if member is None else member),
                 args=[
@@ -584,7 +584,7 @@ class User(commands.Cog):
 
         self.img.save(f'.intermediate_files/user_card{ctx.author.id}.png')
 
-        await ctx.send(file=discord.File(fp=f'.intermediate_files/user_card{ctx.author.id}.png'))
+        await ctx.reply(file=discord.File(fp=f'.intermediate_files/user_card{ctx.author.id}.png'))
         os.remove(f".intermediate_files/user_card{ctx.author.id}.png")
         os.remove(f".intermediate_files/avatar{ctx.author.id}.png")
         os.remove(f".intermediate_files/out_avatar{ctx.author.id}.png")
@@ -593,12 +593,12 @@ class User(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __promo_active(self, ctx: commands.context.Context, promo: str = None):
         if promo is None:
-            await ctx.send(f"""{ctx.author.mention}, Вы не ввели промокод!""")
+            await ctx.reply(f"""{ctx.author.mention}, Вы не ввели промокод!""")
         elif not self.db.checking_for_promo_code_existence_in_table(promo):
-            await ctx.send(f"""{ctx.author.mention}, такого промокода не существует!""")
+            await ctx.reply(f"""{ctx.author.mention}, такого промокода не существует!""")
         elif self.db.get_from_promo_codes(promo, "Global") == 0 and \
                 ctx.guild.id != self.db.get_from_promo_codes(promo, "GuildID"):
-            await ctx.send(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
+            await ctx.reply(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
         else:
             self.cash = self.db.get_from_promo_codes(promo, "Cash")
             self.db.add_coins(ctx.author.id, ctx.guild.id, self.cash)
@@ -609,7 +609,7 @@ class User(commands.Cog):
                 value=f'Вам начислено **{divide_the_number(self.cash)}** коинов!',
                 inline=False
             )
-            await ctx.send(embed=self.emb)
+            await ctx.reply(embed=self.emb)
 
     @commands.command(aliases=['gift'])
     @commands.cooldown(1, 4, commands.BucketType.user)
@@ -618,16 +618,16 @@ class User(commands.Cog):
             member: discord.Member = None, role: discord.Role = None
     ) -> None:
         if role is None:
-            await ctx.send(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
+            await ctx.reply(f"""{ctx.author}, укажите роль, которую Вы хотите приобрести""")
         elif member is None:
-            await ctx.send(f"""{ctx.author}, укажите человека, которому Вы хотите подарить роль""")
+            await ctx.reply(f"""{ctx.author}, укажите человека, которому Вы хотите подарить роль""")
         else:
             if role in member.roles:
-                await ctx.send(f"""{ctx.author}, у Вас уже есть эта роль!""")
+                await ctx.reply(f"""{ctx.author}, у Вас уже есть эта роль!""")
 
             elif self.db.get_from_shop(ctx.guild.id, "RoleCost", order_by="RoleCost", role_id=role.id).fetchone()[0] > \
                     self.db.get_cash(ctx.author.id, ctx.guild.id):
-                await ctx.send(f"""{ctx.author}, у Вас недостаточно денег для покупки этой роли!""")
+                await ctx.reply(f"""{ctx.author}, у Вас недостаточно денег для покупки этой роли!""")
             else:
                 await member.add_roles(role)
                 self.db.take_coins(
@@ -660,17 +660,17 @@ class User(commands.Cog):
                         )
                 await ctx.author.send(embed=self.emb)
         else:
-            await ctx.send(f"{ctx.author.mention}, эту команду можно использовать только в личных сообщениях бота")
+            await ctx.reply(f"{ctx.author.mention}, эту команду можно использовать только в личных сообщениях бота")
 
     @commands.command(aliases=["promo_create"])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __promo_create(self, ctx: commands.context.Context, cash: int = None, key: str = None) -> None:
         if cash is None:
-            await ctx.send(f'{ctx.author.mention}, Вы не ввели сумму!')
+            await ctx.reply(f'{ctx.author.mention}, Вы не ввели сумму!')
         elif cash > self.db.get_cash(ctx.author.id, ctx.guild.id):
-            await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно денег для создания промокода!""")
+            await ctx.reply(f"""{ctx.author.mention}, у Вас недостаточно денег для создания промокода!""")
         elif cash < 1:
-            await ctx.send(f"""{ctx.author.mention}, не-не-не:)""")
+            await ctx.reply(f"""{ctx.author.mention}, не-не-не:)""")
         elif ctx.guild is None:
             pass
         else:
@@ -688,7 +688,7 @@ class User(commands.Cog):
                     value=f'Промокод отправлен Вам в личные сообщения!',
                     inline=False
                 )
-                await ctx.send(embed=self.emb)
+                await ctx.reply(embed=self.emb)
             except discord.Forbidden:
                 self.code2 = self.code
                 self.code = ""
@@ -706,4 +706,4 @@ class User(commands.Cog):
                           f'эту функцию можно выключить.',
                     inline=False
                 )
-                await ctx.send(embed=self.emb)
+                await ctx.reply(embed=self.emb)

@@ -49,7 +49,7 @@ class NewYear(commands.Cog):
         if self.month > 11 or self.month == 1:
             if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                 if item is None:
-                    await ctx.send(f'{ctx.author.mention}, Вы не ввели предмет')
+                    await ctx.reply(f'{ctx.author.mention}, Вы не ввели предмет')
                 else:
                     if item in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
                         self.index = 0
@@ -58,7 +58,7 @@ class NewYear(commands.Cog):
                                 self.index = i
                                 break
                         if self.db.get_from_new_year_event(ctx.author.id, ctx.guild.id, self.index) == 0:
-                            await ctx.send(f"{ctx.author.mention}, у Вас нет этого:(")
+                            await ctx.reply(f"{ctx.author.mention}, у Вас нет этого:(")
                         else:
                             self.emb = discord.Embed(title=f"Использовано {new_year[self.index]['name']}!")
                             self.db.update_new_year_event(
@@ -93,7 +93,7 @@ class NewYear(commands.Cog):
                                             pass
                                         break
                             self.db.update_new_year_event(ctx.author.id, ctx.guild.id, self.index, -1)
-                            await ctx.send(embed=self.emb)
+                            await ctx.reply(embed=self.emb)
 
     @commands.command(aliases=["buy_food"])
     @commands.cooldown(1, 4, commands.BucketType.user)
@@ -103,18 +103,18 @@ class NewYear(commands.Cog):
         if self.month > 11 or self.month == 1:
             if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                 if not 10 > number >= 0:
-                    await ctx.send(f"{ctx.author.mention}, аргумент не верен!")
+                    await ctx.reply(f"{ctx.author.mention}, аргумент не верен!")
                 elif count <= 0:
-                    await ctx.send("Вы не можете указать количество меньше 0!")
+                    await ctx.reply("Вы не можете указать количество меньше 0!")
                 elif count > 10:
-                    await ctx.send("Вы не можете указать количество больше 10!")
+                    await ctx.reply("Вы не можете указать количество больше 10!")
                 else:
                     for i in new_year:
                         if new_year[i]['index'] == int(number):
                             self.index = i
                             break
                     if (new_year[self.index]['price'] * count) > self.db.get_cash(ctx.author.id, ctx.guild.id):
-                        await ctx.send(f"{ctx.author.mention}, у Вас недостаточно средств!")
+                        await ctx.reply(f"{ctx.author.mention}, у Вас недостаточно средств!")
                     else:
                         self.db.take_coins(ctx.author.id, ctx.guild.id, new_year[self.index]['price'] * count)
                         self.db.update_new_year_event(ctx.author.id, ctx.guild.id, self.index, count)
@@ -124,17 +124,17 @@ class NewYear(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __send_present(self, ctx: commands.context.Context, member: discord.Member = None, amount: int = None):
         if member is None:
-            await ctx.send(f"""{ctx.author.mention}, укажите пользователя, которому Вы хотите перевести коины""")
+            await ctx.reply(f"""{ctx.author.mention}, укажите пользователя, которому Вы хотите перевести коины""")
         else:
             if amount is None:
-                await ctx.send(f"""{ctx.author.mention}, Вы не ввели сумму!""")
+                await ctx.reply(f"""{ctx.author.mention}, Вы не ввели сумму!""")
             elif amount > self.db.get_from_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises"):
-                await ctx.send(f"""{ctx.author.mention}, у Вас недостаточно подарков для перевода""")
+                await ctx.reply(f"""{ctx.author.mention}, у Вас недостаточно подарков для перевода""")
             elif amount < 1:
-                await ctx.send(f"""{ctx.author.mention}, Вы не можете ввести число меньше 1!""")
+                await ctx.reply(f"""{ctx.author.mention}, Вы не можете ввести число меньше 1!""")
             else:
                 if member.id == ctx.author.id:
-                    await ctx.send(f"""{ctx.author}, Вы не можете перевести деньги себе""")
+                    await ctx.reply(f"""{ctx.author}, Вы не можете перевести деньги себе""")
                 else:
                     self.db.update_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises", -amount)
                     self.db.update_inventory(member.id, member.guild.id, "NewYearPrises", amount)
@@ -150,31 +150,31 @@ class NewYear(commands.Cog):
             if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                 self.present = self.db.get_from_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises")
                 if self.present == 0:
-                    await ctx.send("У Вас нет подарков:(")
+                    await ctx.reply("У Вас нет подарков:(")
                     return
                 if isinstance(count, int):
                     if int(count) > self.present:
-                        await ctx.send("У Вас недостаточно подарков:(\nУ Вас {} подарков".format(self.present))
+                        await ctx.reply("У Вас недостаточно подарков:(\nУ Вас {} подарков".format(self.present))
                         return
                     elif int(count) <= 0:
-                        await ctx.send(f"{ctx.author.mention}, Вы не можете отрыть 0(ну или меньше) подарков:)")
+                        await ctx.reply(f"{ctx.author.mention}, Вы не можете отрыть 0(ну или меньше) подарков:)")
                         return
                 if count is None:
                     self.prize = random.randint(100, 3500)
                     self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                     self.db.take_present(1, ctx.author.id, ctx.guild.id)
-                    await ctx.send(f"{ctx.author.mention}, из подарка выпало {self.prize} коинов! Поздравляем!")
+                    await ctx.reply(f"{ctx.author.mention}, из подарка выпало {self.prize} коинов! Поздравляем!")
                 elif count == "all":
                     self.prize = sum(random.randint(100, 3500) for _ in range(self.present))
                     self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
-                    await ctx.send(f"{ctx.author.mention}, из подарков выпало {self.prize} коинов! Поздравляем!")
+                    await ctx.reply(f"{ctx.author.mention}, из подарков выпало {self.prize} коинов! Поздравляем!")
                     self.db.take_present(self.present, ctx.author.id, ctx.guild.id)
                 else:
                     try:
                         self.prize = sum(random.randint(100, 3500) for _ in range(int(count)))
                         self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                         self.db.take_present(count, ctx.author.id, ctx.guild.id)
-                        await ctx.send(f"{ctx.author.mention}, из подарков выпало {self.prize} коинов! Поздравляем!")
+                        await ctx.reply(f"{ctx.author.mention}, из подарков выпало {self.prize} коинов! Поздравляем!")
                     except TypeError:
                         pass
 
@@ -185,7 +185,7 @@ class NewYear(commands.Cog):
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
             if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
-                await ctx.send(
+                await ctx.reply(
                     f"{ctx.author.mention}\n```У Вас "
                     f"{self.db.get_from_inventory(ctx.author.id, ctx.guild.id, 'NewYearPrises')} подарков```"
                 )
@@ -206,7 +206,7 @@ class NewYear(commands.Cog):
                     name="Покупка еды",
                     value=f'Чтобы купить - {settings["prefix"]}buyfood <индекс товара>'
                           f'<количество>')
-                await ctx.send(embed=self.emb)
+                await ctx.reply(embed=self.emb)
 
     @commands.command(aliases=["food"])
     @commands.cooldown(1, 4, commands.BucketType.user)
@@ -231,4 +231,4 @@ class NewYear(commands.Cog):
                 self.emb.add_field(
                     name=f"Настроение",
                     value=f'{self.items[-1]}')
-                await ctx.send(embed=self.emb)
+                await ctx.reply(embed=self.emb)
