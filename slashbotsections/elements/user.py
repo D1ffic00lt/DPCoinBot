@@ -745,5 +745,6 @@ class UserSlash(commands.Cog):
             f"сервер {inter.guild} ({inter.guild.id})\n"
             f"Дата {get_time()}\n"
             f"команда: {command}\n"
-            f"Описание: {description}")
+            f"Описание: {description}"
+        )
         await inter.response.send_message("Баг репорт записан")
