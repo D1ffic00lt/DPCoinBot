@@ -1122,52 +1122,56 @@ class Database(object):
                     f"получено достижение «А у меня есть личная жизнь?»!\nВам начислено 56000 коинов!"
                 )
 
-    async def achievement(self, ctx: commands.context.Context) -> None:
-        self.loses = self.get_loses_count(ctx.author.id, ctx.guild.id)
-        self.wins = self.get_wins_count(ctx.author.id, ctx.guild.id)
-        if self.get_three_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.loses >= 3:
-            self.add_coins(ctx.author.id, ctx.guild.id, 400)
-            self.set_three_losses_in_row_achievement(ctx.author.id, ctx.guild.id)
+    async def achievement(self, ctx: Union[commands.context.Context, discord.Interaction]) -> None:
+        if isinstance(ctx, discord.Interaction):
+            self.author_id = ctx.user.id
+        else:
+            self.author_id = ctx.author.id
+        self.loses = self.get_loses_count(self.author_id, ctx.guild.id)
+        self.wins = self.get_wins_count(self.author_id, ctx.guild.id)
+        if self.get_three_losses_in_row_achievement(self.author_id, ctx.guild.id) == 0 and self.loses >= 3:
+            self.add_coins(self.author_id, ctx.guild.id, 400)
+            self.set_three_losses_in_row_achievement(self.author_id, ctx.guild.id)
             await ctx.author.send(
                 f"На сервере {ctx.author.guild} "
                 f"получено достижение «Азартный человек»!\nВам начислено 400 коинов!"
             )
 
-        elif self.get_ten_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.loses >= 10:
-            self.add_coins(ctx.author.id, ctx.guild.id, 3000)
-            self.set_ten_losses_in_row_achievement(ctx.author.id, ctx.guild.id)
+        elif self.get_ten_losses_in_row_achievement(self.author_id, ctx.guild.id) == 0 and self.loses >= 10:
+            self.add_coins(self.author_id, ctx.guild.id, 3000)
+            self.set_ten_losses_in_row_achievement(self.author_id, ctx.guild.id)
             await ctx.author.send(
                 f"На сервере {ctx.author.guild} "
                 f"получено достижение «Сумасшедший»!\nВам начислено 3000 коинов!"
             )
 
-        elif self.get_twenty_losses_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.loses >= 20:
-            self.add_coins(ctx.author.id, ctx.guild.id, 10000)
-            self.set_twenty_losses_in_row_achievement(ctx.author.id, ctx.guild.id)
+        elif self.get_twenty_losses_in_row_achievement(self.author_id, ctx.guild.id) == 0 and self.loses >= 20:
+            self.add_coins(self.author_id, ctx.guild.id, 10000)
+            self.set_twenty_losses_in_row_achievement(self.author_id, ctx.guild.id)
             await ctx.author.send(
                 f"На сервере {ctx.author.guild} "
                 f"получено достижение «Бессмертный»!\nВам начислено 10000 коинов!"
             )
 
-        elif self.get_three_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.wins >= 3:
-            self.add_coins(ctx.author.id, ctx.guild.id, 400)
-            self.set_three_wins_in_row_achievement(ctx.author.id, ctx.guild.id)
+        elif self.get_three_wins_in_row_achievement(self.author_id, ctx.guild.id) == 0 and self.wins >= 3:
+            self.add_coins(self.author_id, ctx.guild.id, 400)
+            self.set_three_wins_in_row_achievement(self.author_id, ctx.guild.id)
             await ctx.author.send(
                 f"На сервере {ctx.author.guild} "
                 f"получено достижение «Да я богач!»!\nВам начислено 400 коинов!"
             )
 
-        elif self.get_ten_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.wins >= 10:
-            self.add_coins(ctx.author.id, ctx.guild.id, 3000)
-            self.set_ten_wins_in_row_achievement(ctx.author.id, ctx.guild.id)
+        elif self.get_ten_wins_in_row_achievement(self.author_id, ctx.guild.id) == 0 and self.wins >= 10:
+            self.add_coins(self.author_id, ctx.guild.id, 3000)
+            self.set_ten_wins_in_row_achievement(self.author_id, ctx.guild.id)
             await ctx.author.send(
                 f"На сервере {ctx.author.guild} "
                 f"получено достижение «Это вообще законно?»!\nВам начислено 3000 коинов!"
             )
 
-        elif self.get_twenty_wins_in_row_achievement(ctx.author.id, ctx.guild.id) == 0 and self.wins >= 20:
-            self.add_coins(ctx.author.id, ctx.guild.id, 20000)
-            self.set_twenty_wins_in_row_achievement(ctx.author.id, ctx.author.id)
+        elif self.get_twenty_wins_in_row_achievement(self.author_id, ctx.guild.id) == 0 and self.wins >= 20:
+            self.add_coins(self.author_id, ctx.guild.id, 20000)
+            self.set_twenty_wins_in_row_achievement(self.author_id, self.author_id)
             await ctx.author.send(
                 f"На сервере {ctx.author.guild} "
                 f"получено достижение «Кажется меня не любят...»!\nВам начислено 20000 коинов!"
@@ -1244,22 +1248,26 @@ class Database(object):
         return False
 
     async def stats_update(
-        self,  ctx: commands.context.Context,
+        self,  ctx: Union[commands.context.Context, discord.Interaction],
         first_arg: str, second_arg: str,
         third_arg: str, count: int
     ) -> None:
-        self.update_user_stats_1(first_arg, ctx.author.id, ctx.author.id)
-        self.update_user_stats_2(second_arg, third_arg, ctx.author.id, ctx.guild.id)
-        self.update_user_stats_3(third_arg, ctx.author.id, ctx.guild.id)
-        self.update_user_stats_4(count, ctx.author.id, ctx.guild.id)
+        if isinstance(ctx, discord.Interaction):
+            self.author_id = ctx.user.id
+        else:
+            self.author_id = ctx.author.id
+        self.update_user_stats_1(first_arg, self.author_id, ctx.guild.id)
+        self.update_user_stats_2(second_arg, third_arg, self.author_id, ctx.guild.id)
+        self.update_user_stats_3(third_arg, self.author_id, ctx.guild.id)
+        self.update_user_stats_4(count, self.author_id, ctx.guild.id)
 
         if third_arg == "LosesCount":
-            self.add_lose(ctx.author.id, ctx.guild.id)
+            self.add_lose(self.author_id, ctx.guild.id)
             self.add_win(ctx.author.id, ctx.guild.id, True)
 
         elif third_arg == "WinsCount":
-            self.add_win(ctx.author.id, ctx.guild.id)
-            self.add_lose(ctx.author.id, ctx.guild.id, True)
+            self.add_win(self.author_id, ctx.guild.id)
+            self.add_lose(self.author_id, ctx.guild.id, True)
 
         await self.achievement(ctx)
 
