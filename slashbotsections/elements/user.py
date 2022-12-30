@@ -736,3 +736,14 @@ class UserSlash(commands.Cog):
                     inline=False
                 )
                 await inter.response.send_message(embed=self.emb)
+
+    @app_commands.command(name="bug_report")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def __promo_create(self, inter: discord.Interaction, command: str, description: str) -> None:
+        await self.bot.get_user(401555829620211723).send(
+            f"Баг репорт от {inter.user} ({inter.user.id})\n"
+            f"сервер {inter.guild} ({inter.guild.id})\n"
+            f"Дата {get_time()}\n"
+            f"команда: {command}\n"
+            f"Описание: {description}")
+        await inter.response.send_message("Баг репорт записан")
