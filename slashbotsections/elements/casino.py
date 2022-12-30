@@ -52,7 +52,6 @@ class CasinoSlash(commands.Cog):
         write_log(f"[{get_time()}] [INFO]: Casino connected")
 
     @app_commands.command(name="wheel")
-    @app_commands.guilds(493970394374471680)
     async def __casino_3(
             self, inter: discord.Interaction,
             bid: int = None, number: int = None
@@ -115,7 +114,6 @@ class CasinoSlash(commands.Cog):
             )
 
     @app_commands.command(name="fail")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __fail(
             self, inter: discord.Interaction,
@@ -179,7 +177,6 @@ class CasinoSlash(commands.Cog):
             await inter.response.send_message(f"Вы можете играть в казино только в специальном канале!", ephemeral=True)
 
     @app_commands.command(name="777")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino777(self, inter: discord.Interaction, bid: int) -> None:
         if inter.user.id != 0:
@@ -273,7 +270,6 @@ class CasinoSlash(commands.Cog):
             await inter.response.send_message(f"Вы можете играть в казино только в специальном канале!", ephemeral=True)
 
     @app_commands.command(name="coinflip")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino_2(self, inter: discord.Interaction, count: int, member: discord.Member = None):
         self.date_now = get_time()
@@ -343,7 +339,6 @@ class CasinoSlash(commands.Cog):
             await inter.response.send_message(f"Вы можете играть в казино только в специальном канале!", ephemeral=True)
 
     @app_commands.command(name="roll")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __roll(self, inter: discord.Interaction, count: int = None, *args):
         self.color = get_color(inter.user.roles)
@@ -619,7 +614,6 @@ class CasinoSlash(commands.Cog):
             await inter.response.send_message(f"Вы можете играть в казино только в специальном канале!", ephemeral=True)
 
     @app_commands.command(name="del_games")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __del_games(self, inter: discord.Interaction, member: discord.Member = None):
         if member is None:
@@ -633,7 +627,6 @@ class CasinoSlash(commands.Cog):
                 await inter.response.send_message("Ты чё ку-ку? Тебе так нельзя.", ephemeral=True)
 
     @app_commands.command(name="reject")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __reject(self, inter: discord.Interaction, member: discord.Member):
         if member is None:
@@ -650,7 +643,6 @@ class CasinoSlash(commands.Cog):
             await inter.message.add_reaction('✅')
 
     @app_commands.command(name="games")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __games(self, inter: discord.Interaction):
         if not self.db.check_coinflip_games(inter.user.id, inter.guild.id):
@@ -672,7 +664,6 @@ class CasinoSlash(commands.Cog):
             await inter.response.send_message("У Вас нет активных игр", ephemeral=True)
 
     @app_commands.command(name="accept")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __c_accept(self, inter: discord.Interaction, member: discord.Member):
         if member is None:

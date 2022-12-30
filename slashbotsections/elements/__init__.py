@@ -1,7 +1,9 @@
-from slashbotsections.elements.user import UserSlash
-from slashbotsections.elements.admin import AdminSlash
-from slashbotsections.elements.guild import GuildSlash
+from slashbotsections.elements.user import *
+from slashbotsections.elements.admin import *
+from slashbotsections.elements.guild import *
+from slashbotsections.elements.casino import *
+from slashbotsections.elements.public import *
 
 __all__ = (
-    "UserSlash", "AdminSlash", "GuildSlash"
+    "UserSlash", "AdminSlash", "GuildSlash", "CasinoSlash", "PublicSlash"
 )
