@@ -67,12 +67,10 @@ class UserSlash(commands.Cog):
         write_log(f"[{get_time()}] [INFO]: User (slash) connected")
 
     @app_commands.command(name="update", description="Информация об обновлении")
-    @app_commands.guilds(493970394374471680)
     async def __update(self, inter: discord.Interaction):
         await inter.response.send_message("123")
 
     @app_commands.command(name="cash", description="сколько у тебя денех?")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __balance(
             self, inter: discord.Interaction,
@@ -100,7 +98,6 @@ class UserSlash(commands.Cog):
             )
 
     @app_commands.command(name="bank", description="сколько у тебя денех в банке?")
-    @app_commands.guilds(493970394374471680)
     @app_commands.choices(action=[
         app_commands.Choice(name="Положить", value="add"),
         app_commands.Choice(name="Снять", value="take")
@@ -153,7 +150,6 @@ class UserSlash(commands.Cog):
                     await inter.response.send_message("✅")
 
     @app_commands.command(name="slb")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __slb(self, inter: discord.Interaction) -> None:
         self.all_cash = 0
@@ -194,11 +190,10 @@ class UserSlash(commands.Cog):
         )
 
     @app_commands.command(name="lb")
-    @app_commands.guilds(493970394374471680)
     @app_commands.choices(mode=[
-        app_commands.Choice(name="чат", value="chat"),
-        app_commands.Choice(name="войс", value="voice"),
-        app_commands.Choice(name="репутация", value="rep")
+        app_commands.Choice(name="Чат", value="chat"),
+        app_commands.Choice(name="Войс", value="voice"),
+        app_commands.Choice(name="Репутация", value="rep")
     ])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __lb(self, inter: discord.Interaction, mode: app_commands.Choice[str] = None) -> None:
@@ -304,7 +299,6 @@ class UserSlash(commands.Cog):
             await inter.response.send_message(embed=self.emb)
 
     @app_commands.command(name="shop")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __shop(self, inter: discord.Interaction):
         self.emb = discord.Embed(title="Магазин ролей")
@@ -344,7 +338,6 @@ class UserSlash(commands.Cog):
         await inter.response.send_message(embed=self.emb)
 
     @app_commands.command(name="buy_item")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __buy_item(self, inter: discord.Interaction, item: int):
         self.db.get_item_from_item_shop(inter.guild.id, item, "*", order_by="ItemCost")
@@ -365,7 +358,6 @@ class UserSlash(commands.Cog):
             await inter.response.send_message("✅ Администрация скоро выдаст Вам товар! ✅")
 
     @app_commands.command(name="buy")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __buy(self, inter: discord.Interaction, role: discord.Role):
         if role is None:
@@ -401,7 +393,6 @@ class UserSlash(commands.Cog):
                 await inter.response.send_message('✅')
 
     @app_commands.command(name="send")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __send(
             self, inter: discord.Interaction,
@@ -418,7 +409,6 @@ class UserSlash(commands.Cog):
             await inter.response.send_message('✅')
 
     @app_commands.command(name="add_rep")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __good_rep(
             self, inter: discord.Interaction, member: discord.Member
@@ -432,7 +422,6 @@ class UserSlash(commands.Cog):
             await inter.response.send_message('✅')
 
     @app_commands.command(name="remove_rep")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __bad_rep(
             self, inter: discord.Interaction, member: discord.Member
@@ -446,7 +435,6 @@ class UserSlash(commands.Cog):
             await inter.response.send_message('✅')
 
     @app_commands.command(name="stats")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __stats(self, inter: discord.Interaction, member: discord.Member = None) -> None:
         self.ID = inter.user.id if member is None else member.id
@@ -527,7 +515,6 @@ class UserSlash(commands.Cog):
         )
 
     @app_commands.command(name="card")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __card(self, inter: discord.Interaction) -> None:
         self.img = Image.new("RGBA", (500, 300), "#323642")
@@ -627,7 +614,6 @@ class UserSlash(commands.Cog):
         os.remove(f".intermediate_files/out_avatar{inter.user.id}.png")
 
     @app_commands.command(name="promo")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __promo_active(self, inter: discord.Interaction, promo: str):
         if not self.db.checking_for_promo_code_existence_in_table(promo):
@@ -653,7 +639,6 @@ class UserSlash(commands.Cog):
             await inter.response.send_message(embed=self.emb)
 
     @app_commands.command(name="gift")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __gift(
             self, inter: discord.Interaction,
@@ -680,7 +665,6 @@ class UserSlash(commands.Cog):
             await inter.response.send_message('✅')
 
     @app_commands.command(name="promos")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __promo_codes(self, inter: discord.Interaction) -> None:
         if not self.db.checking_for_promo_code_existence_in_table_by_id(inter.user.id):
@@ -702,7 +686,6 @@ class UserSlash(commands.Cog):
             await inter.response.send_message('✅')
 
     @app_commands.command(name="promo_create")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __promo_create(self, inter: discord.Interaction, cash: int, key: str = None) -> None:
         if cash is None:

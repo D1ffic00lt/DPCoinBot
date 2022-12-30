@@ -32,7 +32,6 @@ class AdminSlash(commands.Cog):
         write_log(f"[{get_time()}] [INFO]: AdminSlash connected")
 
     @app_commands.command(name="give")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give(self, inter: discord.Interaction, member: discord.Member, cash: int) -> None:
         self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
@@ -51,7 +50,6 @@ class AdminSlash(commands.Cog):
             await inter.response.send_message('✅')
 
     @app_commands.command(name="take")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __take(self, inter: discord.Interaction, member: discord.Member, cash: str) -> None:
         self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
@@ -75,7 +73,6 @@ class AdminSlash(commands.Cog):
             await inter.response.send_message('✅')
 
     @app_commands.command(name="give-role")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give_role(self, inter: discord.Interaction, role: discord.Role, cash: int) -> None:
         self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
@@ -96,7 +93,6 @@ class AdminSlash(commands.Cog):
             await inter.response.send_message('✅')
 
     @app_commands.command(name="take-role")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __take_role(self, inter: discord.Interaction, role: discord.Role, cash: str) -> None:
         self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
@@ -129,7 +125,6 @@ class AdminSlash(commands.Cog):
                 await inter.response.send_message('✅')
 
     @app_commands.command(name="remove-shop")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __remove_shop(self, inter: discord.Interaction, role: discord.Role) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
@@ -137,7 +132,6 @@ class AdminSlash(commands.Cog):
             await inter.response.send_message('✅')
 
     @app_commands.command(name="add-shop")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __add_shop(self, inter: discord.Interaction, role: discord.Role, price: int) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
@@ -156,7 +150,6 @@ class AdminSlash(commands.Cog):
                 await inter.response.send_message('✅')
 
     @app_commands.command(name="add-else")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __add_item_shop(self, inter: discord.Interaction, item: str, price: int) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
@@ -191,7 +184,6 @@ class AdminSlash(commands.Cog):
                     await inter.response.send_message('✅')
 
     @app_commands.command(name="remove-else")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __remove_item_shop(self, inter: discord.Interaction, item_id: int) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
