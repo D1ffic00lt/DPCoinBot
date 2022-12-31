@@ -4,7 +4,7 @@ from discord.ext import commands
 from discord.utils import get
 from discord import app_commands
 
-from botsections.functions.helperfunction import get_time, write_log
+from botsections.functions.additions import get_time, write_log
 from database.db import Database
 
 __all__ = (

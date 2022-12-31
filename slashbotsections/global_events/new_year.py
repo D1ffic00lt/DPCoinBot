@@ -8,7 +8,7 @@ from typing import Union
 
 from database.db import Database
 from botsections.functions.texts import *
-from botsections.functions.helperfunction import get_time, write_log
+from botsections.functions.additions import get_time, write_log
 from botsections.functions.config import settings
 
 __all__ = (
@@ -44,7 +44,6 @@ class NewYearSlash(commands.Cog):
         write_log(f"[{get_time()}] [INFO]: NewYearSlash event connected")
 
     @app_commands.command(name="use")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __use(self, inter: discord.Interaction, item: int) -> None:
         self.month = int(datetime.today().strftime('%m'))
@@ -103,7 +102,6 @@ class NewYearSlash(commands.Cog):
                             await inter.response.send_message(embed=self.emb)
 
     @app_commands.command(name="buy_food")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __buy_food(self, inter: discord.Interaction, number: int = 0, count: int = 1):
         self.month = int(datetime.today().strftime('%m'))
@@ -131,7 +129,6 @@ class NewYearSlash(commands.Cog):
                         await inter.response.send_message('✅')
 
     @app_commands.command(name="send_present")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __send_present(self, inter: discord.Interaction, member: discord.Member, amount: int):
         if member is None:
@@ -163,7 +160,6 @@ class NewYearSlash(commands.Cog):
                 await inter.response.send_message('✅')
 
     @app_commands.command(name="open")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __open(self, inter: discord.Interaction, count: int = None) -> None:
         self.month = int(datetime.today().strftime('%m'))
@@ -211,7 +207,6 @@ class NewYearSlash(commands.Cog):
                         pass
 
     @app_commands.command(name="presents")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __presents(self, inter: discord.Interaction) -> None:
         self.month = int(datetime.today().strftime('%m'))
@@ -224,7 +219,6 @@ class NewYearSlash(commands.Cog):
                 )
 
     @app_commands.command(name="foodshop")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __nwp(self, inter: discord.Interaction) -> None:
         self.month = int(datetime.today().strftime('%m'))
@@ -243,7 +237,6 @@ class NewYearSlash(commands.Cog):
                 await inter.response.send_message(embed=self.emb)
 
     @app_commands.command(name="food")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __food_e(self, inter: discord.Interaction) -> None:
         self.month = int(datetime.today().strftime('%m'))

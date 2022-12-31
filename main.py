@@ -12,7 +12,7 @@ from botsections import *
 from botsections.functions.config import settings
 from botsections.functions.json_ import Json
 from botsections.functions.version import __version__
-from botsections.functions.helperfunction import get_time, write_log
+from botsections.functions.additions import get_time, write_log
 from botsections.functions.encoding import Encoder
 from slashbotsections import *
 

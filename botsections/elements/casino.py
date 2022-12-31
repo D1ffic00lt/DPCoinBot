@@ -8,7 +8,7 @@ from discord.ext import commands
 from datetime import datetime
 
 from database.db import Database
-from botsections.functions.helperfunction import (
+from botsections.functions.additions import (
     fail_rand,
     get_color, divide_the_number, casino2ch, get_time, write_log
 )

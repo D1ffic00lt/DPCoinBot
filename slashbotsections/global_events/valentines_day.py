@@ -7,7 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from database.db import Database
-from botsections.functions.helperfunction import get_time, write_log
+from botsections.functions.additions import get_time, write_log
 
 __all__ = (
     "ValentinesDaySlash",
@@ -31,7 +31,6 @@ class ValentinesDaySlash(commands.Cog):
         write_log(f"[{get_time()}] [INFO]: ValentinesDaySlash event connected")
 
     @app_commands.command(name="val_open")
-    @app_commands.guilds(493970394374471680)
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __val_open(self, inter: discord.Interaction, count: int = None) -> None:
         if int(datetime.today().strftime('%m')) == 2 and int(datetime.today().strftime('%d')) == 14:

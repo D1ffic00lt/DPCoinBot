@@ -13,7 +13,7 @@ from typing import Tuple, Union
 from discord.ext import commands
 
 from botsections.functions.config import settings
-from botsections.functions.helperfunction import *
+from botsections.functions.additions import *
 from botsections.functions.encoding import Encoder
 
 
@@ -56,7 +56,7 @@ class Database(object):
             ID                           INT NOT NULL,
             Cash                         BIGINT DEFAULT 0 NOT NULL,
             Reputation                   INT DEFAULT 0 NOT NULL,
-            Lvl                          INT DEFAULT 0 NOT NULL,
+            Lvl                          INT DEFAULT 1 NOT NULL,
             GuildID                      INT NOT NULL,
             CoinFlipsCount               INT DEFAULT 0 NOT NULL,
             CoinFlipsWinsCount           INT DEFAULT 0 NOT NULL,
@@ -121,7 +121,7 @@ class Database(object):
             """CREATE TABLE IF NOT EXISTS OnlineStats (
             ID                           INT NOT NULL,
             GuildID                      INT NOT NULL,
-            Time                         TIME NOT NULL
+            Time                         VARCHAR (255) NOT NULL
            )"""
         )
         self.cursor.execute(
@@ -132,7 +132,7 @@ class Database(object):
             SecondPlayerName             VARCHAR (255) NOT NULL,
             GuildID                      INT NOT NULL,
             GuildName                    VARCHAR (255) NOT NULL,
-            Cash                         INT NOT NULL,
+            Cash                         BIGINT NOT NULL,
             Date                         VARCHAR (255) NOT NULL
            )"""
         )

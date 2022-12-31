@@ -10,7 +10,7 @@ from discord import app_commands
 from PIL import Image, ImageFont, ImageDraw
 
 from botsections.functions.config import settings
-from botsections.functions.helperfunction import (
+from botsections.functions.additions import (
     get_time, write_log, create_emb,
     divide_the_number, get_color, crop,
     prepare_mask, get_promo_code

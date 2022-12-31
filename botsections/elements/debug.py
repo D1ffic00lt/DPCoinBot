@@ -11,7 +11,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from botsections.functions.helperfunction import (
+from botsections.functions.additions import (
     get_time, write_log
 )
 from botsections.functions.json_ import Json

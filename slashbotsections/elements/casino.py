@@ -9,7 +9,7 @@ from datetime import datetime
 from discord import app_commands
 
 from database.db import Database
-from botsections.functions.helperfunction import (
+from botsections.functions.additions import (
     fail_rand,
     get_color, divide_the_number, casino2ch, get_time, write_log
 )
@@ -340,7 +340,7 @@ class CasinoSlash(commands.Cog):
 
     @app_commands.command(name="roll")
     @commands.cooldown(1, 2, commands.BucketType.user)
-    async def __roll(self, inter: discord.Interaction, count: int = None, *args):
+    async def __roll(self, inter: discord.Interaction, count: int, arg: str):
         self.color = get_color(inter.user.roles)
         self.count = count
         if self.db.is_the_casino_allowed(inter.message.channel.id):
@@ -354,7 +354,7 @@ class CasinoSlash(commands.Cog):
                     0, 36, key=str(inter.user.id), shuffle_long=37, array_long=37
                 )
                 # casino2[inter.user.id]["number"] = 1, [random.randint(0, 36), random.randint(0, 36)]
-                for i in args:
+                for i in arg:
                     self.texts[inter.user.id] += i
                 try:
                     self.casino[inter.user.id]["color"][0] = casino_numbers_color[
