@@ -240,6 +240,9 @@ class User(commands.Cog):
             action: str = None, cash: Union[int, str] = None
     ) -> None:
         if action is None:
+            self.all_cash = self.db.get_cash(ctx.author.id, ctx.guild.id) + self.db.get_cash(
+                ctx.author.id, ctx.guild.id, bank=True
+            )
             await ctx.reply(
                 embed=create_emb(
                     title="Баланс",
@@ -248,18 +251,7 @@ class User(commands.Cog):
                                 f" DP коинов\n\nБаланс в банке составляет"
                                 f"```{divide_the_number(self.db.get_cash(ctx.author.id, ctx.guild.id, bank=True))}``` "
                                 f"DP коинов\n\nВсего коинов - `"
-                                f"""{divide_the_number(
-                                    self.db.get_cash(
-                                        ctx.author.id,
-                                        ctx.guild.id
-                                    )
-                                ) + divide_the_number(
-                                    self.db.get_cash(
-                                        ctx.author.id,
-                                        ctx.guild.id,
-                                        bank=True
-                                    )
-                                )}`"""
+                                f"{divide_the_number(self.all_cash)}"
                 )
             )
         elif action == "add":
@@ -598,7 +590,9 @@ class User(commands.Cog):
             await ctx.reply(f"""{ctx.author.mention}, такого промокода не существует!""")
         elif self.db.get_from_promo_codes(promo, "Global") == 0 and \
                 ctx.guild.id != self.db.get_from_promo_codes(promo, "GuildID"):
-            await ctx.reply(f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!""")
+            await ctx.reply(
+                f"""{ctx.author.mention}, Вы не можете использовать этот промокод на этом данном сервере!"""
+            )
         else:
             self.cash = self.db.get_from_promo_codes(promo, "Cash")
             self.db.add_coins(ctx.author.id, ctx.guild.id, self.cash)

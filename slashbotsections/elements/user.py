@@ -108,6 +108,9 @@ class UserSlash(commands.Cog):
             cash: int = None
     ) -> None:
         if action is None:
+            self.all_cash = self.db.get_cash(inter.user.id, inter.guild.id) + self.db.get_cash(
+                inter.user.id, inter.guild.id, bank=True
+            )
             await inter.response.send_message(
                 embed=create_emb(
                     title="Баланс",
@@ -116,18 +119,7 @@ class UserSlash(commands.Cog):
                                 f" DP коинов\n\nБаланс в банке составляет"
                                 f"```{divide_the_number(self.db.get_cash(inter.user.id, inter.guild.id, bank=True))}```"
                                 f" DP коинов\n\nВсего коинов - `"
-                                f"""{divide_the_number(
-                                    self.db.get_cash(
-                                        inter.user.id,
-                                        inter.guild.id
-                                    )
-                                ) + divide_the_number(
-                                    self.db.get_cash(
-                                        inter.user.id,
-                                        inter.guild.id,
-                                        bank=True
-                                    )
-                                )}`"""
+                                f"""{divide_the_number(self.all_cash)}`"""
                 )
             )
         elif action.value == "add":
@@ -305,8 +297,8 @@ class UserSlash(commands.Cog):
         for row in self.db.get_from_shop(inter.guild.id, "RoleID", "RoleCost", order_by="RoleCost"):
             if inter.guild.get_role(row[0]) is not None:
                 self.emb.add_field(
-                    name=f'Роль {inter.guild.get_role(row[0]).mention}',
-                    value=f'Стоимость: **{row[1]} DP коинов**',
+                    name=u"\u200b",
+                    value=f'**Роль** {inter.guild.get_role(row[0]).mention}\nСтоимость: **{row[1]} DP коинов**',
                     inline=False
                 )
         self.emb.add_field(
