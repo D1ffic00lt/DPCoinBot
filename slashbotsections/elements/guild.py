@@ -38,7 +38,7 @@ class GuildSlash(commands.Cog):
         print(f"[{get_time()}] [INFO]: Guild connected")
         write_log(f"[{get_time()}] [INFO]: Guild connected")
 
-    @app_commands.command(name="auto_setup")
+    @app_commands.command(name="auto_setup", description="Авто-настройка сервера")
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __cat_create(self, inter: discord.Interaction) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
@@ -95,7 +95,7 @@ class GuildSlash(commands.Cog):
                 inline=False)
             await inter.response.send_message(embed=self.emb)
 
-    @app_commands.command(name="start_money")
+    @app_commands.command(name="start_money", description="Стартовый баланс")
     @app_commands.choices(arg=[
         app_commands.Choice(name="Получить", value="get"),
         app_commands.Choice(name="Установить", value="set")

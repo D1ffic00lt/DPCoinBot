@@ -43,13 +43,13 @@ class NewYearSlash(commands.Cog):
         print(f"[{get_time()}] [INFO]: NewYearSlash event connected")
         write_log(f"[{get_time()}] [INFO]: NewYearSlash event connected")
 
-    @app_commands.command(name="use")
+    @app_commands.command(name="use", description="Использовать предмет")
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __use(self, inter: discord.Interaction, item: int) -> None:
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
+            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15 + 15):
                 if item is None:
                     await inter.response.send_message(
                         f'{inter.user.mention}, Вы не ввели предмет!', ephemeral=True
@@ -101,13 +101,13 @@ class NewYearSlash(commands.Cog):
                             self.db.update_new_year_event(inter.user.id, inter.guild.id, self.index, -1)
                             await inter.response.send_message(embed=self.emb)
 
-    @app_commands.command(name="buy_food")
+    @app_commands.command(name="buy_food", description="Купить еду")
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __buy_food(self, inter: discord.Interaction, number: int = 0, count: int = 1):
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
+            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15 + 15):
                 if not 10 > number >= 0:
                     await inter.response.send_message(f"{inter.user.mention}, аргумент не верен!", ephemeral=True)
                 elif count <= 0:
@@ -128,7 +128,7 @@ class NewYearSlash(commands.Cog):
                         self.db.update_new_year_event(inter.user.id, inter.guild.id, self.index, count)
                         await inter.response.send_message('✅')
 
-    @app_commands.command(name="send_present")
+    @app_commands.command(name="send_present", description="Отправить подарок!")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __send_present(self, inter: discord.Interaction, member: discord.Member, amount: int):
         if member is None:
@@ -159,13 +159,13 @@ class NewYearSlash(commands.Cog):
 
                 await inter.response.send_message('✅')
 
-    @app_commands.command(name="open")
+    @app_commands.command(name="open", description="Открыть подарок")
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __open(self, inter: discord.Interaction, count: int = None) -> None:
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
+            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15 + 15):
                 self.present = self.db.get_from_inventory(inter.user.id, inter.guild.id, "NewYearPrises")
                 if self.present == 0:
                     await inter.response.send_message("У Вас нет подарков:(", ephemeral=True)
@@ -206,25 +206,25 @@ class NewYearSlash(commands.Cog):
                     except TypeError:
                         pass
 
-    @app_commands.command(name="presents")
+    @app_commands.command(name="presents", description="Количество подарков")
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __presents(self, inter: discord.Interaction) -> None:
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
+            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15 + 15):
                 await inter.response.send_message(
                     f"{inter.user.mention}\n```У Вас "
                     f"{self.db.get_from_inventory(inter.user.id, inter.guild.id, 'NewYearPrises')} подарков```"
                 )
 
-    @app_commands.command(name="foodshop")
+    @app_commands.command(name="foodshop", description="Магазин новогодней еды")
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __nwp(self, inter: discord.Interaction) -> None:
         self.month = int(datetime.today().strftime('%m'))
         self.day = int(datetime.today().strftime('%d'))
         if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
+            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15 + 15):
                 self.emb = discord.Embed(title="Магазин Еды!")
                 for i in new_year:
                     self.emb.add_field(
@@ -236,7 +236,7 @@ class NewYearSlash(commands.Cog):
                           f'<количество>')
                 await inter.response.send_message(embed=self.emb)
 
-    @app_commands.command(name="food")
+    @app_commands.command(name="food", description="Ваша еда")
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __food_e(self, inter: discord.Interaction) -> None:
         self.month = int(datetime.today().strftime('%m'))
