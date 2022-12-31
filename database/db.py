@@ -13,7 +13,7 @@ from typing import Tuple, Union
 from discord.ext import commands
 
 from botsections.functions.config import settings
-from botsections.functions.helperfunction import *
+from botsections.functions.additions import *
 from botsections.functions.encoding import Encoder
 
 
@@ -33,7 +33,7 @@ class Database(object):
         self.msg: MIMEMultipart = MIMEMultipart()
         self.part2: MIMEBase = MIMEBase('application', "octet-stream")
         self.part1: MIMEBase = MIMEBase('application', "octet-stream")
-        self.check_str_cash = lambda cash, user_cash: int(cash) > user_cash if cash.isdigit() else False
+        self.check_str_cash = lambda cash, user_cash: int(cash) > user_cash if str(cash).isdigit() else False
         self.time = None
         self.now2 = None
         self.minutes: int = 0
@@ -56,7 +56,7 @@ class Database(object):
             ID                           INT NOT NULL,
             Cash                         BIGINT DEFAULT 0 NOT NULL,
             Reputation                   INT DEFAULT 0 NOT NULL,
-            Lvl                          INT DEFAULT 0 NOT NULL,
+            Lvl                          INT DEFAULT 1 NOT NULL,
             GuildID                      INT NOT NULL,
             CoinFlipsCount               INT DEFAULT 0 NOT NULL,
             CoinFlipsWinsCount           INT DEFAULT 0 NOT NULL,
@@ -121,7 +121,7 @@ class Database(object):
             """CREATE TABLE IF NOT EXISTS OnlineStats (
             ID                           INT NOT NULL,
             GuildID                      INT NOT NULL,
-            Time                         TIME NOT NULL
+            Time                         VARCHAR (255) NOT NULL
            )"""
         )
         self.cursor.execute(
@@ -132,7 +132,7 @@ class Database(object):
             SecondPlayerName             VARCHAR (255) NOT NULL,
             GuildID                      INT NOT NULL,
             GuildName                    VARCHAR (255) NOT NULL,
-            Cash                         INT NOT NULL,
+            Cash                         BIGINT NOT NULL,
             Date                         VARCHAR (255) NOT NULL
            )"""
         )
@@ -397,7 +397,7 @@ class Database(object):
         return self.cursor.execute(
             f"SELECT `{item}` FROM `Coinflip` WHERE `GuildID` = ? AND "
             f"`FirstPlayerID` = ? AND `SecondPlayerID` = ?",
-            (item, guild_id, ID1, ID2)
+            (guild_id, ID1, ID2)
         ).fetchone()[0]
 
     def get_from_promo_codes(self, code: str, item: Union[str, List[str]], ID: int = None) -> Union[int, str, Cursor]:
@@ -834,12 +834,10 @@ class Database(object):
         return self.cursor.execute(
             "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
             (first_player_id, guild_id, second_player_id)
-        ).fetchone() is None \
-               or \
-               self.cursor.execute(
-                   "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
-                   (second_player_id, guild_id, first_player_id)
-               ).fetchone() is None
+        ).fetchone() is not None or self.cursor.execute(
+            "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
+            (second_player_id, guild_id, first_player_id)
+        ).fetchone() is not None
 
     def delete_from_online_stats(self, ID: int) -> Cursor:
         with self.connection:
@@ -1263,7 +1261,7 @@ class Database(object):
 
         if third_arg == "LosesCount":
             self.add_lose(self.author_id, ctx.guild.id)
-            self.add_win(ctx.author.id, ctx.guild.id, True)
+            self.add_win(self.author_id, ctx.guild.id, True)
 
         elif third_arg == "WinsCount":
             self.add_win(self.author_id, ctx.guild.id)

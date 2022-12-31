@@ -5,7 +5,7 @@ from datetime import datetime
 from discord.ext import commands
 from typing import Union
 
-from botsections.functions.helperfunction import (
+from botsections.functions.additions import (
     get_time, write_log
 )
 from botsections.functions.json_ import Json

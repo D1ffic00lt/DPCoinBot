@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord.utils import get
 
 from botsections.functions.texts import need_settings
-from botsections.functions.helperfunction import divide_the_number, get_time, write_log
+from botsections.functions.additions import divide_the_number, get_time, write_log
 from database.db import Database
 
 __all__ = (

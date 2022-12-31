@@ -5,7 +5,7 @@ from discord.ext import commands
 from typing import Union
 
 from database.db import Database
-from botsections.functions.helperfunction import get_time, write_log
+from botsections.functions.additions import get_time, write_log
 
 __all__ = (
     "ValentinesDay",

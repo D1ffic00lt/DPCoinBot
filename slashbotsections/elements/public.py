@@ -4,7 +4,7 @@ from discord import app_commands
 from discord.ext import commands
 from datetime import datetime
 
-from botsections.functions.helperfunction import get_time, write_log
+from botsections.functions.additions import get_time, write_log
 from botsections.functions.config import settings
 from botsections.functions.texts import *
 from database.db import Database
@@ -35,7 +35,7 @@ class PublicSlash(commands.Cog):
         print(f"[{get_time()}] [INFO]: Public connected")
         write_log(f"[{get_time()}] [INFO]: Public connected")
 
-    @app_commands.command(name="info")
+    @app_commands.command(name="info", description="За что выдают коины?")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __info(self, inter: discord.Interaction):
         self.emb = discord.Embed(title="За что выдают коины?")
@@ -55,7 +55,7 @@ class PublicSlash(commands.Cog):
         )
         await inter.response.send_message(embed=self.emb)
 
-    @app_commands.command(name="help")
+    @app_commands.command(name="help", description="Информация о командах бота")
     @app_commands.choices(arg=[
         app_commands.Choice(name="Пользователь", value="user"),
         app_commands.Choice(name="Казино", value="casino"),

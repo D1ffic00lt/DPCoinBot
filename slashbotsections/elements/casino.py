@@ -9,7 +9,7 @@ from datetime import datetime
 from discord import app_commands
 
 from database.db import Database
-from botsections.functions.helperfunction import (
+from botsections.functions.additions import (
     fail_rand,
     get_color, divide_the_number, casino2ch, get_time, write_log
 )
@@ -51,12 +51,12 @@ class CasinoSlash(commands.Cog):
         print(f"[{get_time()}] [INFO]: Casino connected")
         write_log(f"[{get_time()}] [INFO]: Casino connected")
 
-    @app_commands.command(name="wheel")
+    @app_commands.command(name="wheel", description="Рулетка! (прямо как в расте)")
     async def __casino_3(
             self, inter: discord.Interaction,
-            bid: int = None, number: int = None
+            bid: int, number: int
     ) -> None:
-        if self.db.is_the_casino_allowed(inter.message.channel.id):
+        if self.db.is_the_casino_allowed(inter.channel.id):
             if bid is None:
                 await inter.response.send_message("Вы ну ввели Вашу ставку!", ephemeral=True)
             elif bid <= 0:
@@ -113,13 +113,13 @@ class CasinoSlash(commands.Cog):
                 f"Вы можете играть в казино только в специальном канале!", ephemeral=True
             )
 
-    @app_commands.command(name="fail")
+    @app_commands.command(name="fail", description="Казино с коэффицентом!")
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __fail(
             self, inter: discord.Interaction,
-            bid: int = None, coefficient: float = None
+            bid: int, coefficient: float
     ) -> None:
-        if self.db.is_the_casino_allowed(inter.message.channel.id):
+        if self.db.is_the_casino_allowed(inter.channel.id):
             if bid is None:
                 await inter.response.send_message(f"Вы не ввели вашу ставку", ephemeral=True)
             elif bid < 10:
@@ -176,12 +176,12 @@ class CasinoSlash(commands.Cog):
         else:
             await inter.response.send_message(f"Вы можете играть в казино только в специальном канале!", ephemeral=True)
 
-    @app_commands.command(name="777")
+    @app_commands.command(name="777", description="Рулетка! (в разработке)")
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino777(self, inter: discord.Interaction, bid: int) -> None:
         if inter.user.id != 0:
             return
-        if self.db.is_the_casino_allowed(inter.message.channel.id):
+        if self.db.is_the_casino_allowed(inter.channel.id):
             if bid is None:
                 await inter.response.send_message(f"Вы не ввели вашу ставку", ephemeral=True)
             elif bid < 10:
@@ -222,7 +222,7 @@ class CasinoSlash(commands.Cog):
                     self.db.add_coins(inter.user.id, inter.guild.id, self.result_bid)
                     self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                     self.emb.add_field(
-                        name=f'🎰Поздравляем!🎰',
+                        name=f'🎰{inter.user}, Поздравляем!🎰',
                         value='`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, Вы выиграли **{}** DP коинов!'.format(
                             *self.line1[0], *self.line1[1], *self.line1[2],
                             *self.line2[0], *self.line2[1], *self.line2[2],
@@ -238,7 +238,7 @@ class CasinoSlash(commands.Cog):
                     self.db.add_coins(inter.user.id, inter.guild.id, self.result_bid)
                     self.emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=self.color)
                     self.emb.add_field(
-                        name=f'🎰Вы выиграли!🎰',
+                        name=f'🎰{inter.user}, Поздравляем!🎰',
                         value='`{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, Вы выиграли **{}** DP коинов!'.format(
                             *self.line1[0], *self.line1[1], *self.line1[2],
                             *self.line2[0], *self.line2[1], *self.line2[2],
@@ -254,7 +254,7 @@ class CasinoSlash(commands.Cog):
                 else:
                     self.emb = discord.Embed(title="🎰Вы проиграли:(🎰", colour=self.color)
                     self.emb.add_field(
-                        name=f':(',
+                        name=f'🎰{inter.user}, Поздравляем!🎰',
                         value='{}\t{}\t{}`\n`{}\t{}\t{}`\n`{}\t{}\t{}\n{}, Вы выиграли **{}** DP коинов!'.format(
                             *self.line1[0], *self.line1[1], *self.line1[2],
                             *self.line2[0], *self.line2[1], *self.line2[2],
@@ -274,7 +274,7 @@ class CasinoSlash(commands.Cog):
     async def __casino_2(self, inter: discord.Interaction, count: int, member: discord.Member = None):
         self.date_now = get_time()
         self.color = get_color(inter.user.roles)
-        if self.db.is_the_casino_allowed(inter.message.channel.id):
+        if self.db.is_the_casino_allowed(inter.channel.id):
             if member is None:
                 if await self.db.cash_check(inter, count, min_cash=10, check=True):
                     self.db.take_coins(inter.user.id, inter.guild.id, count)
@@ -315,8 +315,7 @@ class CasinoSlash(commands.Cog):
                     if self.db.get_active_coinflip(inter.user.id, member.id, inter.guild.id):
                         await inter.response.send_message(
                             f"{inter.user.mention}, такая игра уже существует! Для удаления - "
-                            f"{settings['prefix']}del_games "
-                            f"{member.mention}"
+                            f"{settings['prefix']}del_games", ephemeral=True
                         )
                     else:
                         self.db.insert_into_coinflip(
@@ -328,22 +327,21 @@ class CasinoSlash(commands.Cog):
                         self.emb = discord.Embed(title=f"{member}, вас упомянули в коинфлипе!", colour=self.color)
                         self.emb.add_field(
                             name=f'Коинфлип на {count} DP коинов!',
-                            value=f"{inter.user.mention}, значит в следующий раз"
-                                  f"{settings['prefix']}accept {inter.user.mention}\n\nЧтобы отменить - "
+                            value=f"{settings['prefix']}accept {inter.user.mention}\n\nЧтобы отменить - "
                                   f"{settings['prefix']}reject {inter.user.mention}",
                             inline=False
                         )
                         await inter.response.send_message(embed=self.emb)
-                        await inter.response.send_message(member.mention)
+                        await inter.channel.send(member.mention)
         else:
             await inter.response.send_message(f"Вы можете играть в казино только в специальном канале!", ephemeral=True)
 
     @app_commands.command(name="roll")
     @commands.cooldown(1, 2, commands.BucketType.user)
-    async def __roll(self, inter: discord.Interaction, count: int = None, *args):
+    async def __roll(self, inter: discord.Interaction, count: int, arg: str):
         self.color = get_color(inter.user.roles)
         self.count = count
-        if self.db.is_the_casino_allowed(inter.message.channel.id):
+        if self.db.is_the_casino_allowed(inter.channel.id):
             if await self.db.cash_check(inter, self.count, min_cash=10, check=True):
                 self.texts[inter.user.id] = ""
                 self.casino[inter.user.id] = {}
@@ -354,7 +352,7 @@ class CasinoSlash(commands.Cog):
                     0, 36, key=str(inter.user.id), shuffle_long=37, array_long=37
                 )
                 # casino2[inter.user.id]["number"] = 1, [random.randint(0, 36), random.randint(0, 36)]
-                for i in args:
+                for i in arg:
                     self.texts[inter.user.id] += i
                 try:
                     self.casino[inter.user.id]["color"][0] = casino_numbers_color[
@@ -618,7 +616,7 @@ class CasinoSlash(commands.Cog):
     async def __del_games(self, inter: discord.Interaction, member: discord.Member = None):
         if member is None:
             self.db.delete_from_coinflip(inter.user.id, inter.guild.id, inter.guild.id)
-            await inter.message.add_reaction('✅')
+            await inter.response.send_message('✅')
         else:
             if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
                 self.db.delete_from_coinflip(member.id, member.id, inter.guild.id)
@@ -673,17 +671,17 @@ class CasinoSlash(commands.Cog):
                 f"Такой игры не существует, посмотреть все ваши активные игры - {settings['prefix']}games",
                 ephemeral=True
             )
-        elif reladdons.long.minutes(self.db.get_from_coinflip(inter.user.id, member.id, inter.guild.id, "Date")) > 5:
+        elif reladdons.long.minutes(self.db.get_from_coinflip(member.id, inter.user.id, inter.guild.id, "Date")) > 5:
             await inter.response.send_message(f"Время истекло:(", ephemeral=True)
             self.db.delete_from_coinflip(inter.user.id, member.id, inter.guild.id)
         elif self.db.get_cash(inter.user.id, inter.guild.id) < \
-                self.db.get_from_coinflip(inter.user.id, member.id, inter.guild.id, "Cash"):
+                self.db.get_from_coinflip(member.id, inter.user.id, inter.guild.id, "Cash"):
             await inter.response.send_message(f"У Вас недостаточно средств!", ephemeral=True)
         elif self.db.get_cash(member.id, inter.guild.id) < \
-                self.db.get_from_coinflip(inter.user.id, member.id, inter.guild.id, "Cash"):
+                self.db.get_from_coinflip(member.id, inter.user.id, inter.guild.id, "Cash"):
             await inter.response.send_message(f"У Вашего cоперника недостаточно средств", ephemeral=True)
         else:
-            self.num = self.db.get_from_coinflip(inter.user.id, member.id, inter.guild.id, "Cash")
+            self.num = self.db.get_from_coinflip(member.id, inter.user.id, inter.guild.id, "Cash")
             self.db.take_coins(inter.user.id, inter.guild.id, self.num)
             self.db.take_coins(member.id, inter.guild.id, self.num)
             self.ch = random.randint(1, 2)

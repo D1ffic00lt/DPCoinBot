@@ -4,7 +4,7 @@ from discord.ext import commands
 from discord.utils import get
 from discord import app_commands
 
-from botsections.functions.helperfunction import get_time, write_log
+from botsections.functions.additions import get_time, write_log
 from database.db import Database
 
 __all__ = (
@@ -31,7 +31,7 @@ class AdminSlash(commands.Cog):
         print(f"[{get_time()}] [INFO]: AdminSlash connected")
         write_log(f"[{get_time()}] [INFO]: AdminSlash connected")
 
-    @app_commands.command(name="give")
+    @app_commands.command(name="give", description="Выдать коины")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give(self, inter: discord.Interaction, member: discord.Member, cash: int) -> None:
         self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
@@ -49,7 +49,7 @@ class AdminSlash(commands.Cog):
             self.db.add_coins(member.id, inter.guild.id, cash)
             await inter.response.send_message('✅')
 
-    @app_commands.command(name="take")
+    @app_commands.command(name="take", description="Снять коины")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __take(self, inter: discord.Interaction, member: discord.Member, cash: str) -> None:
         self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
@@ -72,7 +72,7 @@ class AdminSlash(commands.Cog):
                 self.db.take_coins(member.id, inter.guild.id, int(cash))
             await inter.response.send_message('✅')
 
-    @app_commands.command(name="give-role")
+    @app_commands.command(name="give-role", description="Выдать коины по роли")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give_role(self, inter: discord.Interaction, role: discord.Role, cash: int) -> None:
         self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
@@ -92,7 +92,7 @@ class AdminSlash(commands.Cog):
                     self.db.add_coins(member.id, inter.guild.id, cash)
             await inter.response.send_message('✅')
 
-    @app_commands.command(name="take-role")
+    @app_commands.command(name="take-role", description="Забрать коины по роли")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __take_role(self, inter: discord.Interaction, role: discord.Role, cash: str) -> None:
         self.administrator_role_id = self.db.get_administrator_role_id(inter.guild.id)  # !
@@ -124,14 +124,14 @@ class AdminSlash(commands.Cog):
                         self.db.take_coins(member.id, inter.guild.id, int(cash))
                 await inter.response.send_message('✅')
 
-    @app_commands.command(name="remove-shop")
+    @app_commands.command(name="remove-shop", description="Удалить роль из магазина")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __remove_shop(self, inter: discord.Interaction, role: discord.Role) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
             self.db.delete_from_shop(role.id, inter.guild.id)
             await inter.response.send_message('✅')
 
-    @app_commands.command(name="add-shop")
+    @app_commands.command(name="add-shop", description="Добавить роль в магазин")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __add_shop(self, inter: discord.Interaction, role: discord.Role, price: int) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
@@ -149,7 +149,7 @@ class AdminSlash(commands.Cog):
                 self.db.insert_into_shop(role.id, inter.guild.id, price)
                 await inter.response.send_message('✅')
 
-    @app_commands.command(name="add-else")
+    @app_commands.command(name="add-else", description="Добавить предмет в магазин")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __add_item_shop(self, inter: discord.Interaction, item: str, price: int) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
@@ -183,7 +183,7 @@ class AdminSlash(commands.Cog):
                     self.db.insert_into_item_shop(self.ind + 1, str(self.msg), inter.guild.id, price)
                     await inter.response.send_message('✅')
 
-    @app_commands.command(name="remove-else")
+    @app_commands.command(name="remove-else", description="Удалить вещь из магазина")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __remove_item_shop(self, inter: discord.Interaction, item_id: int) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:

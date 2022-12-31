@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from botsections.functions.config import settings
-from botsections.functions.helperfunction import get_time, write_log
+from botsections.functions.additions import get_time, write_log
 from database.db import Database
 
 
@@ -14,8 +14,8 @@ class DPcoinBOT(commands.Bot):
         "lvl", "db"
     )
 
-    def __init__(self, command_prefix: str, **kwargs) -> None:
-        super().__init__(command_prefix, **kwargs)
+    def __init__(self, command_prefix: str, *, intents: discord.Intents, **kwargs) -> None:
+        super().__init__(command_prefix, intents=intents, **kwargs)
         self.lvl: int = 0
         self.db: Database = kwargs["db"]
         self.remove_command('help')

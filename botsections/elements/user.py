@@ -7,7 +7,7 @@ from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
 
-from botsections.functions.helperfunction import (
+from botsections.functions.additions import (
     divide_the_number, create_emb,
     get_color, prepare_mask, crop,
     get_promo_code, get_time, write_log

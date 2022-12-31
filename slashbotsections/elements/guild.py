@@ -6,7 +6,7 @@ from discord.utils import get
 from discord import app_commands
 
 from botsections.functions.texts import need_settings
-from botsections.functions.helperfunction import divide_the_number, get_time, write_log
+from botsections.functions.additions import divide_the_number, get_time, write_log
 from database.db import Database
 
 __all__ = (
@@ -38,7 +38,7 @@ class GuildSlash(commands.Cog):
         print(f"[{get_time()}] [INFO]: Guild connected")
         write_log(f"[{get_time()}] [INFO]: Guild connected")
 
-    @app_commands.command(name="auto_setup")
+    @app_commands.command(name="auto_setup", description="Авто-настройка сервера")
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __cat_create(self, inter: discord.Interaction) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
@@ -95,15 +95,17 @@ class GuildSlash(commands.Cog):
                 inline=False)
             await inter.response.send_message(embed=self.emb)
 
-    @app_commands.command(name="start_money")
-    @app_commands.choices(action=[
+    @app_commands.command(name="start_money", description="Стартовый баланс")
+    @app_commands.choices(arg=[
         app_commands.Choice(name="Получить", value="get"),
         app_commands.Choice(name="Установить", value="set")
     ])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def __start_money(self, inter: discord.Interaction, arg: str = None, cash: int = None) -> None:
+    async def __start_money(
+            self, inter: discord.Interaction, arg: app_commands.Choice[str] = None, cash: int = None
+    ) -> None:
         if inter.user.guild_permissions.administrator or inter.user.id == 401555829620211723:
-            if arg == "set":
+            if arg.value == "set":
                 if await self.db.cash_check(inter, cash, max_cash=1000000) or cash == 0:
                     if not self.db.checking_for_guild_existence_in_table(inter.guild.id):
                         await inter.response.send_message(

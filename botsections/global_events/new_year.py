@@ -7,7 +7,7 @@ from typing import Union
 
 from database.db import Database
 from botsections.functions.texts import *
-from botsections.functions.helperfunction import get_time, write_log
+from botsections.functions.additions import get_time, write_log
 from botsections.functions.config import settings
 
 __all__ = (
