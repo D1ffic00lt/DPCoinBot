@@ -216,7 +216,7 @@ class NewYear(commands.Cog):
         if self.month > 11 or self.month == 1:
             if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                 self.emb = discord.Embed(title=f"Еда {ctx.author}")
-                self.emb.set_thumbnail(url=ctx.author.avatar_url)
+                self.emb.set_thumbnail(url=ctx.author.avatar.url)
                 self.index2 = 3
                 self.items = tuple(self.db.get_from_new_year_event(ctx.author.id, ctx.guild.id, "*"))
                 for t in range(len(self.items) - 3):

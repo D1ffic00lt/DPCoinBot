@@ -244,7 +244,7 @@ class NewYearSlash(commands.Cog):
         if self.month > 11 or self.month == 1:
             if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                 self.emb = discord.Embed(title=f"Еда {inter.user}")
-                self.emb.set_thumbnail(url=inter.user.avatar_url)
+                self.emb.set_thumbnail(url=inter.user.avatar.url)
                 self.index2 = 3
                 self.items = tuple(self.db.get_from_new_year_event(inter.user.id, inter.guild.id, "*"))
                 for t in range(len(self.items) - 3):
