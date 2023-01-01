@@ -216,7 +216,7 @@ class UserSlash(commands.Cog):
                             else:
                                 self.counter += 1
                                 self.emb.add_field(
-                                    name=f'# {self.counter} | `{row[0]}` | lvl `{row[2]}`',
+                                    name=f'# {self.counter} | `{row[0]}`',
                                     value=f'Баланс: {divide_the_number(row[1])}',
                                     inline=False
                                 )

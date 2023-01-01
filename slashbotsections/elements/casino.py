@@ -269,7 +269,7 @@ class CasinoSlash(commands.Cog):
         else:
             await inter.response.send_message(f"Вы можете играть в казино только в специальном канале!", ephemeral=True)
 
-    @app_commands.command(name="coinflip")
+    @app_commands.command(name="coinflip", description="Коинфлип")
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino_2(self, inter: discord.Interaction, count: int, member: discord.Member = None):
         self.date_now = get_time()
@@ -336,7 +336,7 @@ class CasinoSlash(commands.Cog):
         else:
             await inter.response.send_message(f"Вы можете играть в казино только в специальном канале!", ephemeral=True)
 
-    @app_commands.command(name="roll")
+    @app_commands.command(name="roll", description="Рулетка")
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __roll(self, inter: discord.Interaction, count: int, arg: str):
         self.color = get_color(inter.user.roles)
@@ -611,7 +611,7 @@ class CasinoSlash(commands.Cog):
         else:
             await inter.response.send_message(f"Вы можете играть в казино только в специальном канале!", ephemeral=True)
 
-    @app_commands.command(name="del_games")
+    @app_commands.command(name="del_games", description="Удалить все активные игры в коинфипе")
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __del_games(self, inter: discord.Interaction, member: discord.Member = None):
         if member is None:
@@ -624,7 +624,7 @@ class CasinoSlash(commands.Cog):
             else:
                 await inter.response.send_message("Ты чё ку-ку? Тебе так нельзя.", ephemeral=True)
 
-    @app_commands.command(name="reject")
+    @app_commands.command(name="reject", description="Отклонить предложение кинуть монетку")
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __reject(self, inter: discord.Interaction, member: discord.Member):
         if member is None:
@@ -640,7 +640,7 @@ class CasinoSlash(commands.Cog):
             self.db.delete_from_coinflip(inter.user.id, member.id, inter.guild.id)
             await inter.message.add_reaction('✅')
 
-    @app_commands.command(name="games")
+    @app_commands.command(name="games", description="Все ваши активные игры в коинфлип")
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __games(self, inter: discord.Interaction):
         if not self.db.check_coinflip_games(inter.user.id, inter.guild.id):
@@ -661,7 +661,7 @@ class CasinoSlash(commands.Cog):
         else:
             await inter.response.send_message("У Вас нет активных игр", ephemeral=True)
 
-    @app_commands.command(name="accept")
+    @app_commands.command(name="accept", description="Принять игру в коинфлип")
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __c_accept(self, inter: discord.Interaction, member: discord.Member):
         if member is None:
