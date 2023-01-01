@@ -283,8 +283,8 @@ class Database(object):
             )
 
     def insert_into_server(
-        self, guild_id: int, role_id: int,
-        admin_id: int, casino_channel_id: int, category_id: int
+            self, guild_id: int, role_id: int,
+            admin_id: int, casino_channel_id: int, category_id: int
     ) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -434,8 +434,8 @@ class Database(object):
         ).fetchone()[0]
 
     def get_from_user(
-        self, guild_id: int, *args: str,
-        order_by: str, limit: int = None
+            self, guild_id: int, *args: str,
+            order_by: str, limit: int = None
     ) -> Any:
         if limit is None:
             return self.cursor.execute(
@@ -478,8 +478,8 @@ class Database(object):
         )
 
     def get_item_from_item_shop(
-        self, guild_id: int, item_id: int,
-        *args: str, order_by: str
+            self, guild_id: int, item_id: int,
+            *args: str, order_by: str
     ) -> Any:
         return self.cursor.execute(
             f"SELECT {', '.join([f'`{i}`' for i in args])} FROM `ItemShop` "
@@ -645,7 +645,7 @@ class Database(object):
             )
 
     def add_coins_to_the_bank(
-        self, ID: int, guild_id: int, cash: int,
+            self, ID: int, guild_id: int, cash: int,
     ) -> Cursor:
         with self.connection:
             self.take_coins(ID, guild_id, cash)
@@ -662,8 +662,8 @@ class Database(object):
             )
 
     def take_coins_from_the_bank(
-        self, ID: int,
-        guild_id: int, cash: Union[int, str],
+            self, ID: int,
+            guild_id: int, cash: Union[int, str],
     ) -> Cursor:
         with self.connection:
             self.add_coins(
@@ -802,9 +802,9 @@ class Database(object):
             )
 
     def stats_update_member(
-        self, ID: int, guild_id: int,
-        first_arg: str, second_arg: str,
-        third_arg: str, count: int
+            self, ID: int, guild_id: int,
+            first_arg: str, second_arg: str,
+            third_arg: str, count: int
     ) -> None:
         self.update_user_stats_1(first_arg, ID, guild_id)
         self.update_user_stats_2(second_arg, third_arg, ID, guild_id)
@@ -828,8 +828,8 @@ class Database(object):
         )
 
     def get_active_coinflip(
-        self, first_player_id: int,
-        second_player_id: int, guild_id: int
+            self, first_player_id: int,
+            second_player_id: int, guild_id: int
     ) -> Tuple[Any, Any]:
         return self.cursor.execute(
             "SELECT * FROM `Coinflip` WHERE `SecondPlayerID` = ? AND `GuildID` = ? AND `FirstPlayerID` = ?",
@@ -875,9 +875,9 @@ class Database(object):
             )
 
     def insert_into_coinflip(
-        self, first_player_id: int, second_player_id: int,
-        first_player_name: str, second_player_name: str,
-        guild_id: int, guild_name: str, cash: int, date: str
+            self, first_player_id: int, second_player_id: int,
+            first_player_name: str, second_player_name: str,
+            guild_id: int, guild_name: str, cash: int, date: str
     ) -> Cursor:
         with self.connection:
             return self.cursor.execute(
@@ -1054,9 +1054,9 @@ class Database(object):
         except TypeError:
             pass
         else:
-            self.time = datetime_to_str(get_time()) - self.now2
+            self.time = int((datetime_to_str(get_time()) - self.now2).total_seconds() // 60)
             self.delete_from_online_stats(member.id)
-            self.update_minutes_in_voice_channels(int(self.time.total_seconds() // 60), member.id, member.guild.id)
+            self.update_minutes_in_voice_channels(self.time, member.id, member.guild.id)
 
             if arg is True:
                 self.insert_into_online_stats(member.id, member.guild.id)
@@ -1203,9 +1203,9 @@ class Database(object):
             )
 
     async def cash_check(
-        self, ctx: Union[commands.context.Context, discord.Interaction],
-        cash: Union[str, int], max_cash: int = None,
-        min_cash: int = 1, check: bool = False
+            self, ctx: Union[commands.context.Context, discord.Interaction],
+            cash: Union[str, int], max_cash: int = None,
+            min_cash: int = 1, check: bool = False
     ) -> bool:
         self.mention = ctx.author.mention if isinstance(ctx, commands.context.Context) else ctx.user.mention
         self.author_id = ctx.author.id if isinstance(ctx, commands.context.Context) else ctx.user.id
@@ -1246,9 +1246,9 @@ class Database(object):
         return False
 
     async def stats_update(
-        self,  ctx: Union[commands.context.Context, discord.Interaction],
-        first_arg: str, second_arg: str,
-        third_arg: str, count: int
+            self, ctx: Union[commands.context.Context, discord.Interaction],
+            first_arg: str, second_arg: str,
+            third_arg: str, count: int
     ) -> None:
         if isinstance(ctx, discord.Interaction):
             self.author_id = ctx.user.id
@@ -1275,15 +1275,12 @@ class Database(object):
         except TypeError:
             pass
         else:
-            self.minutes = self.get_minutes(member.id, member.guild.id)
-            self.add_coins(
-                member.id, member.guild.id,
-                self.minutes * (datetime_to_str(get_time()) - self.now2).total_seconds() // 60
-            )
+            self.minutes = int((datetime_to_str(get_time()) - self.now2).total_seconds() // 60)
+            self.add_coins(member.id, member.guild.id, self.minutes)
             self.delete_from_online(member.id)
             self.update_minutes_in_voice_channels(self.minutes, member.id, member.guild.id)
-            self.month = int(datetime.today().strftime('%m'))
-            self.day = int(datetime.today().strftime('%d'))
+            self.month = int(datetime.datetime.today().strftime('%m'))
+            self.day = int(datetime.datetime.today().strftime('%d'))
             if self.month > 11 or self.month == 1:
                 if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                     self.prises[member.id] = 0

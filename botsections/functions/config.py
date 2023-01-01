@@ -26,5 +26,6 @@ settings = {
     "sender_email": b'gAAAAABjZNADXnn912gRHsi-VJdTOdwdURimJ3gLB_HhARaxStglvAm6hoNH'
                     b'8_q-1e-FZLpUpzH65t4moKjkYLAGCBi0meIAmoNYdNpcfcb9FTfQ6lHQCOQ=',
     "to_send_email": b'gAAAAABjZNASo0D8yoYUkxlIyJncwUg-rb_N6qubnhuuj4Q9TtLn6aEqjwyQ'
-                     b'gBpeOQ-YFnA_-x2V61LApxNczB6CEvkVXOrhSX0P3pE-5RLvd4B8bjYlMfA='
+                     b'gBpeOQ-YFnA_-x2V61LApxNczB6CEvkVXOrhSX0P3pE-5RLvd4B8bjYlMfA=',
+    "new_year_max_price": 1000
 }

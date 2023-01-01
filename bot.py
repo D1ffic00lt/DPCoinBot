@@ -33,6 +33,8 @@ class DPcoinBOT(commands.Bot):
                 self.db.insert_into_levels(i, int(math.pow((self.lvl * 32), 1.4)), i * int(math.pow(self.lvl, 1.2)))
                 self.lvl += 1
             self.db.cursor.execute("UPDATE `Levels` SET `Award` = 1500000 WHERE `Level` = 404")
+            self.db.cursor.execute("DELETE FROM `OnlineStats`")
+            self.db.cursor.execute("DELETE FROM `Online`")
             self.db.connection.commit()
 
         self.db.clear_coinflip()
