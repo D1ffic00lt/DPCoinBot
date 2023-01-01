@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import datetime
 import smtplib
 import sqlite3
 import numpy as np
@@ -11,6 +10,7 @@ from email.mime.text import MIMEText
 from sqlite3 import Cursor
 from typing import Tuple, Union
 from discord.ext import commands
+from datetime import datetime
 
 from botsections.functions.config import settings
 from botsections.functions.additions import *
@@ -1279,8 +1279,8 @@ class Database(object):
             self.add_coins(member.id, member.guild.id, self.minutes)
             self.delete_from_online(member.id)
             self.update_minutes_in_voice_channels(self.minutes, member.id, member.guild.id)
-            self.month = int(datetime.datetime.today().strftime('%m'))
-            self.day = int(datetime.datetime.today().strftime('%d'))
+            self.month = int(datetime.today().strftime('%m'))
+            self.day = int(datetime.today().strftime('%d'))
             if self.month > 11 or self.month == 1:
                 if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                     self.prises[member.id] = 0
