@@ -182,14 +182,14 @@ class NewYearSlash(commands.Cog):
                         )
                         return
                 if count is None:
-                    self.prize = random.randint(100, 3500)
+                    self.prize = random.randint(100, 800)
                     self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                     self.db.take_present(1, inter.user.id, inter.guild.id)
                     await inter.response.send_message(
                         f"{inter.user.mention}, из подарка выпало {self.prize} коинов! Поздравляем!"
                     )
                 elif count == "all":
-                    self.prize = sum(random.randint(100, 3500) for _ in range(self.present))
+                    self.prize = sum(random.randint(100, 800) for _ in range(self.present))
                     self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                     await inter.response.send_message(
                         f"{inter.user.mention}, из подарков выпало {self.prize} коинов! Поздравляем!"
@@ -197,7 +197,7 @@ class NewYearSlash(commands.Cog):
                     self.db.take_present(self.present, inter.user.id, inter.guild.id)
                 else:
                     try:
-                        self.prize = sum(random.randint(100, 3500) for _ in range(int(count)))
+                        self.prize = sum(random.randint(100, 800) for _ in range(int(count)))
                         self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                         self.db.take_present(count, inter.user.id, inter.guild.id)
                         await inter.response.send_message(

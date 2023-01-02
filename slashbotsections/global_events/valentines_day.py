@@ -54,21 +54,21 @@ class ValentinesDaySlash(commands.Cog):
                     )
                     return
             if count is None:
-                self.prize = random.randint(1000, 3000)
+                self.prize = random.randint(100, 800)
                 self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                 self.db.update_inventory(inter.user.id, inter.guild.id, "Valentines", -1)
                 await inter.response.send_message(
                     f"{inter.user.mention}, из валентинки выпало {self.prize} коинов! Поздравляем!"
                 )
             elif count == "all":
-                self.prize = sum(random.randint(100, 3000) for _ in range(self.valentine))
+                self.prize = sum(random.randint(100, 800) for _ in range(self.valentine))
                 self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                 self.db.update_inventory(inter.user.id, inter.guild.id, "Valentines", -self.valentine)
                 await inter.response.send_message(
                     f"{inter.user.mention}, из валентинок выпало {self.prize} коинов! Поздравляем!"
                 )
             else:
-                self.prize = sum(random.randint(100, 3000) for _ in range(count))
+                self.prize = sum(random.randint(100, 800) for _ in range(count))
                 self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                 self.db.update_inventory(inter.user.id, inter.guild.id, "Valentines", -count)
                 await inter.response.send_message(
