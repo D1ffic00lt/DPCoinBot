@@ -3,9 +3,9 @@ import discord
 from discord.ext import commands
 from datetime import datetime
 
-from botsections.functions.additions import get_time, write_log
+from modules.additions import get_time, write_log
 from config import PREFIX
-from botsections.functions.texts import *
+from modules.texts import *
 from database.db import Database
 
 __all__ = (

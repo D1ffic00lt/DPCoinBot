@@ -12,8 +12,8 @@ from typing import Tuple, Union
 from discord.ext import commands
 
 from config import DEBUG_EMAIL, PASSWORD
-from botsections.functions.additions import *
-from botsections.functions.encoding import Encoder
+from modules.additions import *
+from modules.encoding import Encoder
 
 
 class Database(object):

@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from config import PREFIX
-from botsections.functions.additions import get_time, write_log
+from modules.additions import get_time, write_log
 from database.db import Database
 
 

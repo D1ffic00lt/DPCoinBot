@@ -10,12 +10,12 @@ from discord import app_commands
 from PIL import Image, ImageFont, ImageDraw
 
 from config import settings
-from botsections.functions.additions import (
+from modules.additions import (
     get_time, write_log, create_emb,
     divide_the_number, get_color, crop,
     prepare_mask, get_promo_code
 )
-from botsections.functions.json_ import Json
+from modules.json_ import Json
 from database.db import Database
 
 __all__ = (

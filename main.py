@@ -10,10 +10,10 @@ from bot import DPcoinBOT
 from database.db import Database
 from botsections import *
 from config import PREFIX, TOKEN
-from botsections.functions.json_ import Json
-from botsections.functions.version import __version__
-from botsections.functions.additions import get_time, write_log
-from botsections.functions.encoding import Encoder
+from modules.json_ import Json
+from modules.version import __version__
+from modules.additions import get_time, write_log
+from modules.encoding import Encoder
 from slashbotsections import *
 
 warnings.filterwarnings("ignore")

@@ -5,7 +5,7 @@ from discord.ext import commands
 from typing import Union
 
 from database.db import Database
-from botsections.functions.additions import get_time, write_log
+from modules.additions import get_time, write_log
 from config import (
     VALENTINES_DAY_MIN_PRICE,
     VALENTINES_DAY_MAX_PRICE

@@ -7,12 +7,12 @@ from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
 
-from botsections.functions.additions import (
+from modules.additions import (
     divide_the_number, create_emb,
     get_color, prepare_mask, crop,
     get_promo_code, get_time, write_log
 )
-from botsections.functions.json_ import Json
+from modules.json_ import Json
 from config import PREFIX
 from database.db import Database
 __all__ = (

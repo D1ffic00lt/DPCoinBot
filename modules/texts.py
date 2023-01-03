@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from config import PREFIX
-from botsections.functions.version import __version__
+from modules.version import __version__
 
 __all__ = (
     "foo", "discord_foo",

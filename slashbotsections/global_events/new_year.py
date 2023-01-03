@@ -7,8 +7,8 @@ from discord import app_commands
 from typing import Union
 
 from database.db import Database
-from botsections.functions.texts import *
-from botsections.functions.additions import get_time, write_log
+from modules.texts import *
+from modules.additions import get_time, write_log
 from config import (
     PREFIX,
     NEW_YEAR_MIN_PRICE,
