@@ -10,9 +10,8 @@ from email.mime.text import MIMEText
 from sqlite3 import Cursor
 from typing import Tuple, Union
 from discord.ext import commands
-from datetime import datetime
 
-from botsections.functions.config import settings
+from config import DEBUG_EMAIL, PASSWORD
 from botsections.functions.additions import *
 from botsections.functions.encoding import Encoder
 
@@ -1356,8 +1355,8 @@ class Database(object):
             'Content-Disposition', "attachment; filename= %s" % os.path.basename(".logs/develop_logs.dpcb")
         )
 
-        self.msg['From'] = self.encoder.decrypt(settings["sender_email"])
-        self.msg['To'] = self.encoder.decrypt(settings["sender_email"])
+        self.msg['From'] = self.encoder.decrypt(DEBUG_EMAIL)
+        self.msg['To'] = self.encoder.decrypt(DEBUG_EMAIL)
         self.msg['Subject'] = "Копии"
 
         self.msg.attach(self.part1)
@@ -1365,7 +1364,7 @@ class Database(object):
 
         self.msg.attach(MIMEText("Копии от {}".format(str(get_time()))))
         self.server.starttls()
-        self.server.login(self.msg['From'], self.encoder.decrypt(settings["password"]))
+        self.server.login(self.msg['From'], self.encoder.decrypt(PASSWORD))
         self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
         self.server.quit()
         write_log("[{}] [INFO]: Копии данных отправлена на почту".format(str(get_time())))

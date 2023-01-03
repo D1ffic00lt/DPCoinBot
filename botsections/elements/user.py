@@ -13,7 +13,7 @@ from botsections.functions.additions import (
     get_promo_code, get_time, write_log
 )
 from botsections.functions.json_ import Json
-from botsections.functions.config import settings
+from config import PREFIX
 from database.db import Database
 __all__ = (
     "User",
@@ -283,7 +283,7 @@ class User(commands.Cog):
                     inline=False
                 )
         self.emb.add_field(name="**Как купить роль?**",
-                           value=f'''```diff\n- {settings["prefix"]}buy <Упоминание роли>\n```''')
+                           value=f'''```diff\n- {PREFIX}buy <Упоминание роли>\n```''')
         self.db.get_from_item_shop(ctx.guild.id, "ItemID", "ItemName", "ItemCost", order_by="ItemCost")
         if self.db.get_from_item_shop(
                 ctx.guild.id,
@@ -297,13 +297,13 @@ class User(commands.Cog):
                 self.emb.add_field(
                     name=f'**{row[1]}**',
                     value=f'Стоимость: **{row[2]} DP коинов**\n'
-                          f'Чтобы купить {settings["prefix"]}buy_item {row[0]}',
+                          f'Чтобы купить {PREFIX}buy_item {row[0]}',
                     inline=False
                 )
 
         self.emb.add_field(
             name="**Чтобы купить роль:**",
-            value=f"```diff\n- {settings['prefix']}buy @роль, которую Вы хотите купить\n```")
+            value=f"```diff\n- {PREFIX}buy @роль, которую Вы хотите купить\n```")
         await ctx.reply(embed=self.emb)
 
     @commands.command(aliases=["buy_item"])

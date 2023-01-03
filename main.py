@@ -9,7 +9,7 @@ from asyncio import run
 from bot import DPcoinBOT
 from database.db import Database
 from botsections import *
-from botsections.functions.config import settings
+from config import PREFIX, TOKEN
 from botsections.functions.json_ import Json
 from botsections.functions.version import __version__
 from botsections.functions.additions import get_time, write_log
@@ -50,7 +50,7 @@ async def main() -> None:
     print(f"[{get_time()}] [INFO]: Database connected")
     write_log(f"[{get_time()}] [INFO]: Database connected")
     BOT: DPcoinBOT = DPcoinBOT(
-        command_prefix=settings["prefix"],
+        command_prefix=PREFIX,
         intents=intents,
         db=db, case_insensitive=True
     )
@@ -75,7 +75,7 @@ async def main() -> None:
     await BOT.add_cog(NewYearSlash(BOT, db))
     await BOT.add_cog(ValentinesDaySlash(BOT, db))
 
-    BOT.run(encoder.decrypt(settings["token"]))
+    BOT.run(encoder.decrypt(TOKEN))
 
 if __name__ == '__main__':
     runner = run(main())

@@ -15,7 +15,11 @@ from botsections.functions.additions import (
     get_time, write_log
 )
 from botsections.functions.json_ import Json
-from botsections.functions.config import settings
+from config import (
+    BOT_EMAIL,
+    DEBUG_EMAIL,
+    PASSWORD
+)
 from database.db import Database
 
 __all__ = (
@@ -94,8 +98,8 @@ class Debug(commands.Cog):
                 "attachment; filename= %s" % os.path.basename('database/server.db')
             )
             self.msg = MIMEMultipart()
-            self.msg['From'] = self.encoder.decrypt(settings["sender_email"])
-            self.msg['To'] = self.encoder.decrypt(settings["to_send_email"])
+            self.msg['From'] = self.encoder.decrypt(BOT_EMAIL)
+            self.msg['To'] = self.encoder.decrypt(DEBUG_EMAIL)
             self.msg['Subject'] = "База данных"
             self.msg.attach(self.part)
             self.msg.attach(MIMEText("База данных за {}".format(str(get_time()))))
@@ -103,7 +107,7 @@ class Debug(commands.Cog):
             self.server.starttls()
             self.server.login(
                 self.msg['From'],
-                self.encoder.decrypt(settings["password"])
+                self.encoder.decrypt(PASSWORD)
             )
             self.server.sendmail(
                 self.msg['From'],

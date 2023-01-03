@@ -13,7 +13,7 @@ from botsections.functions.additions import (
     get_color, divide_the_number, casino2ch, get_time, write_log
 )
 from botsections.functions.texts import *
-from botsections.functions.config import settings
+from config import PREFIX
 
 __all__ = (
     "Casino",
@@ -310,7 +310,7 @@ class Casino(commands.Cog):
                     if self.db.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
                         await ctx.reply(
                             f"{ctx.author.mention}, такая игра уже существует! Для удаления - "
-                            f"{settings['prefix']}del_games "
+                            f"{PREFIX}del_games "
                             f"{member.mention}"
                         )
                     else:
@@ -324,8 +324,8 @@ class Casino(commands.Cog):
                         self.emb.add_field(
                             name=f'Коинфлип на {count} DP коинов!',
                             value=f"{ctx.author.mention}, значит в следующий раз"
-                                  f"{settings['prefix']}accept {ctx.author.mention}\n\nЧтобы отменить - "
-                                  f"{settings['prefix']}reject {ctx.author.mention}",
+                                  f"{PREFIX}accept {ctx.author.mention}\n\nЧтобы отменить - "
+                                  f"{PREFIX}reject {ctx.author.mention}",
                             inline=False
                         )
                         await ctx.reply(embed=self.emb)
@@ -630,7 +630,7 @@ class Casino(commands.Cog):
             await ctx.reply("Вы не можете ввести себя")
         elif not self.db.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
             await ctx.reply(
-                f"Такой игры не существует, посмотреть все ваши активные игры - {settings['prefix']}games"
+                f"Такой игры не существует, посмотреть все ваши активные игры - {PREFIX}games"
             )
         else:
             self.db.delete_from_coinflip(ctx.author.id, member.id, ctx.guild.id)
@@ -664,7 +664,7 @@ class Casino(commands.Cog):
             await ctx.reply("Вы не ввели человека")
         elif not self.db.get_active_coinflip(ctx.author.id, member.id, ctx.guild.id):
             await ctx.reply(
-                f"Такой игры не существует, посмотреть все ваши активные игры - {settings['prefix']}games"
+                f"Такой игры не существует, посмотреть все ваши активные игры - {PREFIX}games"
             )
         elif reladdons.long.minutes(self.db.get_from_coinflip(ctx.author.id, member.id, ctx.guild.id, "Date")) > 5:
             await ctx.reply(f"Время истекло:(")
