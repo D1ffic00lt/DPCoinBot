@@ -510,7 +510,7 @@ class UserSlash(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __card(self, inter: discord.Interaction) -> None:
         self.img = Image.new("RGBA", (500, 300), "#323642")
-        self.response = requests.get(str(inter.user.guild_avatar.url)[:-10], stream=True)
+        self.response = requests.get(str(inter.user.avatar.url)[:-10], stream=True)
         self.response = Image.open(io.BytesIO(self.response.content))
         self.response = self.response.convert("RGBA")
         self.response = self.response.resize((100, 100), Image.ANTIALIAS)
