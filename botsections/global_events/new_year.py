@@ -169,19 +169,13 @@ class NewYear(commands.Cog):
                     self.db.take_present(1, ctx.author.id, ctx.guild.id)
                     await ctx.reply(f"Из подарка выпало {self.prize} коинов! Поздравляем!")
                 elif count == "all":
-                    self.prize = sum(
-                        random.randint(NEW_YEAR_MIN_PRICE, NEW_YEAR_MAX_PRICE)
-                        for _ in range(self.present)
-                    )
+                    self.prize = random.randint(NEW_YEAR_MIN_PRICE * self.present, NEW_YEAR_MAX_PRICE * self.present)
                     self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                     self.db.take_present(self.present, ctx.author.id, ctx.guild.id)
                     await ctx.reply(f"Из подарков выпало {self.prize} коинов! Поздравляем!")
                 else:
                     try:
-                        self.prize = sum(
-                            random.randint(NEW_YEAR_MIN_PRICE, NEW_YEAR_MAX_PRICE)
-                            for _ in range(int(count))
-                        )
+                        self.prize = random.randint(NEW_YEAR_MIN_PRICE * int(count), NEW_YEAR_MAX_PRICE * int(count))
                         self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                         self.db.take_present(count, ctx.author.id, ctx.guild.id)
                         await ctx.reply(f"Из подарков выпало {self.prize} коинов! Поздравляем!")
