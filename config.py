@@ -33,25 +33,7 @@ NAME = 'DPcoin BOT'
 PREFIX = "//"
 TESTERS_PREFIX = "&"
 
-NEW_YEAR_MIN_PRICE = 100
-NEW_YEAR_MAX_PRICE = 1000
-VALENTINES_DAY_MIN_PRICE = 100
-VALENTINES_DAY_MAX_PRICE = 1000
-
-settings = {
-    'webhook': 'webhook',                   # пока не требуется
-    'test_webhook': 'test_webhook',         # аналогично
-    'owner_id_group': "owner_id: int",      # аналогично
-    'bot': 'DPcoin BOT',                    # это итак все знают
-    'id': b'gAAAAABjZM_yhaE17Ml7_uWwsp3qcOqf1u2g5_y47mhEmjmdCrhOosd7VAFk'
-          b'wOJdfnRfd7GOl_H_D7ACEAQ0SU7x1O2Sa5VGjWByEWYEnW_ZpIrokGXNvkg=',
-    'prefix': '&',
-    # 'prefix': "//",
-    "password": b'gAAAAABjpvtkXaAppy7hhAXi4EbQKVWa_X3llw-Y5ueNFms4TTbZgA5LrLISc2Ef'
-                b'5puRMqaWaA9Av9tzvTsx9Bgxz8aNGvptBonOqn0F1WqZViYnS7oswOI=',
-    "sender_email": b'gAAAAABjZNADXnn912gRHsi-VJdTOdwdURimJ3gLB_HhARaxStglvAm6hoNH'
-                    b'8_q-1e-FZLpUpzH65t4moKjkYLAGCBi0meIAmoNYdNpcfcb9FTfQ6lHQCOQ=',
-    "to_send_email": b'gAAAAABjZNASo0D8yoYUkxlIyJncwUg-rb_N6qubnhuuj4Q9TtLn6aEqjwyQ'
-                     b'gBpeOQ-YFnA_-x2V61LApxNczB6CEvkVXOrhSX0P3pE-5RLvd4B8bjYlMfA=',
-    "new_year_max_price": 1000
-}
+NEW_YEAR_MIN_PRIZE = 100
+NEW_YEAR_MAX_PRIZE = 1000
+VALENTINES_DAY_MIN_PRIZE = 100
+VALENTINES_DAY_MAX_PRIZE = 1000

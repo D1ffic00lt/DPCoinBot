@@ -10,8 +10,8 @@ from modules.texts import *
 from modules.additions import get_time, write_log
 from config import (
     PREFIX,
-    NEW_YEAR_MIN_PRICE,
-    NEW_YEAR_MAX_PRICE
+    NEW_YEAR_MIN_PRIZE,
+    NEW_YEAR_MAX_PRIZE
 )
 
 __all__ = (
@@ -164,18 +164,18 @@ class NewYear(commands.Cog):
                         await ctx.reply(f"Вы не можете отрыть 0(ну или меньше) подарков:)")
                         return
                 if count is None:
-                    self.prize = random.randint(NEW_YEAR_MIN_PRICE, NEW_YEAR_MAX_PRICE)
+                    self.prize = random.randint(NEW_YEAR_MIN_PRIZE, NEW_YEAR_MAX_PRIZE)
                     self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                     self.db.take_present(1, ctx.author.id, ctx.guild.id)
                     await ctx.reply(f"Из подарка выпало {self.prize} коинов! Поздравляем!")
                 elif count == "all":
-                    self.prize = random.randint(NEW_YEAR_MIN_PRICE * self.present, NEW_YEAR_MAX_PRICE * self.present)
+                    self.prize = random.randint(NEW_YEAR_MIN_PRIZE * self.present, NEW_YEAR_MAX_PRIZE * self.present)
                     self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                     self.db.take_present(self.present, ctx.author.id, ctx.guild.id)
                     await ctx.reply(f"Из подарков выпало {self.prize} коинов! Поздравляем!")
                 else:
                     try:
-                        self.prize = random.randint(NEW_YEAR_MIN_PRICE * int(count), NEW_YEAR_MAX_PRICE * int(count))
+                        self.prize = random.randint(NEW_YEAR_MIN_PRIZE * int(count), NEW_YEAR_MAX_PRIZE * int(count))
                         self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                         self.db.take_present(count, ctx.author.id, ctx.guild.id)
                         await ctx.reply(f"Из подарков выпало {self.prize} коинов! Поздравляем!")

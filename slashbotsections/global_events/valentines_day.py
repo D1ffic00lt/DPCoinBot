@@ -8,7 +8,7 @@ from discord.ext import commands
 
 from database.db import Database
 from modules.additions import get_time, write_log
-from config import VALENTINES_DAY_MIN_PRICE, VALENTINES_DAY_MAX_PRICE
+from config import VALENTINES_DAY_MIN_PRIZE, VALENTINES_DAY_MAX_PRIZE
 __all__ = (
     "ValentinesDaySlash",
 )
@@ -54,7 +54,7 @@ class ValentinesDaySlash(commands.Cog):
                     )
                     return
             if count is None:
-                self.prize = random.randint(VALENTINES_DAY_MIN_PRICE, VALENTINES_DAY_MAX_PRICE)
+                self.prize = random.randint(VALENTINES_DAY_MIN_PRIZE, VALENTINES_DAY_MAX_PRIZE)
                 self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                 self.db.update_inventory(inter.user.id, inter.guild.id, "Valentines", -1)
                 await inter.response.send_message(
@@ -62,8 +62,8 @@ class ValentinesDaySlash(commands.Cog):
                 )
             elif count == "all":
                 self.prize = random.randint(
-                    VALENTINES_DAY_MIN_PRICE * self.valentine,
-                    VALENTINES_DAY_MAX_PRICE * self.valentine
+                    VALENTINES_DAY_MIN_PRIZE * self.valentine,
+                    VALENTINES_DAY_MAX_PRIZE * self.valentine
                 )
                 self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                 self.db.update_inventory(inter.user.id, inter.guild.id, "Valentines", -self.valentine)
@@ -71,7 +71,7 @@ class ValentinesDaySlash(commands.Cog):
                     f"{inter.user.mention}, из валентинок выпало {self.prize} коинов! Поздравляем!"
                 )
             else:
-                self.prize = random.randint(VALENTINES_DAY_MIN_PRICE * count, VALENTINES_DAY_MAX_PRICE * count)
+                self.prize = random.randint(VALENTINES_DAY_MIN_PRIZE * count, VALENTINES_DAY_MAX_PRIZE * count)
                 self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                 self.db.update_inventory(inter.user.id, inter.guild.id, "Valentines", -count)
                 await inter.response.send_message(
