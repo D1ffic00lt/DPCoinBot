@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-    Да, я конч, спалил все токены, пароли и всякое такое,
-    но я исправился! Я поменял все токены и пароли, к тому же, они теперь шифруются
-    можете теперь даже не пытаться
-"""
 TOKEN = b'gAAAAABjZNuG9AfbDpnoMSRjmbJtFyekQL3y-aM0nc8BpAOPtKxNt3-oFwt' \
         b'FjLTyI9EhjgutkFyiPga1U6cbjzm7BXvmVfK2s8ZbrYPGYJNSxKm8wkEUXS' \
         b'BUYkt0edRyx_M_AGbSRf7NPTP26Xnla71pOtppcT-wb0q5ofacOGG_M7eHO' \
