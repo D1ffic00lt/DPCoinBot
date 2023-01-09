@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+__version__ = "2.0.1pre"
+
 TOKEN = b'gAAAAABjZNuG9AfbDpnoMSRjmbJtFyekQL3y-aM0nc8BpAOPtKxNt3-oFwt' \
         b'FjLTyI9EhjgutkFyiPga1U6cbjzm7BXvmVfK2s8ZbrYPGYJNSxKm8wkEUXS' \
         b'BUYkt0edRyx_M_AGbSRf7NPTP26Xnla71pOtppcT-wb0q5ofacOGG_M7eHO' \
