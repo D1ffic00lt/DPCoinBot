@@ -9,7 +9,7 @@ from discord.ext import commands
 from discord import app_commands
 from PIL import Image, ImageFont, ImageDraw
 
-from config import settings
+from config import PREFIX
 from modules.additions import (
     get_time, write_log, create_emb,
     divide_the_number, get_color, crop,
@@ -303,7 +303,7 @@ class UserSlash(commands.Cog):
                 )
         self.emb.add_field(
             name="**Как купить роль?**",
-            value=f'''```diff\n- {settings["prefix"]}buy <Упоминание роли>\n```'''
+            value=f'''```diff\n- {PREFIX}buy <Упоминание роли>\n```'''
         )
         self.db.get_from_item_shop(inter.guild.id, "ItemID", "ItemName", "ItemCost", order_by="ItemCost")
         if self.db.get_from_item_shop(
@@ -320,13 +320,13 @@ class UserSlash(commands.Cog):
                 self.emb.add_field(
                     name=f'**{row[1]}**',
                     value=f'Стоимость: **{row[2]} DP коинов**\n'
-                          f'Чтобы купить {settings["prefix"]}buy_item {row[0]}',
+                          f'Чтобы купить {PREFIX}buy_item {row[0]}',
                     inline=False
                 )
 
         self.emb.add_field(
             name="**Чтобы купить роль:**",
-            value=f"```diff\n- {settings['prefix']}buy @роль, которую Вы хотите купить\n```")
+            value=f"```diff\n- {PREFIX}buy @роль, которую Вы хотите купить\n```")
         await inter.response.send_message(embed=self.emb)
 
     @app_commands.command(name="buy_item", description="Купить товар из магазина")
