@@ -20,6 +20,8 @@ DEBUG_EMAIL = b'gAAAAABjZNASo0D8yoYUkxlIyJncwUg-rb_N6qubnhuuj4Q9TtLn6' \
               b'aEqjwyQgBpeOQ-YFnA_-x2V61LApxNczB6CEvkVXOrhSX0P3pE-5R' \
               b'Lvd4B8bjYlMfA='
 
+FORMAT = '[%(asctime)s] [ERROR]: %(message)s'
+
 WEBHOOK = None
 TEST_WEBHOOK = None
 OWNER_ID = None

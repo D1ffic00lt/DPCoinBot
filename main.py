@@ -3,13 +3,14 @@ import os
 import warnings
 import discord
 import nest_asyncio
+import logging
 
 from asyncio import run
 
 from bot import DPcoinBOT
 from database.db import Database
 from botsections import *
-from config import PREFIX, TOKEN
+from config import PREFIX, TOKEN, FORMAT
 from modules.json_ import Json
 from modules.version import __version__
 from modules.additions import get_time, write_log
@@ -17,11 +18,11 @@ from modules.encoding import Encoder
 from slashbotsections import *
 
 warnings.filterwarnings("ignore")
+logging.basicConfig(format=FORMAT)
+nest_asyncio.apply()
 
 print(f"[{get_time()}] [INFO]: Program started")
 write_log(f"[{get_time()}] [INFO]: Program started")
-
-nest_asyncio.apply()
 
 
 async def main() -> None:
@@ -78,4 +79,7 @@ async def main() -> None:
     BOT.run(encoder.decrypt(TOKEN))
 
 if __name__ == '__main__':
-    runner = run(main())
+    try:
+        runner = run(main())
+    except Exception as error:
+        logging.error(error)
