@@ -9,12 +9,12 @@ from datetime import datetime
 from discord import app_commands
 
 from database.db import Database
-from botsections.functions.additions import (
+from modules.additions import (
     fail_rand,
     get_color, divide_the_number, casino2ch, get_time, write_log
 )
-from botsections.functions.texts import *
-from botsections.functions.config import settings
+from modules.texts import *
+from config import PREFIX
 
 __all__ = (
     "CasinoSlash",
@@ -315,7 +315,7 @@ class CasinoSlash(commands.Cog):
                     if self.db.get_active_coinflip(inter.user.id, member.id, inter.guild.id):
                         await inter.response.send_message(
                             f"{inter.user.mention}, такая игра уже существует! Для удаления - "
-                            f"{settings['prefix']}del_games", ephemeral=True
+                            f"{PREFIX}del_games", ephemeral=True
                         )
                     else:
                         self.db.insert_into_coinflip(
@@ -327,8 +327,8 @@ class CasinoSlash(commands.Cog):
                         self.emb = discord.Embed(title=f"{member}, вас упомянули в коинфлипе!", colour=self.color)
                         self.emb.add_field(
                             name=f'Коинфлип на {count} DP коинов!',
-                            value=f"{settings['prefix']}accept {inter.user.mention}\n\nЧтобы отменить - "
-                                  f"{settings['prefix']}reject {inter.user.mention}",
+                            value=f"{PREFIX}accept {inter.user.mention}\n\nЧтобы отменить - "
+                                  f"{PREFIX}reject {inter.user.mention}",
                             inline=False
                         )
                         await inter.response.send_message(embed=self.emb)
@@ -633,7 +633,7 @@ class CasinoSlash(commands.Cog):
             await inter.response.send_message("Вы не можете указать себя", ephemeral=True)
         elif not self.db.get_active_coinflip(inter.user.id, member.id, inter.guild.id):
             await inter.response.send_message(
-                f"Такой игры не существует, посмотреть все ваши активные игры - {settings['prefix']}games",
+                f"Такой игры не существует, посмотреть все ваши активные игры - {PREFIX}games",
                 ephemeral=True
             )
         else:
@@ -668,7 +668,7 @@ class CasinoSlash(commands.Cog):
             await inter.response.send_message("Вы не указали человека", ephemeral=True)
         elif not self.db.get_active_coinflip(inter.user.id, member.id, inter.guild.id):
             await inter.response.send_message(
-                f"Такой игры не существует, посмотреть все ваши активные игры - {settings['prefix']}games",
+                f"Такой игры не существует, посмотреть все ваши активные игры - {PREFIX}games",
                 ephemeral=True
             )
         elif reladdons.long.minutes(self.db.get_from_coinflip(member.id, inter.user.id, inter.guild.id, "Date")) > 5:

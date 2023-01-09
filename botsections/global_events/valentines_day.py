@@ -5,8 +5,11 @@ from discord.ext import commands
 from typing import Union
 
 from database.db import Database
-from botsections.functions.additions import get_time, write_log
-
+from modules.additions import get_time, write_log
+from config import (
+    VALENTINES_DAY_MIN_PRIZE,
+    VALENTINES_DAY_MAX_PRIZE
+)
 __all__ = (
     "ValentinesDay",
 )
@@ -44,17 +47,20 @@ class ValentinesDay(commands.Cog):
                     await ctx.reply(f"{ctx.author.mention}, Вы не можете отрыть 0(ну или меньше) валентинок:)")
                     return
             if count is None:
-                self.prize = random.randint(1000, 6000)
+                self.prize = random.randint(VALENTINES_DAY_MIN_PRIZE, VALENTINES_DAY_MAX_PRIZE)
                 self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                 self.db.update_inventory(ctx.author.id, ctx.guild.id, "Valentines", -1)
                 await ctx.reply(f"{ctx.author.mention}, из валентинки выпало {self.prize} коинов! Поздравляем!")
             elif count == "all":
-                self.prize = sum(random.randint(100, 6000) for _ in range(self.valentine))
+                self.prize = random.randint(
+                    VALENTINES_DAY_MIN_PRIZE * self.valentine,
+                    VALENTINES_DAY_MAX_PRIZE * self.valentine
+                )
                 self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                 self.db.update_inventory(ctx.author.id, ctx.guild.id, "Valentines", -self.valentine)
                 await ctx.reply(f"{ctx.author.mention}, из валентинок выпало {self.prize} коинов! Поздравляем!")
             else:
-                self.prize = sum(random.randint(100, 6000) for _ in range(count))
+                self.prize = random.randint(VALENTINES_DAY_MIN_PRIZE * count, VALENTINES_DAY_MAX_PRIZE * count)
                 self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                 self.db.update_inventory(ctx.author.id, ctx.guild.id, "Valentines", -count)
                 await ctx.reply(f"{ctx.author.mention}, из валентинок выпало {self.prize} коинов! Поздравляем!")

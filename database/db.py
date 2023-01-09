@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import datetime
 import smtplib
 import sqlite3
 import numpy as np
@@ -12,9 +11,9 @@ from sqlite3 import Cursor
 from typing import Tuple, Union
 from discord.ext import commands
 
-from botsections.functions.config import settings
-from botsections.functions.additions import *
-from botsections.functions.encoding import Encoder
+from config import DEBUG_EMAIL, PASSWORD
+from modules.additions import *
+from modules.encoding import Encoder
 
 
 class Database(object):
@@ -1279,8 +1278,8 @@ class Database(object):
             self.add_coins(member.id, member.guild.id, self.minutes)
             self.delete_from_online(member.id)
             self.update_minutes_in_voice_channels(self.minutes, member.id, member.guild.id)
-            self.month = int(datetime.datetime.today().strftime('%m'))
-            self.day = int(datetime.datetime.today().strftime('%d'))
+            self.month = int(datetime.today().strftime('%m'))
+            self.day = int(datetime.today().strftime('%d'))
             if self.month > 11 or self.month == 1:
                 if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                     self.prises[member.id] = 0
@@ -1356,8 +1355,8 @@ class Database(object):
             'Content-Disposition', "attachment; filename= %s" % os.path.basename(".logs/develop_logs.dpcb")
         )
 
-        self.msg['From'] = self.encoder.decrypt(settings["sender_email"])
-        self.msg['To'] = self.encoder.decrypt(settings["sender_email"])
+        self.msg['From'] = self.encoder.decrypt(DEBUG_EMAIL)
+        self.msg['To'] = self.encoder.decrypt(DEBUG_EMAIL)
         self.msg['Subject'] = "Копии"
 
         self.msg.attach(self.part1)
@@ -1365,7 +1364,7 @@ class Database(object):
 
         self.msg.attach(MIMEText("Копии от {}".format(str(get_time()))))
         self.server.starttls()
-        self.server.login(self.msg['From'], self.encoder.decrypt(settings["password"]))
+        self.server.login(self.msg['From'], self.encoder.decrypt(PASSWORD))
         self.server.sendmail(self.msg['From'], self.msg['To'], self.msg.as_string())
         self.server.quit()
         write_log("[{}] [INFO]: Копии данных отправлена на почту".format(str(get_time())))

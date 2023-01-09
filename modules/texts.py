@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from botsections.functions.config import settings
-from botsections.functions.version import __version__
+from config import PREFIX
+from modules.version import __version__
 
 __all__ = (
     "foo", "discord_foo",
@@ -41,7 +41,7 @@ levels: dict = {
               f'сообщение, соответствующее условиям, начисляется 8 коинов\n**Стоимость: 200000 DP коинов**',
     "level5": f'Максимальный левел! За одну минуту в голосовом канале даётся 20 коинов, за одно '
               f'сообщение, соответствующее условиям, начисляется 20 коинов\n**Стоимость: 400000 DP коинов**',
-    "LevelUp": f"""```diff\n- {settings["prefix"]}lvl_up - поднимет Вам левел\n```"""
+    "LevelUp": f"""```diff\n- {PREFIX}lvl_up - поднимет Вам левел\n```"""
 }
 
 new_year: dict = {
@@ -179,7 +179,7 @@ auto_setup = {
 
     ],
     "auto_setup_names": [
-        f'{settings["prefix"]}setup <Упоминание роли> <Упоминание канала для отправки покупок> '
+        f'{PREFIX}setup <Упоминание роли> <Упоминание канала для отправки покупок> '
         f'<Упоминание канал для казино>'
     ]
 }

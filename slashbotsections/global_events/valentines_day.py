@@ -7,8 +7,8 @@ from discord import app_commands
 from discord.ext import commands
 
 from database.db import Database
-from botsections.functions.additions import get_time, write_log
-
+from modules.additions import get_time, write_log
+from config import VALENTINES_DAY_MIN_PRIZE, VALENTINES_DAY_MAX_PRIZE
 __all__ = (
     "ValentinesDaySlash",
 )
@@ -54,21 +54,24 @@ class ValentinesDaySlash(commands.Cog):
                     )
                     return
             if count is None:
-                self.prize = random.randint(1000, 3000)
+                self.prize = random.randint(VALENTINES_DAY_MIN_PRIZE, VALENTINES_DAY_MAX_PRIZE)
                 self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                 self.db.update_inventory(inter.user.id, inter.guild.id, "Valentines", -1)
                 await inter.response.send_message(
                     f"{inter.user.mention}, из валентинки выпало {self.prize} коинов! Поздравляем!"
                 )
             elif count == "all":
-                self.prize = sum(random.randint(100, 3000) for _ in range(self.valentine))
+                self.prize = random.randint(
+                    VALENTINES_DAY_MIN_PRIZE * self.valentine,
+                    VALENTINES_DAY_MAX_PRIZE * self.valentine
+                )
                 self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                 self.db.update_inventory(inter.user.id, inter.guild.id, "Valentines", -self.valentine)
                 await inter.response.send_message(
                     f"{inter.user.mention}, из валентинок выпало {self.prize} коинов! Поздравляем!"
                 )
             else:
-                self.prize = sum(random.randint(100, 3000) for _ in range(count))
+                self.prize = random.randint(VALENTINES_DAY_MIN_PRIZE * count, VALENTINES_DAY_MAX_PRIZE * count)
                 self.db.add_coins(inter.user.id, inter.guild.id, self.prize)
                 self.db.update_inventory(inter.user.id, inter.guild.id, "Valentines", -count)
                 await inter.response.send_message(

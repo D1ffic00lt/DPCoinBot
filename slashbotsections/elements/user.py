@@ -9,13 +9,13 @@ from discord.ext import commands
 from discord import app_commands
 from PIL import Image, ImageFont, ImageDraw
 
-from botsections.functions.config import settings
-from botsections.functions.additions import (
+from config import settings
+from modules.additions import (
     get_time, write_log, create_emb,
     divide_the_number, get_color, crop,
     prepare_mask, get_promo_code
 )
-from botsections.functions.json_ import Json
+from modules.json_ import Json
 from database.db import Database
 
 __all__ = (
@@ -510,7 +510,7 @@ class UserSlash(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __card(self, inter: discord.Interaction) -> None:
         self.img = Image.new("RGBA", (500, 300), "#323642")
-        self.response = requests.get(str(inter.user.guild_avatar.url)[:-10], stream=True)
+        self.response = requests.get(str(inter.user.avatar.url)[:-10], stream=True)
         self.response = Image.open(io.BytesIO(self.response.content))
         self.response = self.response.convert("RGBA")
         self.response = self.response.resize((100, 100), Image.ANTIALIAS)

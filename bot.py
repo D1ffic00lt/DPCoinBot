@@ -4,8 +4,8 @@ import discord
 
 from discord.ext import commands
 
-from botsections.functions.config import settings
-from botsections.functions.additions import get_time, write_log
+from config import PREFIX
+from modules.additions import get_time, write_log
 from database.db import Database
 
 
@@ -24,7 +24,7 @@ class DPcoinBOT(commands.Bot):
         await self.wait_until_ready()
         await self.change_presence(
             status=discord.Status.online,
-            activity=discord.Game(f"{settings['prefix']}help")
+            activity=discord.Game(f"{PREFIX}help")
         )
         self.db.server_add(self)
         if not self.db.checking_for_levels_existence_in_table():

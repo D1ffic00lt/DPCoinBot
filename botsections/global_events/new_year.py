@@ -6,9 +6,13 @@ from discord.ext import commands
 from typing import Union
 
 from database.db import Database
-from botsections.functions.texts import *
-from botsections.functions.additions import get_time, write_log
-from botsections.functions.config import settings
+from modules.texts import *
+from modules.additions import get_time, write_log
+from config import (
+    PREFIX,
+    NEW_YEAR_MIN_PRIZE,
+    NEW_YEAR_MAX_PRIZE
+)
 
 __all__ = (
     "NewYear",
@@ -160,18 +164,18 @@ class NewYear(commands.Cog):
                         await ctx.reply(f"Вы не можете отрыть 0(ну или меньше) подарков:)")
                         return
                 if count is None:
-                    self.prize = random.randint(100, 1000)
+                    self.prize = random.randint(NEW_YEAR_MIN_PRIZE, NEW_YEAR_MAX_PRIZE)
                     self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                     self.db.take_present(1, ctx.author.id, ctx.guild.id)
                     await ctx.reply(f"Из подарка выпало {self.prize} коинов! Поздравляем!")
                 elif count == "all":
-                    self.prize = sum(random.randint(100, 1000) for _ in range(self.present))
+                    self.prize = random.randint(NEW_YEAR_MIN_PRIZE * self.present, NEW_YEAR_MAX_PRIZE * self.present)
                     self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                     self.db.take_present(self.present, ctx.author.id, ctx.guild.id)
                     await ctx.reply(f"Из подарков выпало {self.prize} коинов! Поздравляем!")
                 else:
                     try:
-                        self.prize = sum(random.randint(100, 1000) for _ in range(int(count)))
+                        self.prize = random.randint(NEW_YEAR_MIN_PRIZE * int(count), NEW_YEAR_MAX_PRIZE * int(count))
                         self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
                         self.db.take_present(count, ctx.author.id, ctx.guild.id)
                         await ctx.reply(f"Из подарков выпало {self.prize} коинов! Поздравляем!")
@@ -204,7 +208,7 @@ class NewYear(commands.Cog):
                         value=f'{new_year[i]["price"]} DP коинов\n')
                 self.emb.add_field(
                     name="Покупка еды",
-                    value=f'Чтобы купить - {settings["prefix"]}buyfood <индекс товара>'
+                    value=f'Чтобы купить - {PREFIX}buyfood <индекс товара>'
                           f'<количество>')
                 await ctx.reply(embed=self.emb)
 
@@ -216,7 +220,7 @@ class NewYear(commands.Cog):
         if self.month > 11 or self.month == 1:
             if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
                 self.emb = discord.Embed(title=f"Еда {ctx.author}")
-                self.emb.set_thumbnail(url=ctx.author.avatar_url)
+                self.emb.set_thumbnail(url=ctx.author.avatar.url)
                 self.index2 = 3
                 self.items = tuple(self.db.get_from_new_year_event(ctx.author.id, ctx.guild.id, "*"))
                 for t in range(len(self.items) - 3):
