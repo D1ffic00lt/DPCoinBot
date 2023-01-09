@@ -10,19 +10,25 @@ from asyncio import run
 from bot import DPcoinBOT
 from database.db import Database
 from botsections import *
-from config import PREFIX, TOKEN, FORMAT
 from modules.json_ import Json
 from modules.version import __version__
 from modules.additions import get_time, write_log
 from modules.encoding import Encoder
 from slashbotsections import *
+from config import (
+    PREFIX, TOKEN,
+    FORMAT, DATE_FORMAT,
+    LOG_PATH
+)
 
 warnings.filterwarnings("ignore")
-logging.basicConfig(format=FORMAT)
 nest_asyncio.apply()
 
 print(f"[{get_time()}] [INFO]: Program started")
 write_log(f"[{get_time()}] [INFO]: Program started")
+
+logging.basicConfig(format=FORMAT, datefmt=DATE_FORMAT)
+logging.FileHandler(LOG_PATH)
 
 
 async def main() -> None:
@@ -82,4 +88,4 @@ if __name__ == '__main__':
     try:
         runner = run(main())
     except Exception as error:
-        logging.error(error)
+        logging.error(error, exc_info=True)

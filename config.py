@@ -20,7 +20,9 @@ DEBUG_EMAIL = b'gAAAAABjZNASo0D8yoYUkxlIyJncwUg-rb_N6qubnhuuj4Q9TtLn6' \
               b'aEqjwyQgBpeOQ-YFnA_-x2V61LApxNczB6CEvkVXOrhSX0P3pE-5R' \
               b'Lvd4B8bjYlMfA='
 
-FORMAT = '[%(asctime)s] [ERROR]: %(message)s'
+FORMAT = '[%(asctime)s] [%(levelname)s]: %(process)d %(message)s'
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+LOG_PATH = ".logs/develop_logs.dpcb"
 
 WEBHOOK = None
 TEST_WEBHOOK = None
