@@ -3,9 +3,9 @@ import discord
 from discord.ext import commands
 from datetime import datetime
 
-from botsections.functions.additions import get_time, write_log
-from botsections.functions.config import settings
-from botsections.functions.texts import *
+from modules.additions import get_time, write_log
+from config import PREFIX
+from modules.texts import *
 from database.db import Database
 
 __all__ = (
@@ -64,7 +64,7 @@ class Public(commands.Cog):
                 if isinstance(self.db.get_administrator_role_id(ctx.guild.id), bool):
                     self.emb.add_field(name="```НАСТРОЙКА СЕРВЕРА```", value=setup_value)
                 self.emb.add_field(
-                    name=f'{settings["prefix"]}auto_setup',
+                    name=f'{PREFIX}auto_setup',
                     value='Авто настройка бота, бот создаст категорию, 2 текстовых канала(для казино'
                           ' и для выдачи товаров) и роль, которая сможет выдавать коины, далее бот выдаст инструкции по'
                           ' дальнейшей настройки\n'
@@ -74,40 +74,40 @@ class Public(commands.Cog):
                           '```',
                     inline=False)
                 self.emb.add_field(
-                    name=f'{settings["prefix"]}setup <Упоминание роли> <Упоминание канала для отправки покупок> '
+                    name=f'{PREFIX}setup <Упоминание роли> <Упоминание канала для отправки покупок> '
                          f'<Упоминание канал для казино>',
                     value='Настроить бота, Роль, которая сможет выдавать коины, канал, в который будут отправляться '
                           'заказы через buye, канал, в котором доступно казино',
                     inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}give <Упоминание пользователя> <Сумма>**',
+                self.emb.add_field(name=f'**{PREFIX}give <Упоминание пользователя> <Сумма>**',
                                    value='Выдать деньги пользователю', inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}take <Упоминание пользователя> <Сумма(Либо all для '
+                self.emb.add_field(name=f'**{PREFIX}take <Упоминание пользователя> <Сумма(Либо all для '
                                         f'обнуления '
                                         f'счёта)>**',
                                    value='Забрать деньги у пользователя', inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}give-role <Упоминание роли> <Сумма>**',
+                self.emb.add_field(name=f'**{PREFIX}give-role <Упоминание роли> <Сумма>**',
                                    value='Выдать деньги пользователю', inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}take-role <Упоминание роли> <Сумма(Либо all для '
+                self.emb.add_field(name=f'**{PREFIX}take-role <Упоминание роли> <Сумма(Либо all для '
                                         f'обнуления '
                                         f'счёта)>**',
                                    value='Забрать деньги у пользователя', inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}add-shop <Упоминание роли> <Цена>**',
+                self.emb.add_field(name=f'**{PREFIX}add-shop <Упоминание роли> <Цена>**',
                                    value='Добавить роль в магазин', inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}start_money**',
+                self.emb.add_field(name=f'**{PREFIX}start_money**',
                                    value='Стартовый баланс при входе на сервер', inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}start_money set <Количество>**',
+                self.emb.add_field(name=f'**{PREFIX}start_money set <Количество>**',
                                    value='Установить стартовый баланс при входе на сервер', inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}del_games <Упоминание пользователя>**',
+                self.emb.add_field(name=f'**{PREFIX}del_games <Упоминание пользователя>**',
                                    value='Удалить все активные игры для определённого пользователя', inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}add-else <Цена> <То, что вы хотите добавить в '
+                self.emb.add_field(name=f'**{PREFIX}add-else <Цена> <То, что вы хотите добавить в '
                                         f'магазин>**',
                                    value='Добавить какой-либо предмет в магазин'
                                          '(примечание: после добавление предмету будет '
                                          'выдан id, buye **1** - id выделен',
                                    inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}remove-else <id>**',
+                self.emb.add_field(name=f'**{PREFIX}remove-else <id>**',
                                    value='Удалить какой-либо предмет из магазина', inline=False)
-                self.emb.add_field(name=f'**{settings["prefix"]}remove-shop <Упоминание роли>**',
+                self.emb.add_field(name=f'**{PREFIX}remove-shop <Упоминание роли>**',
                                    value='Удалить роль из магазина', inline=False)
                 await ctx.reply(embed=self.emb)
             else:
@@ -139,25 +139,25 @@ class Public(commands.Cog):
                                      'сделать это не получится никак, это для '
                                      'тех, кто говорит, что подкрут))', inline=False)
             self.emb.add_field(name=f'Как работает coinflip с ботом?',
-                               value=f"Ну тут всё проще. Вы прописываете {settings['prefix']}coinflip <сумма>"
+                               value=f"Ну тут всё проще. Вы прописываете {PREFIX}coinflip <сумма>"
                                      f"дальше программа выбирает n число(1 или 2), "
                                      f"если выпадает 1 - побеждаете Вы, и сумма, "
                                      f"которую Вы поставили, умножается в 2 раза, если выпадает 2 - вы проигрываете",
                                inline=False)
             self.emb.add_field(name=f'Как работает coinflip с другим человеком?',
-                               value=f"Тут всё немного сложнее. Вы прописываете {settings['prefix']}coinflip <сумма> "
+                               value=f"Тут всё немного сложнее. Вы прописываете {PREFIX}coinflip <сумма> "
                                      f"<упоминание второго игрока>, а второй игрок прописывает "
-                                     f"{settings['prefix']}accept <упоминание первого игрока(Вас)>. "
+                                     f"{PREFIX}accept <упоминание первого игрока(Вас)>. "
                                      f"После этого программа также выбирает 2 числа, "
                                      f"если выпадает 1, то побеждаете Вы, "
                                      f"если 2, то Ваш противник", inline=False)
             self.emb.add_field(name=f'Команды коинфлипа на двух игроков',
-                               value=f"**{settings['prefix']}coinflip <сумма> "
+                               value=f"**{PREFIX}coinflip <сумма> "
                                      f"<упоминание второго игрока>** - старт коинфлипа\n"
-                                     f"**{settings['prefix']}accept <упоминание игрока>** - принять коинфлип\n"
-                                     f"**{settings['prefix']}reject <упоминание игрока>** - отклонить коинфлип\n"
-                                     f"**{settings['prefix']}games** - все Ваши активные игры\n"
-                                     f"**{settings['prefix']}del_games** - отклонить все активные игры", inline=False)
+                                     f"**{PREFIX}accept <упоминание игрока>** - принять коинфлип\n"
+                                     f"**{PREFIX}reject <упоминание игрока>** - отклонить коинфлип\n"
+                                     f"**{PREFIX}games** - все Ваши активные игры\n"
+                                     f"**{PREFIX}del_games** - отклонить все активные игры", inline=False)
             self.emb.add_field(name=f"Как работает казино 777?",
                                value=f"Вы ставите ставку, программа генерирует 3 ряда чисел\n"
                                      f"**Случаи выигрыша:**\n"
@@ -192,7 +192,7 @@ class Public(commands.Cog):
                                      "2to1/2to2/2to3 - **в 3 раза**\n"
                                      "ch/nch - **в 2 раза**\n"
                                      "Число - **в 35 раз**\n".format(
-                                            settings['prefix'], self.row12, self.row22, self.row32
+                                            PREFIX, self.row12, self.row22, self.row32
                                         )
                                )
             self.emb.add_field(name=f"Как работает fail?",
@@ -213,25 +213,25 @@ class Public(commands.Cog):
                     "**параметры:** gg - зелёная галочка, "
                     "bg - синяя галочка, dv - разработчик, cd - программист\n\n"
                     "//add_to_ban_list <server_id> - добавить сервер в банлист\n"
-                    "{settings['prefix']}develop_stats <Параметр (lb, slb)> <Параметр (on, off)> - ну тут понятно"
+                    f"{PREFIX}develop_stats <Параметр (lb, slb)> <Параметр (on, off)> - ну тут понятно"
                 )
         elif arg == "new_year":
             self.emb = discord.Embed(title="Команды Нового года")
-            self.emb.add_field(name=f'**{settings["prefix"]}presents**',
+            self.emb.add_field(name=f'**{PREFIX}presents**',
                                value='Все ваши подарки', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}present <упоминание игрока> <количество>**',
+            self.emb.add_field(name=f'**{PREFIX}present <упоминание игрока> <количество>**',
                                value='Подарить кому-то подарок', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}open <Аргумент>**',
+            self.emb.add_field(name=f'**{PREFIX}open <Аргумент>**',
                                value='Открыть подарок\nАргументы: all - открыть все подарки, '
                                      'число - определённое количество',
                                inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}foodshop**',
+            self.emb.add_field(name=f'**{PREFIX}foodshop**',
                                value='Магазин еды', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}food**',
+            self.emb.add_field(name=f'**{PREFIX}food**',
                                value='Ваша еда', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}use <Номер из foodshop>**',
+            self.emb.add_field(name=f'**{PREFIX}use <Номер из foodshop>**',
                                value='Использовать еду', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}buyfood <Номер из foodshop> <Количество>**',
+            self.emb.add_field(name=f'**{PREFIX}buyfood <Номер из foodshop> <Количество>**',
                                value='Купить еду', inline=False)
             await ctx.reply(embed=self.emb)
 
@@ -242,7 +242,7 @@ class Public(commands.Cog):
                 self.row32 = "1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34"
 
                 self.emb = discord.Embed(title="Команды бета тестеров:")
-                self.emb.add_field(name=f'**{settings["prefix"]}roll <Ставка> <Цифра или аргумент>**',
+                self.emb.add_field(name=f'**{PREFIX}roll <Ставка> <Цифра или аргумент>**',
                                    value='Аргументы:\n'
                                          '1st12 - число от 1 до 12\n'
                                          '2nd12 - число от 12 до 24\n'
@@ -262,70 +262,70 @@ class Public(commands.Cog):
 
         elif arg is None:
             self.emb = discord.Embed(title="Команды бота:")
-            self.emb.add_field(name=f'**{settings["prefix"]}info**',
+            self.emb.add_field(name=f'**{PREFIX}info**',
                                value='За что выдают коины', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}cash <Упоминание пользователя>**',
+            self.emb.add_field(name=f'**{PREFIX}cash <Упоминание пользователя>**',
                                value='Узнать баланс', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}send <Упоминание пользователя> <Сумма>**',
+            self.emb.add_field(name=f'**{PREFIX}send <Упоминание пользователя> <Сумма>**',
                                value='Перевести деньги', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}shop**',
+            self.emb.add_field(name=f'**{PREFIX}shop**',
                                value='Открыть магазин', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}buy <Упоминание роли>**',
+            self.emb.add_field(name=f'**{PREFIX}buy <Упоминание роли>**',
                                value='Купить роль', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}rust_casino <Ставка> <Число(1, 3, 5, 10, 20)>**',
-                               value=f'Казино, для подробной информации **{settings["prefix"]}help casino**',
+            self.emb.add_field(name=f'**{PREFIX}rust_casino <Ставка> <Число(1, 3, 5, 10, 20)>**',
+                               value=f'Казино, для подробной информации **{PREFIX}help casino**',
                                inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}fail <Ставка> <Коэффициент>**',
-                               value=f'Fail, для подробной информации **{settings["prefix"]}help casino**',
+            self.emb.add_field(name=f'**{PREFIX}fail <Ставка> <Коэффициент>**',
+                               value=f'Fail, для подробной информации **{PREFIX}help casino**',
                                inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}777 <Ставка>**',
-                               value=f'Казино 777, для подобной информации **{settings["prefix"]}help casino**',
+            self.emb.add_field(name=f'**{PREFIX}777 <Ставка>**',
+                               value=f'Казино 777, для подобной информации **{PREFIX}help casino**',
                                inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}roll <Ставка> <Аргумент>**',
-                               value=f'Рулетка, для подобной информации **{settings["prefix"]}help casino**',
+            self.emb.add_field(name=f'**{PREFIX}roll <Ставка> <Аргумент>**',
+                               value=f'Рулетка, для подобной информации **{PREFIX}help casino**',
                                inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}stats <Упоминание пользователя>**',
+            self.emb.add_field(name=f'**{PREFIX}stats <Упоминание пользователя>**',
                                value=f'Посмотреть статистику',
                                inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}buye <Номер товара>**',
+            self.emb.add_field(name=f'**{PREFIX}buye <Номер товара>**',
                                value='Купить другой товар сервера', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}bank**',
+            self.emb.add_field(name=f'**{PREFIX}bank**',
                                value='Узнать баланс на счету', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}bank add <Сумма>**',
+            self.emb.add_field(name=f'**{PREFIX}bank add <Сумма>**',
                                value='Положить деньги на счёт', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}bank take <Сумма>**',
+            self.emb.add_field(name=f'**{PREFIX}bank take <Сумма>**',
                                value='Снять деньги со счёта', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}levels**',
+            self.emb.add_field(name=f'**{PREFIX}levels**',
                                value='Информация о левелах', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}lvl_up**',
+            self.emb.add_field(name=f'**{PREFIX}lvl_up**',
                                value='Поднять себе левл', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}lb**',
+            self.emb.add_field(name=f'**{PREFIX}lb**',
                                value='Рейтинг богачей сервера', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}lb chat**',
+            self.emb.add_field(name=f'**{PREFIX}lb chat**',
                                value='Рейтинг чата сервера', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}lb voice**',
+            self.emb.add_field(name=f'**{PREFIX}lb voice**',
                                value='Рейтинг голосовых каналов сервера', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}slb**',
+            self.emb.add_field(name=f'**{PREFIX}slb**',
                                value='Общий баланс сервера', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}del_games**',
+            self.emb.add_field(name=f'**{PREFIX}del_games**',
                                value='Удалить все активные игры', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}promo <Промокод>**',
+            self.emb.add_field(name=f'**{PREFIX}promo <Промокод>**',
                                value='Активировать промокод', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}promo_create <Сумма>**',
+            self.emb.add_field(name=f'**{PREFIX}promo_create <Сумма>**',
                                value='Создать промокод', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}promocodes <Промокод>**',
+            self.emb.add_field(name=f'**{PREFIX}promocodes <Промокод>**',
                                value='Все Ваши промокоды(писать в личные сообщения)', inline=False)
-            self.emb.add_field(name=f'**{settings["prefix"]}card**',
+            self.emb.add_field(name=f'**{PREFIX}card**',
                                value='Получить вашу карточку', inline=False)
             self.month = int(datetime.today().strftime('%m'))
             self.day = int(datetime.today().strftime('%d'))
             if self.month == 2 and self.day == 14:
-                self.emb.add_field(name=f'**{settings["prefix"]}val_open <аргумент>**',
+                self.emb.add_field(name=f'**{PREFIX}val_open <аргумент>**',
                                    value='Открыть валентинки\n'
                                          'Аргументы: all - открыть все валентинки, число - определённое количество',
                                    inline=False)
             self.emb.add_field(name='Помощь для администрации',
-                               value=f'**{settings["prefix"]}help admin** - помощь для администрации', inline=False)
+                               value=f'**{PREFIX}help admin** - помощь для администрации', inline=False)
             await ctx.reply(embed=self.emb)
         else:
             self.emb = discord.Embed(title="Команды бота:")

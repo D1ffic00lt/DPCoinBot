@@ -5,10 +5,11 @@ from datetime import datetime
 from discord.ext import commands
 from typing import Union
 
-from botsections.functions.additions import (
+from config import DATE_FORMAT
+from modules.additions import (
     get_time, write_log
 )
-from botsections.functions.json_ import Json
+from modules.json_ import Json
 from database.db import Database
 
 __all__ = (
@@ -117,11 +118,11 @@ class Events(commands.Cog):
             self.last_message[message.author.id] = {"message": "", "date": get_time()}
         if not message.author.bot:
             self.time = datetime.strptime(
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "%Y-%m-%d %H:%M:%S"
+                datetime.now().strftime(DATE_FORMAT),
+                DATE_FORMAT
             ) - datetime.strptime(
                 self.last_message[message.author.id]["date"],
-                "%Y-%m-%d %H:%M:%S"
+                DATE_FORMAT
             )
 
             self.index = random.randint(1, 3)

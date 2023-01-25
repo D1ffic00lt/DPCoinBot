@@ -9,13 +9,13 @@ from discord.ext import commands
 from discord import app_commands
 from PIL import Image, ImageFont, ImageDraw
 
-from botsections.functions.config import settings
-from botsections.functions.additions import (
+from config import PREFIX
+from modules.additions import (
     get_time, write_log, create_emb,
     divide_the_number, get_color, crop,
     prepare_mask, get_promo_code
 )
-from botsections.functions.json_ import Json
+from modules.json_ import Json
 from database.db import Database
 
 __all__ = (
@@ -303,7 +303,7 @@ class UserSlash(commands.Cog):
                 )
         self.emb.add_field(
             name="**Как купить роль?**",
-            value=f'''```diff\n- {settings["prefix"]}buy <Упоминание роли>\n```'''
+            value=f'''```diff\n- {PREFIX}buy <Упоминание роли>\n```'''
         )
         self.db.get_from_item_shop(inter.guild.id, "ItemID", "ItemName", "ItemCost", order_by="ItemCost")
         if self.db.get_from_item_shop(
@@ -320,13 +320,13 @@ class UserSlash(commands.Cog):
                 self.emb.add_field(
                     name=f'**{row[1]}**',
                     value=f'Стоимость: **{row[2]} DP коинов**\n'
-                          f'Чтобы купить {settings["prefix"]}buy_item {row[0]}',
+                          f'Чтобы купить {PREFIX}buy_item {row[0]}',
                     inline=False
                 )
 
         self.emb.add_field(
             name="**Чтобы купить роль:**",
-            value=f"```diff\n- {settings['prefix']}buy @роль, которую Вы хотите купить\n```")
+            value=f"```diff\n- {PREFIX}buy @роль, которую Вы хотите купить\n```")
         await inter.response.send_message(embed=self.emb)
 
     @app_commands.command(name="buy_item", description="Купить товар из магазина")
@@ -510,7 +510,7 @@ class UserSlash(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __card(self, inter: discord.Interaction) -> None:
         self.img = Image.new("RGBA", (500, 300), "#323642")
-        self.response = requests.get(str(inter.user.guild_avatar.url)[:-10], stream=True)
+        self.response = requests.get(str(inter.user.avatar.url)[:-10], stream=True)
         self.response = Image.open(io.BytesIO(self.response.content))
         self.response = self.response.convert("RGBA")
         self.response = self.response.resize((100, 100), Image.ANTIALIAS)
