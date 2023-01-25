@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from config import PREFIX
-from modules.version import __version__
+from config import PREFIX, __version__
 
 __all__ = (
     "foo", "discord_foo",

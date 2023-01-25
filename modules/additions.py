@@ -10,6 +10,7 @@ from typing import Callable, List, Any
 from PIL import Image, ImageDraw
 from vk_api import VkApi
 
+from config import DATE_FORMAT
 
 casino2 = {}
 
@@ -47,7 +48,7 @@ def casino2ch(us_id: int) -> tuple:
 
 
 def get_time() -> str:
-    return str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    return str(datetime.now().strftime(DATE_FORMAT))
 
 
 def remove_emoji(text) -> str:
@@ -88,7 +89,7 @@ def logging(func: Callable) -> Callable:
 
 
 def datetime_to_str(datetime_):
-    return datetime.strptime(datetime_, "%Y-%m-%d %H:%M:%S")
+    return datetime.strptime(datetime_, DATE_FORMAT)
 
 
 def create_emb(
