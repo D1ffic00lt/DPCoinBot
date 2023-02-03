@@ -4,6 +4,7 @@ import random
 from datetime import datetime
 from discord.ext import commands
 from typing import Union
+from toxicityclassifier import ToxicityClassificator
 
 from config import DATE_FORMAT
 from modules.additions import (
@@ -45,6 +46,7 @@ class Events(commands.Cog):
         self.last_message: dict = {}
         self.ban_list: list = []
         self.bot = bot
+        self.model = ToxicityClassificator()
         print(f"[{get_time()}] [INFO]: Events connected")
         write_log(f"[{get_time()}] [INFO]: Events connected")
 
