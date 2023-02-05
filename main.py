@@ -11,14 +11,13 @@ from bot import DPcoinBOT
 from database.db import Database
 from botsections import *
 from modules.json_ import Json
-from config import __version__
 from modules.additions import get_time, write_log
 from modules.encoding import Encoder
 from slashbotsections import *
 from config import (
     PREFIX, TOKEN,
     FORMAT, DATE_FORMAT,
-    LOG_PATH
+    LOG_PATH, __version__
 )
 
 warnings.filterwarnings("ignore")

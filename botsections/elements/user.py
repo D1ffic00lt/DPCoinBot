@@ -377,34 +377,6 @@ class User(commands.Cog):
                     self.db.add_coins(member.id, ctx.guild.id, cash)
                 await ctx.message.add_reaction('✅')
 
-    @commands.command(aliases=["add_rep"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __good_rep(
-            self, ctx: commands.context.Context, member: discord.Member = None
-    ) -> None:
-        if member is None:
-            await ctx.reply(f"{ctx.author}, Вы не указали пользователя!")
-        else:
-            if member.id == ctx.author.id:
-                await ctx.reply(f"{ctx.author}, Вы не можете повысить репутацию самому себе")
-            else:
-                self.db.add_reputation(ctx.author.id, ctx.guild.id, 1)
-                await ctx.message.add_reaction('✅')
-
-    @commands.command(aliases=["remove_rep"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __bad_rep(
-            self, ctx: commands.context.Context, member: discord.Member = None
-    ) -> None:
-        if member is None:
-            await ctx.reply(f"{ctx.author}, Вы не указали пользователя!")
-        else:
-            if member.id == ctx.author.id:
-                await ctx.reply(f"{ctx.author}, Вы не можете понизить репутацию самому себе")
-            else:
-                self.db.add_reputation(ctx.author.id, ctx.guild.id, -1)
-                await ctx.message.add_reaction('✅')
-
     @commands.command(aliases=["stats"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __stats(self, ctx: commands.context.Context, member: discord.Member = None) -> None:

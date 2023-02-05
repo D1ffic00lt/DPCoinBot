@@ -54,7 +54,7 @@ class Database(object):
             Name                         VARCHAR (255) NOT NULL,
             ID                           INT NOT NULL,
             Cash                         BIGINT DEFAULT 0 NOT NULL,
-            Reputation                   INT DEFAULT 0 NOT NULL,
+            Reputation                   DOUBLE DEFAULT 10 NOT NULL,
             Lvl                          INT DEFAULT 1 NOT NULL,
             GuildID                      INT NOT NULL,
             CoinFlipsCount               INT DEFAULT 0 NOT NULL,
@@ -79,7 +79,8 @@ class Database(object):
             Xp                           BIGINT DEFAULT 0 NOT NULL,
             ChatLevel                    INT DEFAULT 0 NOT NULL,
             MessagesCount                INT DEFAULT 0 NOT NULL,
-            CashInBank BIGINT            DEFAULT 0 NOT NULL 
+            CashInBank                   BIGINT DEFAULT 0 NOT NULL,
+            RatingMessages               BIGINT DEFAULT 0 NOT NULL
            )"""
         )
         self.cursor.execute(
@@ -653,11 +654,34 @@ class Database(object):
                 (cash, ID, guild_id)
             )
 
-    def add_reputation(self, ID: int, GuildID: int, reputation: int) -> Cursor:
+    def add_rating_message(self, ID: int, GuildID: int) -> tuple[Cursor, int]:
         with self.connection:
             return self.cursor.execute(
-                "UPDATE `Users` SET `Reputation` = `Reputation` + ? WHERE `ID` = ? AND `GuildID` = ?",
-                (reputation, ID, GuildID)
+                "UPDATE `Users` SET `RatingMessages` = `RatingMessages` + 1 WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, GuildID)
+            ), \
+                   self.cursor.execute(
+                       "SELECT `RatingMessages` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
+                       (ID, GuildID)
+                   ).fetchone()[0]
+
+    def add_reputation(self, ID: int, GuildID: int, reputation: float) -> Cursor:
+        with self.connection:
+            messages_count = self.add_rating_message(ID, GuildID)[1] + 2
+            user_reputation = self.cursor.execute(
+                "SELECT `Reputation` FROM `Users` WHERE `ID` = ? AND `GuildID` = ?",
+                (ID, GuildID)
+            ).fetchone()[0]
+            reputation = 10 - reputation * 10
+            if user_reputation - (5 - reputation) / messages_count > 10:
+                user_reputation = 10
+            elif (user_reputation - (5 - reputation) / messages_count) < 0:
+                user_reputation = 0.0000001
+            else:
+                user_reputation = (user_reputation - (5 - reputation) / messages_count)
+            return self.cursor.execute(
+                "UPDATE `Users` SET `Reputation` = ? WHERE `ID` = ? AND `GuildID` = ?",
+                (user_reputation, ID, GuildID)
             )
 
     def take_coins_from_the_bank(

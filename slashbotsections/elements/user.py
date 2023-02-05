@@ -400,32 +400,6 @@ class UserSlash(commands.Cog):
                 self.db.add_coins(member.id, inter.guild.id, cash)
             await inter.response.send_message('✅')
 
-    @app_commands.command(name="add_rep", description="Добавить репутацию")
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __good_rep(
-            self, inter: discord.Interaction, member: discord.Member
-    ) -> None:
-        if member.id == inter.user.id:
-            await inter.response.send_message(
-                f"{inter.user}, Вы не можете повысить репутацию самому себе", ephemeral=True
-            )
-        else:
-            self.db.add_reputation(inter.user.id, inter.guild.id, 1)
-            await inter.response.send_message('✅')
-
-    @app_commands.command(name="remove_rep", description="Снять репутацию ")
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __bad_rep(
-            self, inter: discord.Interaction, member: discord.Member
-    ) -> None:
-        if member.id == inter.user.id:
-            await inter.response.send_message(
-                f"{inter.user}, Вы не можете понизить репутацию самому себе", ephemeral=True
-                 )
-        else:
-            self.db.add_reputation(inter.user.id, inter.guild.id, -1)
-            await inter.response.send_message('✅')
-
     @app_commands.command(name="stats", description="Статистика")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __stats(self, inter: discord.Interaction, member: discord.Member = None) -> None:

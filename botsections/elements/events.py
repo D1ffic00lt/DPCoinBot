@@ -1,3 +1,5 @@
+import logging
+
 import discord
 import random
 
@@ -113,12 +115,19 @@ class Events(commands.Cog):
                     }
                 )
         await self.bot.process_commands(message)
-        try:
+        try:  # когда-нибудь я это уберу
             if self.last_message[message.author.id] is None:
                 self.last_message[message.author.id] = {"message": "", "date": get_time()}
         except KeyError:
             self.last_message[message.author.id] = {"message": "", "date": get_time()}
         if not message.author.bot:
+            if message.author is not None and message.guild is not None:
+                # print(self.model.get_probability(message.content))
+                self.db.add_reputation(
+                    message.author.id,
+                    message.guild.id,
+                    self.model.get_probability(message.content)
+                )
             self.time = datetime.strptime(
                 datetime.now().strftime(DATE_FORMAT),
                 DATE_FORMAT
@@ -167,9 +176,6 @@ class Events(commands.Cog):
                             else:
                                 self.level *= 4
                         self.db.add_coins(message.author.id, message.guild.id, self.level)
-
-                    elif self.index == 2 and message.author is not None and message.guild is not None:
-                        self.db.add_reputation(message.author.id, message.guild.id, 1)
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
