@@ -1,9 +1,9 @@
+import logging
 import discord
 
 from discord.ext import commands
 from datetime import datetime
 
-from modules.additions import get_time, write_log
 from config import PREFIX
 from modules.texts import *
 from database.db import Database
@@ -31,8 +31,7 @@ class Public(commands.Cog):
         self.row32: str
         self.month: int = 0
         self.day: int = 0
-        print(f"[{get_time()}] [INFO]: Public connected")
-        write_log(f"[{get_time()}] [INFO]: Public connected")
+        logging.info(f"Public connected")
 
     @commands.command(aliases=["info"])
     @commands.cooldown(1, 10, commands.BucketType.user)

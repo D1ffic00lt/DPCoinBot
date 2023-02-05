@@ -1,10 +1,10 @@
+import logging
 import discord
 
 from discord.ext import commands
 from discord.utils import get
 from discord import app_commands
 
-from modules.additions import get_time, write_log
 from database.db import Database
 
 __all__ = (
@@ -28,8 +28,7 @@ class AdminSlash(commands.Cog):
         self.msg: str
         self.ind: int
         self.administrator_role_id: int
-        print(f"[{get_time()}] [INFO]: AdminSlash connected")
-        write_log(f"[{get_time()}] [INFO]: AdminSlash connected")
+        logging.info(f"Admin (Slash) connected")
 
     @app_commands.command(name="give", description="Выдать коины")
     @commands.cooldown(1, 5, commands.BucketType.user)

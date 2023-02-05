@@ -1,10 +1,10 @@
+import logging
 import discord
-from discord import app_commands
 
+from discord import app_commands
 from discord.ext import commands
 from datetime import datetime
 
-from modules.additions import get_time, write_log
 from config import PREFIX
 from modules.texts import *
 from database.db import Database
@@ -32,8 +32,7 @@ class PublicSlash(commands.Cog):
         self.row32: str
         self.month: int = 0
         self.day: int = 0
-        print(f"[{get_time()}] [INFO]: Public connected")
-        write_log(f"[{get_time()}] [INFO]: Public connected")
+        logging.info(f"Public (Slash) connected")
 
     @app_commands.command(name="info", description="За что выдают коины?")
     @commands.cooldown(1, 10, commands.BucketType.user)

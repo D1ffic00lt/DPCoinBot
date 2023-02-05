@@ -1,5 +1,4 @@
 import logging
-
 import discord
 import random
 
@@ -9,9 +8,8 @@ from typing import Union
 from toxicityclassifier import ToxicityClassificator
 
 from config import DATE_FORMAT
-from modules.additions import (
-    get_time, write_log
-)
+from modules.additions import get_time
+
 from modules.json_ import Json
 from database.db import Database
 
@@ -49,8 +47,7 @@ class Events(commands.Cog):
         self.ban_list: list = []
         self.bot = bot
         self.model = ToxicityClassificator()
-        print(f"[{get_time()}] [INFO]: Events connected")
-        write_log(f"[{get_time()}] [INFO]: Events connected")
+        logging.info(f"Events connected")
 
     @commands.Cog.listener()
     async def on_voice_state_update(
@@ -122,7 +119,7 @@ class Events(commands.Cog):
             self.last_message[message.author.id] = {"message": "", "date": get_time()}
         if not message.author.bot:
             if message.author is not None and message.guild is not None:
-                # print(self.model.get_probability(message.content))
+                # logging.info(self.model.get_probability(message.content))
                 self.db.add_reputation(
                     message.author.id,
                     message.guild.id,
@@ -180,5 +177,4 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         self.db.server_add(self.bot)
-        print(f"[{get_time()}] [INFO]: {member.id} add to the database")
-        write_log(f"[{get_time()}] [INFO]: {member.id} add to the database")
+        logging.info(f"{member} add to the database")

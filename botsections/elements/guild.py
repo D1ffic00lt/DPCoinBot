@@ -1,3 +1,4 @@
+import logging
 import discord
 
 from typing import Union
@@ -5,7 +6,7 @@ from discord.ext import commands
 from discord.utils import get
 
 from modules.texts import need_settings
-from modules.additions import divide_the_number, get_time, write_log
+from modules.additions import divide_the_number
 from database.db import Database
 
 __all__ = (
@@ -34,8 +35,7 @@ class Guild(commands.Cog):
         self.category: Union[discord.CategoryChannel, int]
         self.emb: discord.Embed
         self.guild: discord.Guild
-        print(f"[{get_time()}] [INFO]: Guild connected")
-        write_log(f"[{get_time()}] [INFO]: Guild connected")
+        logging.info(f"Guild connected")
 
     @commands.command(aliases=["auto_setup"])
     @commands.cooldown(1, 4, commands.BucketType.user)
