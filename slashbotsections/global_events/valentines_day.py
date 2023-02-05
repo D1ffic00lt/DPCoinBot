@@ -1,3 +1,4 @@
+import logging
 import random
 
 from datetime import datetime
@@ -7,7 +8,6 @@ from discord import app_commands
 from discord.ext import commands
 
 from database.db import Database
-from modules.additions import get_time, write_log
 from config import VALENTINES_DAY_MIN_PRIZE, VALENTINES_DAY_MAX_PRIZE
 __all__ = (
     "ValentinesDaySlash",
@@ -27,8 +27,7 @@ class ValentinesDaySlash(commands.Cog):
         self.db = db
         self.valentine: int = 0
         self.prize: int = 0
-        print(f"[{get_time()}] [INFO]: ValentinesDaySlash event connected")
-        write_log(f"[{get_time()}] [INFO]: ValentinesDaySlash event connected")
+        logging.info(f"ValentinesDay (Slash) event connected")
 
     @app_commands.command(name="val_open", description="Открыть валентинку")
     @commands.cooldown(1, 4, commands.BucketType.user)

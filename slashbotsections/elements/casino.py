@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import random
 import discord
 import reladdons
@@ -10,8 +11,9 @@ from discord import app_commands
 
 from database.db import Database
 from modules.additions import (
-    fail_rand,
-    get_color, divide_the_number, casino2ch, get_time, write_log
+    fail_rand, get_color,
+    divide_the_number, casino2ch,
+    get_time
 )
 from modules.texts import *
 from config import PREFIX
@@ -48,8 +50,7 @@ class CasinoSlash(commands.Cog):
         self.num: int = 0
         self.result_bid: int
         self.date_now: datetime
-        print(f"[{get_time()}] [INFO]: Casino connected")
-        write_log(f"[{get_time()}] [INFO]: Casino connected")
+        logging.info(f"Casino (Slash) connected")
 
     @app_commands.command(name="wheel", description="Рулетка! (прямо как в расте)")
     async def __casino_3(
@@ -72,7 +73,7 @@ class CasinoSlash(commands.Cog):
                 else:
                     self.color = get_color(inter.user.roles)
                     random.shuffle(self.rust_casino)
-                    print(self.rust_casino)
+                    logging.info(self.rust_casino)
                     if number in [1, 3, 5, 10, 20]:
                         self.db.take_coins(inter.user.id, inter.guild.id, bid)
 

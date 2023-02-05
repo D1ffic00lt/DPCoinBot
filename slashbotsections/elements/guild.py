@@ -1,3 +1,4 @@
+import logging
 import discord
 
 from typing import Union
@@ -6,7 +7,7 @@ from discord.utils import get
 from discord import app_commands
 
 from modules.texts import need_settings
-from modules.additions import divide_the_number, get_time, write_log
+from modules.additions import divide_the_number
 from database.db import Database
 
 __all__ = (
@@ -35,8 +36,7 @@ class GuildSlash(commands.Cog):
         self.category: Union[discord.CategoryChannel, int]
         self.emb: discord.Embed
         self.guild: discord.Guild
-        print(f"[{get_time()}] [INFO]: Guild connected")
-        write_log(f"[{get_time()}] [INFO]: Guild connected")
+        logging.info(f"Guild (Slash) connected")
 
     @app_commands.command(name="auto_setup", description="Авто-настройка сервера")
     @commands.cooldown(1, 4, commands.BucketType.user)

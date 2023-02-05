@@ -2,6 +2,7 @@ import io
 import os
 import discord
 import requests
+import logging
 
 from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
@@ -10,7 +11,7 @@ from typing import Union
 from modules.additions import (
     divide_the_number, create_emb,
     get_color, prepare_mask, crop,
-    get_promo_code, get_time, write_log
+    get_promo_code
 )
 from modules.json_ import Json
 from config import PREFIX
@@ -59,8 +60,7 @@ class User(commands.Cog):
         self.code: str = ""
         self.code2: str = ""
         self.js: dict = {}
-        print(f"[{get_time()}] [INFO]: User connected")
-        write_log(f"[{get_time()}] [INFO]: User connected")
+        logging.info(f"User connected")
 
     @commands.command(aliases=["slb"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -223,7 +223,7 @@ class User(commands.Cog):
                     )
                 )
             except TypeError:
-                print(f"[{get_time()}] [ERROR]: TypeError: user.py 224 cash")
+                logging.error(f"TypeError: user.py 226 cash")
         else:
             await ctx.reply(
                 embed=create_emb(
@@ -375,34 +375,6 @@ class User(commands.Cog):
                 else:
                     self.db.take_coins(ctx.author.id, ctx.guild.id, cash)
                     self.db.add_coins(member.id, ctx.guild.id, cash)
-                await ctx.message.add_reaction('✅')
-
-    @commands.command(aliases=["add_rep"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __good_rep(
-            self, ctx: commands.context.Context, member: discord.Member = None
-    ) -> None:
-        if member is None:
-            await ctx.reply(f"{ctx.author}, Вы не указали пользователя!")
-        else:
-            if member.id == ctx.author.id:
-                await ctx.reply(f"{ctx.author}, Вы не можете повысить репутацию самому себе")
-            else:
-                self.db.add_reputation(ctx.author.id, ctx.guild.id, 1)
-                await ctx.message.add_reaction('✅')
-
-    @commands.command(aliases=["remove_rep"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __bad_rep(
-            self, ctx: commands.context.Context, member: discord.Member = None
-    ) -> None:
-        if member is None:
-            await ctx.reply(f"{ctx.author}, Вы не указали пользователя!")
-        else:
-            if member.id == ctx.author.id:
-                await ctx.reply(f"{ctx.author}, Вы не можете понизить репутацию самому себе")
-            else:
-                self.db.add_reputation(ctx.author.id, ctx.guild.id, -1)
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["stats"])

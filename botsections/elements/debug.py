@@ -1,3 +1,4 @@
+import logging
 import os
 import _io
 import smtplib
@@ -56,8 +57,7 @@ class Debug(commands.Cog):
         self.lines: str
         self.read_file: _io.TextIOWrapper
         self.write_file: _io.TextIOWrapper
-        print(f"[{get_time()}] [INFO]: Debug connected")
-        write_log(f"[{get_time()}] [INFO]: Debug connected")
+        logging.info(f"Debug connected")
 
     @commands.command(aliases=["debug"])
     async def __debug_logs(
@@ -310,7 +310,7 @@ class Debug(commands.Cog):
         elif isinstance(error, commands.CommandNotFound):
             pass
         else:
-            print(error)
+            logging.error(error)
             try:
                 write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
                           f"({ctx.guild.id})\t {str(error)}\t{str(get_time())}\n")

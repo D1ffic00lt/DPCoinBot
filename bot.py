@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import math
+import logging
 import discord
+import math
 
 from discord.ext import commands
 
 from config import PREFIX
-from modules.additions import get_time, write_log
 from database.db import Database
 
 
@@ -38,5 +38,4 @@ class DPcoinBOT(commands.Bot):
             self.db.connection.commit()
 
         self.db.clear_coinflip()
-        print(f"[{get_time()}] [INFO]: Bot connected")
-        write_log(f"[{get_time()}] [INFO]: Bot connected")
+        logging.info(f"Bot connected")
