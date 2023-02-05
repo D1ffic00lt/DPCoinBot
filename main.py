@@ -17,7 +17,8 @@ from slashbotsections import *
 from config import (
     PREFIX, TOKEN,
     FORMAT, DATE_FORMAT,
-    LOG_PATH, __version__
+    LOG_PATH, __version__,
+    TESTING_MODE, TESTERS_PREFIX
 )
 
 warnings.filterwarnings("ignore")
@@ -56,7 +57,7 @@ async def main() -> None:
     print(f"[{get_time()}] [INFO]: Database connected")
     write_log(f"[{get_time()}] [INFO]: Database connected")
     BOT: DPcoinBOT = DPcoinBOT(
-        command_prefix=PREFIX,
+        command_prefix=PREFIX if not TESTING_MODE else TESTERS_PREFIX,
         intents=intents,
         db=db, case_insensitive=True
     )
