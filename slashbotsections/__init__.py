@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from slashbotsections.elements import *
 from slashbotsections.global_events import *
 

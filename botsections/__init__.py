@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from botsections.elements import *
 from botsections.global_events import *
 

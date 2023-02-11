@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 import random
 
@@ -9,6 +10,7 @@ from discord.ext import commands
 
 from database.db import Database
 from config import VALENTINES_DAY_MIN_PRIZE, VALENTINES_DAY_MAX_PRIZE
+
 __all__ = (
     "ValentinesDaySlash",
 )
