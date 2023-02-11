@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+import logging
 import discord
 import random
 
@@ -8,7 +10,6 @@ from typing import Union
 
 from database.db import Database
 from modules.texts import *
-from modules.additions import get_time, write_log
 from config import (
     PREFIX,
     NEW_YEAR_MIN_PRIZE,
@@ -44,8 +45,7 @@ class NewYearSlash(commands.Cog):
         self.xp: Union[int, float] = 0
         self.level_in_chat: Union[int, float] = 0
 
-        print(f"[{get_time()}] [INFO]: NewYearSlash event connected")
-        write_log(f"[{get_time()}] [INFO]: NewYearSlash event connected")
+        logging.info(f"NewYear (Slash) event connected")
 
     @app_commands.command(name="use", description="Использовать предмет")
     @commands.cooldown(1, 4, commands.BucketType.user)

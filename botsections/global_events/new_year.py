@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+import logging
 import discord
 import random
 
@@ -7,7 +9,6 @@ from typing import Union
 
 from database.db import Database
 from modules.texts import *
-from modules.additions import get_time, write_log
 from config import (
     PREFIX,
     NEW_YEAR_MIN_PRIZE,
@@ -42,8 +43,7 @@ class NewYear(commands.Cog):
         self.items: tuple = ()
         self.xp: Union[int, float] = 0
         self.level_in_chat: Union[int, float] = 0
-        print(f"[{get_time()}] [INFO]: NewYear event connected")
-        write_log(f"[{get_time()}] [INFO]: NewYear event connected")
+        logging.info(f"NewYear event connected")
 
     @commands.command(aliases=["use"])
     @commands.cooldown(1, 4, commands.BucketType.user)

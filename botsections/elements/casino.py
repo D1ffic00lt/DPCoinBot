@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import random
 import discord
 import reladdons
@@ -9,8 +10,8 @@ from datetime import datetime
 
 from database.db import Database
 from modules.additions import (
-    fail_rand,
-    get_color, divide_the_number, casino2ch, get_time, write_log
+    fail_rand, get_color, divide_the_number,
+    casino2ch, get_time
 )
 from modules.texts import *
 from config import PREFIX
@@ -47,8 +48,7 @@ class Casino(commands.Cog):
         self.num: int = 0
         self.result_bid: int
         self.date_now: datetime
-        print(f"[{get_time()}] [INFO]: Casino connected")
-        write_log(f"[{get_time()}] [INFO]: Casino connected")
+        logging.info(f"Casino connected")
 
     @commands.command(aliases=['rust_casino'])
     @commands.cooldown(1, 2, commands.BucketType.user)
@@ -69,7 +69,7 @@ class Casino(commands.Cog):
                 else:
                     self.color = get_color(ctx.author.roles)
                     random.shuffle(self.rust_casino)
-                    print(self.rust_casino)
+                    logging.info(self.rust_casino)
                     if number in [1, 3, 5, 10, 20]:
                         self.db.take_coins(ctx.author.id, ctx.guild.id, bid)
 

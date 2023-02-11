@@ -1,11 +1,11 @@
-from typing import Union
-
+# -*- coding: utf-8 -*-
+import logging
 import discord
 
+from typing import Union
 from discord.ext import commands
 from discord.utils import get
 
-from modules.additions import get_time, write_log
 from database.db import Database
 
 __all__ = (
@@ -28,8 +28,7 @@ class Admin(commands.Cog):
         self.bot = bot
         self.msg: str
         self.ind: int
-        print(f"[{get_time()}] [INFO]: Admin connected")
-        write_log(f"[{get_time()}] [INFO]: Admin connected")
+        logging.info(f"Admin connected")
 
     @commands.command(aliases=['give', 'award'])
     @commands.cooldown(1, 5, commands.BucketType.user)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from botsections.elements.admin import *
 from botsections.elements.casino import *
 from botsections.elements.debug import *

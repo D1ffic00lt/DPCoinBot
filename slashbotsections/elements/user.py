@@ -1,17 +1,18 @@
+# -*- coding: utf-8 -*-
 import io
 import os
-from typing import Union
-
+import logging
 import discord
 import requests
 
 from discord.ext import commands
 from discord import app_commands
 from PIL import Image, ImageFont, ImageDraw
+from typing import Union
 
 from config import PREFIX
 from modules.additions import (
-    get_time, write_log, create_emb,
+    get_time, create_emb,
     divide_the_number, get_color, crop,
     prepare_mask, get_promo_code
 )
@@ -63,8 +64,7 @@ class UserSlash(commands.Cog):
         self.code: str = ""
         self.code2: str = ""
         self.js: dict = {}
-        print(f"[{get_time()}] [INFO]: User (slash) connected")
-        write_log(f"[{get_time()}] [INFO]: User (slash) connected")
+        logging.info(f"User (slash) connected")
 
     @app_commands.command(name="update", description="Информация об обновлении")
     async def __update(self, inter: discord.Interaction):
@@ -398,32 +398,6 @@ class UserSlash(commands.Cog):
             else:
                 self.db.take_coins(inter.user.id, inter.guild.id, cash)
                 self.db.add_coins(member.id, inter.guild.id, cash)
-            await inter.response.send_message('✅')
-
-    @app_commands.command(name="add_rep", description="Добавить репутацию")
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __good_rep(
-            self, inter: discord.Interaction, member: discord.Member
-    ) -> None:
-        if member.id == inter.user.id:
-            await inter.response.send_message(
-                f"{inter.user}, Вы не можете повысить репутацию самому себе", ephemeral=True
-            )
-        else:
-            self.db.add_reputation(inter.user.id, inter.guild.id, 1)
-            await inter.response.send_message('✅')
-
-    @app_commands.command(name="remove_rep", description="Снять репутацию ")
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def __bad_rep(
-            self, inter: discord.Interaction, member: discord.Member
-    ) -> None:
-        if member.id == inter.user.id:
-            await inter.response.send_message(
-                f"{inter.user}, Вы не можете понизить репутацию самому себе", ephemeral=True
-                 )
-        else:
-            self.db.add_reputation(inter.user.id, inter.guild.id, -1)
             await inter.response.send_message('✅')
 
     @app_commands.command(name="stats", description="Статистика")

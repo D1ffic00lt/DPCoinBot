@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+import logging
 import random
 
 from datetime import datetime
@@ -5,7 +7,6 @@ from discord.ext import commands
 from typing import Union
 
 from database.db import Database
-from modules.additions import get_time, write_log
 from config import (
     VALENTINES_DAY_MIN_PRIZE,
     VALENTINES_DAY_MAX_PRIZE
@@ -28,8 +29,7 @@ class ValentinesDay(commands.Cog):
         self.db = db
         self.valentine: int = 0
         self.prize: int = 0
-        print(f"[{get_time()}] [INFO]: ValentinesDay event connected")
-        write_log(f"[{get_time()}] [INFO]: ValentinesDay event connected")
+        logging.info(f"ValentinesDay event connected")
 
     @commands.command(aliases=["val_open"])
     @commands.cooldown(1, 4, commands.BucketType.user)

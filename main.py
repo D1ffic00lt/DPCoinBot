@@ -11,24 +11,24 @@ from bot import DPcoinBOT
 from database.db import Database
 from botsections import *
 from modules.json_ import Json
-from config import __version__
-from modules.additions import get_time, write_log
 from modules.encoding import Encoder
 from slashbotsections import *
 from config import (
     PREFIX, TOKEN,
     FORMAT, DATE_FORMAT,
-    LOG_PATH
+    LOG_PATH, __version__,
+    TESTING_MODE, TESTERS_PREFIX
 )
+
+logging.basicConfig(format=FORMAT, datefmt=DATE_FORMAT, level=logging.INFO)
+handler = logging.FileHandler(LOG_PATH, mode='+a')
+handler.setFormatter(logging.Formatter(FORMAT))
+logging.getLogger().addHandler(handler)
 
 warnings.filterwarnings("ignore")
 nest_asyncio.apply()
 
-print(f"[{get_time()}] [INFO]: Program started")
-write_log(f"[{get_time()}] [INFO]: Program started")
-
-logging.basicConfig(format=FORMAT, datefmt=DATE_FORMAT)
-logging.FileHandler(LOG_PATH)
+logging.info("Program started")
 
 
 async def main() -> None:
@@ -51,18 +51,15 @@ async def main() -> None:
     with open(".json/key.dpcb", "rb") as file:
         encoder = Encoder(file.read())
 
-    print(f"[{get_time()}] [INFO]: Encoder connected")
-    write_log(f"[{get_time()}] [INFO]: Encoder connected")
+    logging.info(f"Encoder connected")
     db = Database("database/server.db", encoder=encoder)
-    print(f"[{get_time()}] [INFO]: Database connected")
-    write_log(f"[{get_time()}] [INFO]: Database connected")
+    logging.info(f"Database connected")
     BOT: DPcoinBOT = DPcoinBOT(
-        command_prefix=PREFIX,
+        command_prefix=PREFIX if not TESTING_MODE else TESTERS_PREFIX,
         intents=intents,
         db=db, case_insensitive=True
     )
-    print("[{}] [INFO]: version: {}".format(get_time(), __version__))
-    write_log("[{}] [INFO]: version: {}".format(get_time(), __version__))
+    logging.info("version: {}".format(__version__))
 
     await BOT.add_cog(Casino(BOT, db))
     await BOT.add_cog(Debug(BOT, db, encoder=encoder))
