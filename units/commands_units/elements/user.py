@@ -14,7 +14,7 @@ from modules.additions import (
     get_color, prepare_mask, crop,
     get_promo_code
 )
-from modules.json_ import Json
+from modules.json_logging import Json
 from config import PREFIX
 from database.db import Database
 __all__ = (

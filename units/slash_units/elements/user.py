@@ -16,7 +16,7 @@ from modules.additions import (
     divide_the_number, get_color, crop,
     prepare_mask, get_promo_code
 )
-from modules.json_ import Json
+from modules.json_logging import Json
 from database.db import Database
 
 __all__ = (

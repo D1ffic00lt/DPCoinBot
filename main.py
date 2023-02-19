@@ -9,10 +9,9 @@ from asyncio import run
 
 from bot import DPcoinBOT
 from database.db import Database
-from botsections import *
-from modules.json_ import Json
+from units import *
+from modules.json_logging import Json
 from modules.encoding import Encoder
-from slashbotsections import *
 from config import (
     PREFIX, TOKEN,
     FORMAT, DATE_FORMAT,
