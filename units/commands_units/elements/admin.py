@@ -17,31 +17,27 @@ class Admin(commands.Cog):
     NAME = 'admin module'
 
     __slots__ = (
-        "db", "bot", "role",
-        "msg", "ind"
+        "db", "bot"
     )
 
     def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.role: discord.Role
         self.db: Database = db
         self.bot = bot
-        self.msg: str
-        self.ind: int
         logging.info(f"Admin connected")
 
     @commands.command(aliases=['give', 'award'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give(self, ctx: commands.context.Context, member: discord.Member = None, amount: int = None) -> None:
-        self.administrator_role_id = self.db.get_administrator_role_id(ctx.guild.id)  # !
+        administrator_role_id = self.db.get_administrator_role_id(ctx.guild.id)  # !
         if ctx.author.id != 401555829620211723:
-            if isinstance(self.administrator_role_id, bool):
+            if isinstance(administrator_role_id, bool):
                 if not ctx.author.guild_permissions.administrator:
                     await ctx.reply("У Вас нет прав для использования этой команды")
                     return
             else:
-                self.role = discord.utils.get(ctx.guild.roles, id=self.administrator_role_id)
-                if self.role not in ctx.author.roles:
+                role = discord.utils.get(ctx.guild.roles, id=administrator_role_id)
+                if role not in ctx.author.roles:
                     await ctx.reply("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
         if member is None:
@@ -60,15 +56,15 @@ class Admin(commands.Cog):
     async def __take(
             self, ctx: commands.context.Context, member: discord.Member = None, amount: Union[str, int] = None
     ) -> None:
-        self.administrator_role_id = self.db.get_administrator_role_id(ctx.guild.id)  # !
+        administrator_role_id = self.db.get_administrator_role_id(ctx.guild.id)  # !
         if ctx.author.id != 401555829620211723:
-            if isinstance(self.administrator_role_id, bool):
+            if isinstance(administrator_role_id, bool):
                 if not ctx.author.guild_permissions.administrator:
                     await ctx.reply("У Вас нет прав для использования этой команды")
                     return
             else:
-                self.role = discord.utils.get(ctx.guild.roles, id=self.administrator_role_id)
-                if self.role not in ctx.author.roles:
+                role = discord.utils.get(ctx.guild.roles, id=administrator_role_id)
+                if role not in ctx.author.roles:
                     await ctx.reply("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
         if member is None:
@@ -87,15 +83,15 @@ class Admin(commands.Cog):
     @commands.command(aliases=['give-role', 'award-role'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __give_role(self, ctx: commands.context.Context, role_: discord.Role = None, amount: int = None) -> None:
-        self.administrator_role_id = self.db.get_administrator_role_id(ctx.guild.id)  # !
+        administrator_role_id = self.db.get_administrator_role_id(ctx.guild.id)  # !
         if ctx.author.id != 401555829620211723:
-            if isinstance(self.administrator_role_id, bool):
+            if isinstance(administrator_role_id, bool):
                 if not ctx.author.guild_permissions.administrator:
                     await ctx.reply("У Вас нет прав для использования этой команды")
                     return
             else:
-                self.role = discord.utils.get(ctx.guild.roles, id=self.administrator_role_id)
-                if self.role not in ctx.author.roles:
+                role = discord.utils.get(ctx.guild.roles, id=administrator_role_id)
+                if role not in ctx.author.roles:
                     await ctx.reply("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
             if role_ is None:
@@ -115,15 +111,15 @@ class Admin(commands.Cog):
     async def __take_role(
             self, ctx: commands.context.Context, role_: discord.Role = None, amount: Union[str, int] = None
     ) -> None:
-        self.administrator_role_id = self.db.get_administrator_role_id(ctx.guild.id)  # !
+        administrator_role_id = self.db.get_administrator_role_id(ctx.guild.id)  # !
         if ctx.author.id != 401555829620211723:
-            if isinstance(self.administrator_role_id, bool):
+            if isinstance(administrator_role_id, bool):
                 if not ctx.author.guild_permissions.administrator:
                     await ctx.reply("У Вас нет прав для использования этой команды")
                     return
             else:
-                self.role = discord.utils.get(ctx.guild.roles, id=self.administrator_role_id)
-                if self.role not in ctx.author.roles:
+                role = discord.utils.get(ctx.guild.roles, id=administrator_role_id)
+                if role not in ctx.author.roles:
                     await ctx.reply("У Вас нет прав для использования этой команды", ephemeral=True)
                     return
         if role_ is None:
@@ -179,8 +175,8 @@ class Admin(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def __add_item_shop(self, ctx: commands.context.Context, cost: int = None, *, item) -> None:
         if ctx.author.guild_permissions.administrator or ctx.author.id == 401555829620211723:
-            self.msg = item
-            if self.msg is None:
+            msg = item
+            if msg is None:
                 await ctx.reply(f"""{ctx.author}, укажите то, что Вы хотите добавить в магазин""")
             else:
                 if self.db.get_from_item_shop(ctx.guild.id, "ItemID", order_by="ItemID").fetchone() is None:
@@ -191,7 +187,7 @@ class Admin(commands.Cog):
                     elif cost > 1000000:
                         await ctx.reply(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
                     else:
-                        self.db.insert_into_item_shop(1, str(self.msg), ctx.guild.id, cost)
+                        self.db.insert_into_item_shop(1, str(msg), ctx.guild.id, cost)
                         await ctx.message.add_reaction('✅')
                 else:
                     if cost is None:
@@ -201,7 +197,7 @@ class Admin(commands.Cog):
                     elif cost > 1000000:
                         await ctx.reply(f'{ctx.author}, нельзя начислить больше 1.000.000 DP коинов!')
                     else:
-                        self.ind = max(
+                        ind = max(
                             [
                                 i[0] for i in self.db.get_from_item_shop(
                                     ctx.guild.id,
@@ -210,7 +206,7 @@ class Admin(commands.Cog):
                                 ).fetchall()
                             ]
                         )
-                        self.db.insert_into_item_shop(self.ind + 1, str(self.msg), ctx.guild.id, cost)
+                        self.db.insert_into_item_shop(ind + 1, str(msg), ctx.guild.id, cost)
                         await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['remove-else'])
