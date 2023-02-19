@@ -10,7 +10,7 @@ from asyncio import run
 from bot import DPcoinBOT
 from database.db import Database
 from units import *
-from modules.json_ import Json
+from modules.json_logging import Json
 from modules.encoding import Encoder
 from config import (
     PREFIX, TOKEN,

@@ -16,7 +16,7 @@ from email.mime.text import MIMEText
 from modules.additions import (
     get_time, write_log
 )
-from modules.json_ import Json
+from modules.json_logging import Json
 from config import (
     BOT_EMAIL,
     DEBUG_EMAIL,

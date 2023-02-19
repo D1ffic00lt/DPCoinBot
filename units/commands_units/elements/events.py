@@ -11,7 +11,7 @@ from toxicityclassifier import ToxicityClassificator
 from config import DATE_FORMAT
 from modules.additions import get_time
 
-from modules.json_ import Json
+from modules.json_logging import Json
 from database.db import Database
 
 __all__ = (
