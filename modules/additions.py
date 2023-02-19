@@ -1,4 +1,3 @@
-""" не смотрите сюда пж """
 # -*- coding: utf-8 -*-
 import random
 import discord
@@ -8,7 +7,6 @@ import os
 from datetime import datetime
 from typing import Callable, List, Any
 from PIL import Image, ImageDraw
-from vk_api import VkApi
 
 from config import DATE_FORMAT
 
@@ -78,16 +76,6 @@ def ignore_exceptions(func: Callable) -> Callable:
     return decorator
 
 
-def logging(func: Callable) -> Callable:
-    def decorator(*args, **kwargs):
-        with open(".logs/develop_logs.dpcb", "+a") as file:
-            print(f"[{get_time()}] [INFO]: ", end="", file=file)
-            print(f"[{get_time()}] [INFO]: ", end="")
-        return func(*args, **kwargs)
-
-    return decorator
-
-
 def datetime_to_str(datetime_):
     return datetime.strptime(datetime_, DATE_FORMAT)
 
@@ -123,14 +111,3 @@ def get_color(roles: List[discord.Role]):
     if str(last_role) == "@everyone":
         return discord.Color.from_rgb(32, 34, 37)
     return last_role.color
-
-
-def write_msg(user_id: int, message: str, vk: VkApi):
-    vk.method(
-        'messages.send',
-        {
-            'user_id': user_id,
-            'message': message,
-            'random_id': random.randint(1, 1000056785700)
-        }
-    )

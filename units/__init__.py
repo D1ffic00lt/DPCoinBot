@@ -1,2 +1,2 @@
-from units.commandsunits import *
-from units.slashunits import *
+from units.commands_units import *
+from units.slash_units import *

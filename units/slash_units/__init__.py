@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from units.slashunits.elements import *
-from units.slashunits.global_events import *
+from units.slash_units.elements import *
+from units.slash_units.global_events import *
 
 __all__ = (
     "UserSlash", "AdminSlash", "GuildSlash",
