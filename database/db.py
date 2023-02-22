@@ -637,7 +637,7 @@ class Database(object):
                 (cash, ID, guild_id)
             )
 
-    def add_rating_message(self, ID: int, GuildID: int) -> tuple[Cursor, int]:
+    def add_rating_message(self, ID: int, GuildID: int) -> Tuple[Cursor, int]:
         with self.connection:
             return self.cursor.execute(
                 "UPDATE `Users` SET `RatingMessages` = `RatingMessages` + 1 WHERE `ID` = ? AND `GuildID` = ?",
