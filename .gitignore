@@ -2,6 +2,7 @@
 *.db
 *.dpcb
 *__pycache__
+*.vsconfig
 
 .idea
 .json
