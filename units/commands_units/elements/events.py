@@ -119,7 +119,7 @@ class Events(commands.Cog):
         except KeyError:
             self.last_message[message.author.id] = {"message": "", "date": get_time()}
         if not message.author.bot:
-            if message.author is not None and message.guild is not None:
+            if message.author is not None and message.guild is not None and message.content not in ["", None]:
                 # logging.info(self.model.get_probability(message.content))
                 self.db.add_reputation(
                     message.author.id,
