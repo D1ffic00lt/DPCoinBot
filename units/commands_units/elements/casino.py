@@ -2,7 +2,6 @@
 import logging
 import random
 import discord
-import reladdons
 
 from typing import List, Dict
 from discord.ext import commands
@@ -10,7 +9,7 @@ from discord.ext import commands
 from database.db import Database
 from modules.additions import (
     fail_rand, get_color, divide_the_number,
-    casino2ch, get_time
+    casino2ch, get_time, choice, total_minutes
 )
 from modules.texts import *
 from config import PREFIX
@@ -173,20 +172,20 @@ class Casino(commands.Cog):
                 color = get_color(ctx.author.roles)
                 result_bid = bid
                 self.db.take_coins(ctx.author.id, ctx.guild.id, bid)
-                line1 = reladdons.randoms.choice(
+                line1 = choice(
                     "7", "0", "8", "1",
                     output=3,
                     shuffle_long=7,
                     array_long=5,
                     key=str(ctx.author.id)
                 )
-                line2 = reladdons.randoms.choice(
+                line2 = choice(
                     "7", "0", "8", "1",
                     output=3, shuffle_long=9,
                     array_long=5,
                     key=str(ctx.author.id)
                 )
-                line3 = reladdons.randoms.choice(
+                line3 = choice(
                     "7", "0", "8", "1",
                     output=3,
                     shuffle_long=8,
@@ -330,12 +329,11 @@ class Casino(commands.Cog):
             if await self.db.cash_check(ctx, count, min_cash=10, check=True):
                 self.texts[ctx.author.id] = ""
                 self.casino[ctx.author.id] = {}
-                self.casino[ctx.author.id]["color"] = reladdons.randoms.choice(
+                self.casino[ctx.author.id]["color"] = choice(
                     "black", "red", shuffle_long=37, key=str(ctx.author.id), array_long=37
                 )
-                self.casino[ctx.author.id]["number"] = reladdons.randoms.randint(
-                    0, 36, key=str(ctx.author.id), shuffle_long=37, array_long=37
-                )
+                self.casino[ctx.author.id]["number"] = (random.randint(0, 36), )
+                # TODO: fix indexes
                 # casino2[ctx.author.id]["number"] = 1, [random.randint(0, 36), random.randint(0, 36)]
                 for i in args:
                     self.texts[ctx.author.id] += i
@@ -654,7 +652,7 @@ class Casino(commands.Cog):
             await ctx.reply(
                 f"Такой игры не существует, посмотреть все ваши активные игры - {PREFIX}games"
             )
-        elif reladdons.long.minutes(self.db.get_from_coinflip(ctx.author.id, member.id, ctx.guild.id, "Date")) > 5:
+        elif total_minutes(self.db.get_from_coinflip(ctx.author.id, member.id, ctx.guild.id, "Date")) > 5:
             await ctx.reply(f"Время истекло:(")
             self.db.delete_from_coinflip(ctx.author.id, member.id, ctx.guild.id)
         elif self.db.get_cash(ctx.author.id, ctx.guild.id) < \
