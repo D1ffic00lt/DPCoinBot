@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import random
 import discord
-import emoji
 import os
 
 from datetime import datetime
@@ -47,10 +46,6 @@ def casino2ch(us_id: int) -> tuple:
 
 def get_time() -> str:
     return str(datetime.now().strftime(DATE_FORMAT))
-
-
-def remove_emoji(text) -> str:
-    return str(emoji.get_emoji_regexp().sub(u'', str(text)))
 
 
 def divide_the_number(num):
