@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import random
 import discord
-import emoji
 import os
 
 from datetime import datetime
@@ -47,10 +46,6 @@ def casino2ch(us_id: int) -> tuple:
 
 def get_time() -> str:
     return str(datetime.now().strftime(DATE_FORMAT))
-
-
-def remove_emoji(text) -> str:
-    return str(emoji.get_emoji_regexp().sub(u'', str(text)))
 
 
 def divide_the_number(num):
@@ -111,3 +106,33 @@ def get_color(roles: List[discord.Role]):
     if str(last_role) == "@everyone":
         return discord.Color.from_rgb(32, 34, 37)
     return last_role.color
+
+
+def choice(*args, output: int = 1, shuffle_long: int = 2, array_long: int = 1, key: str = None):
+    # TODO: KILL THIS FUNCTION
+    if key is None:
+        key = str(random.randint(1, 999999))
+    out = []
+    args_list2 = []
+    args_list = {}
+    rand = []
+    for i in args:
+        args_list2.append(i)
+    for i in range(len(args)):
+        args_list[str(i)] = args_list2[random.randint(0, len(args) - 1)]
+    for i in range(array_long):
+        rand.append(args_list[str(random.randint(0, len(args) - 1))])
+    for i in range(shuffle_long):
+        random.shuffle(rand)
+    for i in range(output):
+        out.append(rand[i])
+    return out
+
+
+def total_minutes(data):
+    # TODO: kill me pls...
+    now = datetime.strptime(data, "%Y-%m-%d %H:%M:%S")
+    dt_start = datetime.strptime(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
+    time = dt_start - now
+    time = int(time.total_seconds() // 60)
+    return time

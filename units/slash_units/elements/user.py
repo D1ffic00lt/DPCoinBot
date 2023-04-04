@@ -10,7 +10,7 @@ from discord import app_commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
 
-from config import PREFIX
+from config import PREFIX, GPT3_WITH_CONTEXT_PRICE, GPT3_WITHOUT_CONTEXT_PRICE
 from modules.additions import (
     get_time, create_emb,
     divide_the_number, get_color, crop,
@@ -18,10 +18,12 @@ from modules.additions import (
 )
 from modules.json_logging import Json
 from database.db import Database
+from units.gpt import GTP3Model
 
 __all__ = (
     "UserSlash",
 )
+
 
 
 class UserSlash(commands.Cog):
@@ -36,10 +38,11 @@ class UserSlash(commands.Cog):
         "code", "code2", "response", "avatar"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db: Database, gpt_token: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot: commands.Bot = bot
+        self.gpt_token = gpt_token
         self.server: Union[discord.Guild, type(None)]
         self.bot: commands.Bot = bot
         self.name: discord.Member
@@ -64,6 +67,7 @@ class UserSlash(commands.Cog):
         self.code: str = ""
         self.code2: str = ""
         self.js: dict = {}
+        self.gpt_users: dict[int, GTP3Model] = {}
         logging.info(f"User (slash) connected")
 
     @app_commands.command(name="update", description="Информация об обновлении")
@@ -714,3 +718,53 @@ class UserSlash(commands.Cog):
             f"Описание: {description}"
         )
         await inter.response.send_message("Баг репорт записан")
+
+    @app_commands.command(name="gpt", description="Написать запрос к gpt")
+    @app_commands.choices(
+        model=[
+            app_commands.Choice(name="GPT-3", value="gpt3"),
+            app_commands.Choice(name="GPT-4 (soon)", value="gpt4")
+        ],
+        context=[
+            app_commands.Choice(name="Да", value="yes"),
+            app_commands.Choice(name="Нет", value="not")
+        ]
+    )
+    async def __gpt(
+            self, inter: discord.Interaction,
+            message: str,
+            model: app_commands.Choice[str] = "gpt3",
+            context: app_commands.Choice[str] = "not"
+    ) -> None:
+        if inter.guild is None:
+            await inter.response.send_message("no guild")
+            return
+        match model:
+            case "gpt3":
+                match context:
+                    case "yes":
+                        if self.db.get_cash(inter.user.id, inter.guild.id) < GPT3_WITH_CONTEXT_PRICE:
+                            await inter.response.send_message(f"{inter.user}, у Вас недостаточно средств!", ephemeral=True)
+                            return
+                        if inter.user.id not in self.gpt_users.keys():
+                            self.gpt_users[inter.user.id] = GTP3Model(self.gpt_token)
+                        # self.db.take_coins(inter.user.id, inter.guild.id, GPT3_WITH_CONTEXT_PRICE)
+                        await inter.response.send_message("Please, wait...")
+                        await inter.edit_original_response(
+                            content=f"```\n{await self.gpt_users[inter.user.id].answer_with_context(message)}\n```"
+                        )
+                    case "not":
+                        if self.db.get_cash(inter.user.id, inter.guild.id) < GPT3_WITHOUT_CONTEXT_PRICE:
+                            await inter.response.send_message(
+                                f"{inter.user}, у Вас недостаточно средств!", ephemeral=True
+                            )
+                            return
+                        if inter.user.id not in self.gpt_users.keys():
+                            self.gpt_users[inter.user.id] = GTP3Model(self.gpt_token)
+                        # self.db.take_coins(inter.user.id, inter.guild.id, GPT3_WITHOUT_CONTEXT_PRICE)
+                        await inter.response.send_message("Please, wait...")
+                        await inter.edit_original_response(
+                            content=f"```\n{await self.gpt_users[inter.user.id].answer(message)}\n```"
+                        )
+            case "gpt4":
+                await inter.response.send_message("soon...")
