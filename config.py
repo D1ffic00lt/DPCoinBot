@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__version__ = "2.0.1pre"
+__version__ = "2.0.2pre"
 
 GPT_TOKEN = b'gAAAAABkK8t7F-WKCUbXBQYB3fL4zMgUwgsIv81ytVuEZIDvkLs0-fE' \
             b'1J7NJvdY4h1WLFyOAtB0ASLZBDLolxgB4TUbIbmlOsKoDTw3nWA4XAZ' \
