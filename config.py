@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 __version__ = "2.0.1pre"
 
+GPT_TOKEN = b'gAAAAABkK8t7F-WKCUbXBQYB3fL4zMgUwgsIv81ytVuEZIDvkLs0-fE' \
+            b'1J7NJvdY4h1WLFyOAtB0ASLZBDLolxgB4TUbIbmlOsKoDTw3nWA4XAZ' \
+            b'f_OdswK1gE4IyMISEyLVwxqIw6faMWw2IkNbX7FiSDWRco2g_xIi34f' \
+            b'xUENJDohh2IabfEfR8='
 TOKEN = b'gAAAAABjZNuG9AfbDpnoMSRjmbJtFyekQL3y-aM0nc8BpAOPtKxNt3-oFwt' \
         b'FjLTyI9EhjgutkFyiPga1U6cbjzm7BXvmVfK2s8ZbrYPGYJNSxKm8wkEUXS' \
         b'BUYkt0edRyx_M_AGbSRf7NPTP26Xnla71pOtppcT-wb0q5ofacOGG_M7eHO' \
