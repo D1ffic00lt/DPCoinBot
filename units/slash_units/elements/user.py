@@ -726,15 +726,15 @@ class UserSlash(commands.Cog):
             app_commands.Choice(name="GPT-4 (soon)", value="gpt4")
         ],
         context=[
-            app_commands.Choice(name="Да", value=True),
-            app_commands.Choice(name="Нет", value=False)
+            app_commands.Choice(name="Да", value="yes"),
+            app_commands.Choice(name="Нет", value="not")
         ]
     )
     async def __gpt(
             self, inter: discord.Interaction,
             message: str,
             model: app_commands.Choice[str] = "gpt3",
-            context: app_commands.Choice[bool] = False
+            context: app_commands.Choice[bool] = "not"
     ) -> None:
         if inter.guild is None:
             await inter.response.send_message()
@@ -742,15 +742,15 @@ class UserSlash(commands.Cog):
         match model:
             case "gpt3":
                 match context:
-                    case True:
-                        if self.db.get_cash(inter.user.id, inter.guild.id) < 10000:
+                    case "yes":
+                        if self.db.get_cash(inter.user.id, inter.guild.id) < 20000:
                             await inter.response.send_message(f"{inter.user}, у Вас недостаточно средств!", ephemeral=True)
                             return
                         if inter.user.id not in self.gpt_users.keys():
                             self.gpt_users[inter.user.id] = GTP3Model(self.gpt_token)
                         self.db.take_coins(inter.user.id, inter.guild.id, 20000)
                         await inter.response.send_message(self.gpt_users[inter.user.id].answer_with_context(message))
-                    case False:
+                    case "not":
                         if self.db.get_cash(inter.user.id, inter.guild.id) < 10000:
                             await inter.response.send_message(f"{inter.user}, у Вас недостаточно средств!", ephemeral=True)
                             return
