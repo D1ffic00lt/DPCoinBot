@@ -10,7 +10,7 @@ from discord import app_commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
 
-from config import PREFIX
+from config import PREFIX, GPT3_WITH_CONTEXT_PRICE, GPT3_WITHOUT_CONTEXT_PRICE
 from modules.additions import (
     get_time, create_emb,
     divide_the_number, get_color, crop,
@@ -743,28 +743,28 @@ class UserSlash(commands.Cog):
             case "gpt3":
                 match context:
                     case "yes":
-                        if self.db.get_cash(inter.user.id, inter.guild.id) < 20000:
+                        if self.db.get_cash(inter.user.id, inter.guild.id) < GPT3_WITH_CONTEXT_PRICE:
                             await inter.response.send_message(f"{inter.user}, у Вас недостаточно средств!", ephemeral=True)
                             return
                         if inter.user.id not in self.gpt_users.keys():
                             self.gpt_users[inter.user.id] = GTP3Model(self.gpt_token)
-                        self.db.take_coins(inter.user.id, inter.guild.id, 20000)
+                        # self.db.take_coins(inter.user.id, inter.guild.id, GPT3_WITH_CONTEXT_PRICE)
                         await inter.response.send_message("Please, wait...")
                         await inter.edit_original_response(
-                            content=f"```\n{self.gpt_users[inter.user.id].answer_with_context(message)}\n```"
+                            content=f"```\n{await self.gpt_users[inter.user.id].answer_with_context(message)}\n```"
                         )
                     case "not":
-                        if self.db.get_cash(inter.user.id, inter.guild.id) < 10000:
+                        if self.db.get_cash(inter.user.id, inter.guild.id) < GPT3_WITHOUT_CONTEXT_PRICE:
                             await inter.response.send_message(
                                 f"{inter.user}, у Вас недостаточно средств!", ephemeral=True
                             )
                             return
                         if inter.user.id not in self.gpt_users.keys():
                             self.gpt_users[inter.user.id] = GTP3Model(self.gpt_token)
-                        self.db.take_coins(inter.user.id, inter.guild.id, 10000)
+                        # self.db.take_coins(inter.user.id, inter.guild.id, GPT3_WITHOUT_CONTEXT_PRICE)
                         await inter.response.send_message("Please, wait...")
                         await inter.edit_original_response(
-                            content=f"```\n{self.gpt_users[inter.user.id].answer(message)}\n```"
+                            content=f"```\n{await self.gpt_users[inter.user.id].answer(message)}\n```"
                         )
             case "gpt4":
                 await inter.response.send_message("soon...")

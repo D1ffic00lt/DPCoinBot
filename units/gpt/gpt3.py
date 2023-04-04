@@ -1,23 +1,34 @@
-import openai
+import openai_async
 
 
 class GTP3Model(object):
     def __init__(self, token: str, model: str = "gpt-3.5-turbo-0301") -> None:
         self.token = token
-        openai.api_key = self.token
         self.model = model
         self.content = []
 
-    def answer(self, message: str) -> str:
-        gpt_answer = openai.ChatCompletion.create(
-            model=self.model, messages=[{"role": "user", "content": message}]
+    async def answer(self, message: str) -> str:
+        print(1)
+        response = await openai_async.chat_complete(
+            self.token,
+            timeout=100,
+            payload={
+                "model": self.model,
+                "messages": [{"role": "user", "content": message}],
+            },
         )
-        return gpt_answer.choices[0].message.content
+        return response.json()["choices"][0]["message"]["content"]
 
-    def answer_with_context(self, message: str) -> str:
+    async def answer_with_context(self, message: str) -> str:
+        print(1)
         self.content.append({"role": "user", "content": message})
-        gpt_answer = openai.ChatCompletion.create(
-            model=self.model, messages=self.content
+        response = await openai_async.chat_complete(
+            self.token,
+            timeout=100,
+            payload={
+                "model": self.model,
+                "messages": self.content,
+            },
         )
-        self.content.append({"role": "system", "content": gpt_answer.choices[0].message.content})
-        return gpt_answer.choices[0].message.content
+        self.content.append({"role": "system", "content": response.json()["choices"][0]["message"]})
+        return response.json()["choices"][0]["message"]["content"]
