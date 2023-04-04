@@ -2,7 +2,6 @@
 import logging
 import random
 import discord
-import reladdons
 
 from typing import List, Dict
 from discord.ext import commands
@@ -13,7 +12,7 @@ from database.db import Database
 from modules.additions import (
     fail_rand, get_color,
     divide_the_number, casino2ch,
-    get_time
+    get_time, choice, total_minutes
 )
 from modules.texts import *
 from config import PREFIX
@@ -191,20 +190,20 @@ class CasinoSlash(commands.Cog):
                 self.color = get_color(inter.user.roles)
                 self.result_bid = bid
                 self.db.take_coins(inter.user.id, inter.guild.id, bid)
-                self.line1 = reladdons.randoms.choice(
+                self.line1 = choice(
                     "7", "0", "8", "1",
                     output=3,
                     shuffle_long=7,
                     array_long=5,
                     key=str(inter.user.id)
                 )
-                self.line2 = reladdons.randoms.choice(
+                self.line2 = choice(
                     "7", "0", "8", "1",
                     output=3, shuffle_long=9,
                     array_long=5,
                     key=str(inter.user.id)
                 )
-                self.line3 = reladdons.randoms.choice(
+                self.line3 = choice(
                     "7", "0", "8", "1",
                     output=3,
                     shuffle_long=8,
@@ -346,12 +345,10 @@ class CasinoSlash(commands.Cog):
             if await self.db.cash_check(inter, self.count, min_cash=10, check=True):
                 self.texts[inter.user.id] = ""
                 self.casino[inter.user.id] = {}
-                self.casino[inter.user.id]["color"] = reladdons.randoms.choice(
+                self.casino[inter.user.id]["color"] = choice(
                     "black", "red", shuffle_long=37, key=str(inter.user.id), array_long=37
                 )
-                self.casino[inter.user.id]["number"] = reladdons.randoms.randint(
-                    0, 36, key=str(inter.user.id), shuffle_long=37, array_long=37
-                )
+                self.casino[inter.user.id]["number"] = random.randint(0, 36) # TODO
                 # casino2[inter.user.id]["number"] = 1, [random.randint(0, 36), random.randint(0, 36)]
                 for i in arg:
                     self.texts[inter.user.id] += i
@@ -672,7 +669,7 @@ class CasinoSlash(commands.Cog):
                 f"Такой игры не существует, посмотреть все ваши активные игры - {PREFIX}games",
                 ephemeral=True
             )
-        elif reladdons.long.minutes(self.db.get_from_coinflip(member.id, inter.user.id, inter.guild.id, "Date")) > 5:
+        elif total_minutes(self.db.get_from_coinflip(member.id, inter.user.id, inter.guild.id, "Date")) > 5:
             await inter.response.send_message(f"Время истекло:(", ephemeral=True)
             self.db.delete_from_coinflip(inter.user.id, member.id, inter.guild.id)
         elif self.db.get_cash(inter.user.id, inter.guild.id) < \
