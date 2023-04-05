@@ -8,7 +8,6 @@ class GTP3Model(object):
         self.content = []
 
     async def answer(self, message: str) -> str:
-        print(1)
         response = await openai_async.chat_complete(
             self.token,
             timeout=100,
@@ -20,7 +19,6 @@ class GTP3Model(object):
         return response.json()["choices"][0]["message"]["content"]
 
     async def answer_with_context(self, message: str) -> str:
-        print(1)
         self.content.append({"role": "user", "content": message})
         response = await openai_async.chat_complete(
             self.token,
@@ -30,5 +28,6 @@ class GTP3Model(object):
                 "messages": self.content,
             },
         )
+        print(response)
         self.content.append({"role": "system", "content": response.json()["choices"][0]["message"]})
         return response.json()["choices"][0]["message"]["content"]
