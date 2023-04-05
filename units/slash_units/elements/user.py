@@ -25,7 +25,6 @@ __all__ = (
 )
 
 
-
 class UserSlash(commands.Cog):
     NAME = 'user slash module'
 
@@ -546,7 +545,7 @@ class UserSlash(commands.Cog):
             font=ImageFont.truetype("calibrib.ttf", size=25)
         )
         self.images = []
-        self.verification,  self.developer, self.coder = \
+        self.verification, self.developer, self.coder = \
             self.db.get_from_card(inter.user.id, "Verification", "Developer", "Coder")
         if int(self.verification) == 1:
             self.image = Image.open("files/green_galka.png")
@@ -749,7 +748,9 @@ class UserSlash(commands.Cog):
                     case "yes":
                         await inter.response.send_message("Please, wait...")
                         if self.db.get_cash(inter.user.id, inter.guild.id) < GPT3_WITH_CONTEXT_PRICE:
-                            await inter.response.send_message(f"{inter.user}, у Вас недостаточно средств!", ephemeral=True)
+                            await inter.response.send_message(
+                                f"{inter.user}, у Вас недостаточно средств!", ephemeral=True
+                            )
                             return
                         if inter.user.id not in self.gpt_users.keys():
                             self.gpt_users[inter.user.id] = GTP3Model(self.gpt_token)
