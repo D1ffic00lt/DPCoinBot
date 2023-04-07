@@ -16,7 +16,8 @@ from config import (
     PREFIX, TOKEN,
     FORMAT, DATE_FORMAT,
     LOG_PATH, __version__,
-    TESTING_MODE, TESTERS_PREFIX
+    TESTING_MODE, TESTERS_PREFIX,
+    GPT_TOKEN
 )
 
 logging.basicConfig(format=FORMAT, datefmt=DATE_FORMAT, level=logging.INFO)
@@ -62,7 +63,7 @@ async def main() -> None:
 
     await BOT.add_cog(Casino(BOT, db))
     await BOT.add_cog(Debug(BOT, db, encoder=encoder))
-    await BOT.add_cog(User(BOT, db))
+    await BOT.add_cog(User(BOT, db, encoder.decrypt(GPT_TOKEN)))
     await BOT.add_cog(Events(BOT, db))
     await BOT.add_cog(Guild(BOT, db))
     await BOT.add_cog(Admin(BOT, db))
@@ -71,7 +72,7 @@ async def main() -> None:
     await BOT.add_cog(ValentinesDay(BOT, db))
 
     await BOT.add_cog(CasinoSlash(BOT, db))
-    await BOT.add_cog(UserSlash(BOT, db))
+    await BOT.add_cog(UserSlash(BOT, db, encoder.decrypt(GPT_TOKEN)))
     await BOT.add_cog(GuildSlash(BOT, db))
     await BOT.add_cog(AdminSlash(BOT, db))
     await BOT.add_cog(PublicSlash(BOT, db))
