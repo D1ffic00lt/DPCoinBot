@@ -736,20 +736,24 @@ class UserSlash(commands.Cog):
             model: app_commands.Choice[str] = "gpt3",
             context: app_commands.Choice[str] = "not"
     ) -> None:
+        if model == "gpt3":
+            model = app_commands.Choice(name="GPT-3", value="gpt3")
+        if context == "not":
+            context = app_commands.Choice(name="Нет", value="not")
         if inter.guild is None:
             await inter.response.send_message("no guild")
             return
-        match model:
+        match model.value:
             case "gpt3":
-                match context:
+                match context.value:
                     case "yes":
+                        await inter.response.send_message("Please, wait...")
                         if self.db.get_cash(inter.user.id, inter.guild.id) < GPT3_WITH_CONTEXT_PRICE:
                             await inter.response.send_message(f"{inter.user}, у Вас недостаточно средств!", ephemeral=True)
                             return
                         if inter.user.id not in self.gpt_users.keys():
                             self.gpt_users[inter.user.id] = GTP3Model(self.gpt_token)
                         # self.db.take_coins(inter.user.id, inter.guild.id, GPT3_WITH_CONTEXT_PRICE)
-                        await inter.response.send_message("Please, wait...")
                         await inter.edit_original_response(
                             content=f"```\n{await self.gpt_users[inter.user.id].answer_with_context(message)}\n```"
                         )
