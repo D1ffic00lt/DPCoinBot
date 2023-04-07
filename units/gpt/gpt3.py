@@ -28,6 +28,5 @@ class GTP3Model(object):
                 "messages": self.content,
             },
         )
-        print(response)
         self.content.append({"role": "system", "content": response.json()["choices"][0]["message"]})
         return response.json()["choices"][0]["message"]["content"]

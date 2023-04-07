@@ -678,3 +678,31 @@ class User(commands.Cog):
                     inline=False
                 )
                 await ctx.reply(embed=self.emb)
+
+    @commands.command(aliases=["gpt"])
+    @commands.cooldown(1, 20, commands.BucketType.user)
+    async def __gpt(self, ctx: commands.context.Context, message: str) -> None:
+        if ctx.guild is not None:
+            if self.db.get_cash(ctx.author.id, ctx.guild.id) < 10000:
+                await ctx.reply("NO MAMA")
+                return
+            if ctx.author.id not in self.gpt_users.keys():
+                self.gpt_users[ctx.author.id] = GTP3Model(self.gpt_token)
+            self.db.take_coins(ctx.author.id, ctx.guild.id, 10000)
+            await ctx.reply(self.gpt_users[ctx.author.id].answer(message))
+        else:
+            await ctx.reply(f"{ctx.author.mention}, эту команду нельзя использовать в личных сообщениях бота")
+
+    @commands.command(aliases=["gpt-context"])
+    @commands.cooldown(1, 20, commands.BucketType.user)
+    async def __gpt(self, ctx: commands.context.Context, message: str) -> None:
+        if ctx.guild is not None:
+            if self.db.get_cash(ctx.author.id, ctx.guild.id) < 20000:
+                await ctx.reply("NO MAMA")
+                return
+            if ctx.author.id not in self.gpt_users.keys():
+                self.gpt_users[ctx.author.id] = GTP3Model(self.gpt_token)
+            self.db.take_coins(ctx.author.id, ctx.guild.id, 20000)
+            await ctx.reply(self.gpt_users[ctx.author.id].answer_with_context(message))
+        else:
+            await ctx.reply(f"{ctx.author.mention}, эту команду нельзя использовать в личных сообщениях бота")
