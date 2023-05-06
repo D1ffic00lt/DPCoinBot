@@ -1,9 +1,9 @@
 import io
-from math import e
 import requests
+
 from PIL import Image, ImageDraw, ImageFont
 
-from additions import prepare_mask, divide_the_number
+from .additions import prepare_mask, divide_the_number
 
 
 class CardGenerator(object):
@@ -107,7 +107,7 @@ class CardGenerator(object):
                 self.img.alpha_composite(images[i], (x, 220))
                 x += 100
 
-    def drawProgressBar(self, progress):
+    def draw_xp_bar(self, progress):
         x = 320 + 70 + 40
         y = 150
         w = 400
