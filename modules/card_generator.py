@@ -104,21 +104,21 @@ class CardGenerator(object):
         if len(images) != 0:
             x = 320 + 70 + 40
             for i in range(len(images)):
-                self.img.alpha_composite(images[i], (x, 150))
+                self.img.alpha_composite(images[i], (x, 220))
                 x += 100
 
-    def drawProgressBar(self, progress, bg="black", fg="red"):
+    def drawProgressBar(self, progress):
         x = 320 + 70 + 40
-        y = 260
+        y = 150
         w = 400
         h = 50
         draw = ImageDraw.Draw(self.img)
-        draw.ellipse((x + w, y, x + h + w, y + h), fill=bg)
-        draw.ellipse((x, y, x + h, y + h), fill=bg)
-        draw.rectangle((x + (h / 2), y, x + w + (h / 2), y + h), fill=bg)
+        draw.ellipse((x + w, y, x + h + w, y + h), fill="grey")
+        draw.ellipse((x, y, x + h, y + h), fill="grey")
+        draw.rectangle((x + (h / 2), y, x + w + (h / 2), y + h), fill="grey")
 
         w *= progress
-        draw.ellipse((x + w, y, x + h + w, y + h), fill=fg)
-        draw.ellipse((x, y, x + h, y + h), fill=fg)
-        draw.rectangle((x + (h / 2), y, x + w + (h / 2), y + h), fill=fg)
+        draw.ellipse((x + w, y, x + h + w, y + h), fill="aqua")
+        draw.ellipse((x, y, x + h, y + h), fill="aqua")
+        draw.rectangle((x + (h / 2), y, x + w + (h / 2), y + h), fill="aqua")
         return draw
