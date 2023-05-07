@@ -15,9 +15,9 @@ class CardGenerator(object):
     MINUTES_IN_VOICE_OFFSETS = 0.05
     LVL_OFFSETS = 1
     ALL_OFFSETS = (
-            WINS_OFFSETS + LOSES_OFFSETS +
-            MESSAGES_OFFSETS + MINUTES_IN_VOICE_OFFSETS +
-            LVL_OFFSETS
+        WINS_OFFSETS + LOSES_OFFSETS +
+        MESSAGES_OFFSETS + MINUTES_IN_VOICE_OFFSETS +
+        LVL_OFFSETS
     )
     RANK_S_VALUE = 1
     RANK_DOUBLE_A_VALUE = 10
@@ -25,19 +25,17 @@ class CardGenerator(object):
     RANK_A3_VALUE = 30
     RANK_B_VALUE = 50
     TOTAL_VALUES = (
-            RANK_S_VALUE +
-            RANK_DOUBLE_A_VALUE +
-            RANK_A2_VALUE +
-            RANK_A3_VALUE +
-            RANK_B_VALUE
+        RANK_S_VALUE +
+        RANK_DOUBLE_A_VALUE +
+        RANK_A2_VALUE +
+        RANK_A3_VALUE +
+        RANK_B_VALUE
     )
 
     def __init__(
             self, avatar_url: str
     ):
-        self.rang_data = {
-
-        }
+        self.rang_data = {}
         self.title_font = ImageFont.truetype("../static/fonts/UniSansBold.ttf", size=80)
         self.font = ImageFont.truetype("../static/fonts/UniSans.ttf", size=70)
         self.img = Image.new("RGBA", (1500, 900), "#323642")
@@ -170,23 +168,25 @@ class CardGenerator(object):
     def normalization(self, mean):
         z = (self.ALL_OFFSETS - mean) / math.sqrt(2 * self.TOTAL_VALUES ** 2)
         t = 1 / (1 + 0.3275911 * abs(z))
-        a1 = 0.254829592
-        a2 = -0.284496736
-        a3 = 1.421413741
-        a4 = -1.453152027
-        a5 = 1.061405429
-        erf = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * math.exp(-z * z)
+        erf = 1 - (
+            (
+                (
+                    (
+                        1.061405429 * t + -1.453152027
+                    ) * t + 1.421413741
+                ) * t + -0.284496736
+            ) * t + 0.254829592) * t * math.exp(-z * z)
         sign = 1 if z >= 0 else -1
         return (1 + sign * erf) / 2
 
     def add_rang(self):
         score = (
-                        self.rang_data["wins"] * self.WINS_OFFSETS +
-                        self.rang_data["loses"] * self.LOSES_OFFSETS +
-                        self.rang_data["messages"] * self.MESSAGES_OFFSETS +
-                        self.rang_data["minutes_in_voice"] * self.MINUTES_IN_VOICE_OFFSETS +
-                        self.rang_data["lvl"] * self.LVL_OFFSETS
-                ) / 100
+            self.rang_data["wins"] * self.WINS_OFFSETS +
+            self.rang_data["loses"] * self.LOSES_OFFSETS +
+            self.rang_data["messages"] * self.MESSAGES_OFFSETS +
+            self.rang_data["minutes_in_voice"] * self.MINUTES_IN_VOICE_OFFSETS +
+            self.rang_data["lvl"] * self.LVL_OFFSETS
+        ) / 100
         score = self.normalization(score) * 100
         if score < self.RANK_S_VALUE:
             level = "S+"
@@ -203,11 +203,26 @@ class CardGenerator(object):
         total_size = 300
         size = 20
         draw = ImageDraw.Draw(self.img)
-        draw.ellipse((x, y, x + total_size, y + total_size), "#5494f4")
-        draw.pieslice((x, y, x + total_size, y + total_size), start=270 - score * 10, end=270, fill="#dde5fb")
-        draw.ellipse((x + size, y + size, x + total_size - size, y + total_size - size), "#323642")
+        draw.ellipse(
+            (x, y, x + total_size, y + total_size),
+            "#5494f4"
+        )
+        draw.pieslice(
+            (x, y, x + total_size, y + total_size),
+            start=270 - score * 10, end=270, fill="#dde5fb"
+        )
+        draw.ellipse(
+            (x + size, y + size, x + total_size - size, y + total_size - size),
+            "#323642"
+        )
         if len(level) == 3:
-            draw.text((x + 35 + total_size / 6, y + 60 + total_size / 6), level, font=self.title_font)
+            draw.text(
+                (x + 35 + total_size / 6, y + 60 + total_size / 6),
+                level, font=self.title_font
+            )
         else:
-            draw.text((x + 60 + total_size / 6, y + 60 + total_size / 6), level, font=self.title_font)
+            draw.text(
+                (x + 60 + total_size / 6, y + 60 + total_size / 6),
+                level, font=self.title_font
+            )
         return level, score
