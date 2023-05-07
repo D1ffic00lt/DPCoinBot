@@ -1,4 +1,6 @@
 import io
+import math
+
 import requests
 
 from PIL import Image, ImageDraw, ImageFont
@@ -7,9 +9,35 @@ from additions import prepare_mask, divide_the_number
 
 
 class CardGenerator(object):
+    WINS_OFFSETS = 0.5
+    LOSES_OFFSETS = 0.5
+    MESSAGES_OFFSETS = 0.5
+    MINUTES_IN_VOICE_OFFSETS = 0.05
+    LVL_OFFSETS = 1
+    ALL_OFFSETS = (
+            WINS_OFFSETS + LOSES_OFFSETS +
+            MESSAGES_OFFSETS + MINUTES_IN_VOICE_OFFSETS +
+            LVL_OFFSETS
+    )
+    RANK_S_VALUE = 1
+    RANK_DOUBLE_A_VALUE = 10
+    RANK_A2_VALUE = 20
+    RANK_A3_VALUE = 30
+    RANK_B_VALUE = 50
+    TOTAL_VALUES = (
+            RANK_S_VALUE +
+            RANK_DOUBLE_A_VALUE +
+            RANK_A2_VALUE +
+            RANK_A3_VALUE +
+            RANK_B_VALUE
+    )
+
     def __init__(
             self, avatar_url: str
     ):
+        self.rang_data = {
+
+        }
         self.title_font = ImageFont.truetype("../static/fonts/UniSansBold.ttf", size=80)
         self.font = ImageFont.truetype("../static/fonts/UniSans.ttf", size=70)
         self.img = Image.new("RGBA", (1500, 900), "#323642")
@@ -27,13 +55,23 @@ class CardGenerator(object):
             self, name: str, wins: int = 0, loses: int = 0,
             minutes_in_voice: int = 0, messages: int = 0, xp: int = 0
     ):
+        self.rang_data["wins"] = wins
+        self.rang_data["loses"] = loses
+        self.rang_data["messages"] = messages
+        self.rang_data["minutes_in_voice"] = minutes_in_voice
         image_draw = ImageDraw.Draw(self.img)
-
-        image_draw.text(
-            (320 + 70 + 40, 70),
-            name,
-            font=self.title_font
-        )
+        if len(name) < 21:
+            image_draw.text(
+                (320 + 70 + 40, 70),
+                name,
+                font=self.title_font
+            )
+        else:
+            image_draw.text(
+                (320 + 70 + 40, 70),
+                name,
+                font=ImageFont.truetype("../static/fonts/UniSansBold.ttf", size=60)
+            )
         image_draw.text(
             (60, 420),
             f"Wins: {divide_the_number(wins)}",
@@ -113,6 +151,7 @@ class CardGenerator(object):
                 x += 100
 
     def draw_xp_bar(self, lvl, total_xp, xp):
+        self.rang_data["lvl"] = lvl
         x = 320 + 70 + 40
         y = 150
         w = 400
@@ -127,3 +166,48 @@ class CardGenerator(object):
         draw.ellipse((x, y, x + h, y + h), fill="aqua")
         draw.rectangle((x + (h / 2), y, x + w + (h / 2), y + h), fill="aqua")
         return draw
+
+    def normalization(self, mean):
+        z = (self.ALL_OFFSETS - mean) / math.sqrt(2 * self.TOTAL_VALUES ** 2)
+        t = 1 / (1 + 0.3275911 * abs(z))
+        a1 = 0.254829592
+        a2 = -0.284496736
+        a3 = 1.421413741
+        a4 = -1.453152027
+        a5 = 1.061405429
+        erf = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * math.exp(-z * z)
+        sign = 1 if z >= 0 else -1
+        return (1 + sign * erf) / 2
+
+    def add_rang(self):
+        score = (
+                        self.rang_data["wins"] * self.WINS_OFFSETS +
+                        self.rang_data["loses"] * self.LOSES_OFFSETS +
+                        self.rang_data["messages"] * self.MESSAGES_OFFSETS +
+                        self.rang_data["minutes_in_voice"] * self.MINUTES_IN_VOICE_OFFSETS +
+                        self.rang_data["lvl"] * self.LVL_OFFSETS
+                ) / 100
+        score = self.normalization(score) * 100
+        if score < self.RANK_S_VALUE:
+            level = "S+"
+        elif score < self.RANK_DOUBLE_A_VALUE:
+            level = "S"
+        elif score < self.RANK_A2_VALUE:
+            level = "A++"
+        elif score < self.RANK_A3_VALUE:
+            level = "A+"
+        else:
+            level = "B+"
+        x = 320 + 70 + 40 + 470 + 260
+        y = 420 + 150
+        total_size = 300
+        size = 20
+        draw = ImageDraw.Draw(self.img)
+        draw.ellipse((x, y, x + total_size, y + total_size), "#5494f4")
+        draw.pieslice((x, y, x + total_size, y + total_size), start=270 - score * 10, end=270, fill="#dde5fb")
+        draw.ellipse((x + size, y + size, x + total_size - size, y + total_size - size), "#323642")
+        if len(level) == 3:
+            draw.text((x + 35 + total_size / 6, y + 60 + total_size / 6), level, font=self.title_font)
+        else:
+            draw.text((x + 60 + total_size / 6, y + 60 + total_size / 6), level, font=self.title_font)
+        return level, score
