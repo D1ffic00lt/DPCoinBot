@@ -435,7 +435,7 @@ class Database(object):
 
     def get_card(self, ID: int, guild_id: int):
         return self.cursor.execute(
-            "SELECT `AllWinsCount`, `AllLosesCount`, `MinutesInVoiceChannels`, `MessagesCount` FROM `Users`"
+            "SELECT `AllWinsCount`, `AllLosesCount`, `MinutesInVoiceChannels`, `MessagesCount`, `Xp` FROM `Users`"
             "WHERE `GuildID` = ? AND `ID` = ?",
             (guild_id, ID)
         ).fetchall()
