@@ -8,8 +8,7 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Union
 
-from database.db import Database
-from modules.texts import *
+from units.texts import *
 from config import (
     PREFIX,
     NEW_YEAR_MIN_PRIZE,
@@ -30,10 +29,10 @@ class NewYearSlash(commands.Cog):
         "level_in_chat", "items"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
-        self.db: Database = db
+        self.db = db
         self.emb: discord.Embed
         self.month: int = 0
         self.day: int = 0

@@ -8,7 +8,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from database.db import Database
 from config import VALENTINES_DAY_MIN_PRIZE, VALENTINES_DAY_MAX_PRIZE
 
 __all__ = (
@@ -23,7 +22,7 @@ class ValentinesDaySlash(commands.Cog):
         "bot", "db", "prize", "valentine"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
         self.db = db

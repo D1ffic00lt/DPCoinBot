@@ -9,14 +9,13 @@ from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw
 from typing import Union
 
-from modules.additions import (
+from units.additions import (
     divide_the_number, create_emb,
     get_color, prepare_mask, crop,
     get_promo_code
 )
-from modules.json_logging import Json
+from units.json_logging import Json
 from config import PREFIX
-from database.db import Database
 from units.gpt.gpt3 import GTP3Model
 
 __all__ = (
@@ -36,7 +35,7 @@ class User(commands.Cog):
         "code", "code2", "response", "avatar", "gpt_users"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, gpt_token: str, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, gpt_token: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.gpt_token = gpt_token

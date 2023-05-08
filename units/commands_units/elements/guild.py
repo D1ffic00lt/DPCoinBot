@@ -6,9 +6,8 @@ from typing import Union
 from discord.ext import commands
 from discord.utils import get
 
-from modules.texts import need_settings
-from modules.additions import divide_the_number
-from database.db import Database
+from units.texts import need_settings
+from units.additions import divide_the_number
 
 __all__ = (
     "Guild",
@@ -24,7 +23,7 @@ class Guild(commands.Cog):
         "category", "emb", "guild"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot = bot

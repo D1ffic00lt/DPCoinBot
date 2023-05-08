@@ -6,8 +6,7 @@ from discord.ext import commands
 from datetime import datetime
 
 from config import PREFIX
-from modules.texts import *
-from database.db import Database
+from units.texts import *
 
 __all__ = (
     "Public",
@@ -22,7 +21,7 @@ class Public(commands.Cog):
         "row22", "row32", "month", "day"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot: commands.Bot = bot

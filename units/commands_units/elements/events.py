@@ -9,10 +9,9 @@ from typing import Union
 from toxicityclassifier import ToxicityClassificator
 
 from config import DATE_FORMAT
-from modules.additions import get_time
+from units.additions import get_time
 
-from modules.json_logging import Json
-from database.db import Database
+from units.json_logging import Json
 
 __all__ = (
     "Events",
@@ -29,7 +28,7 @@ class Events(commands.Cog):
         "the_channel_from_which_the_member_came_out", "last_message", "text"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.text: str = ""

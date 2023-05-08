@@ -11,13 +11,12 @@ from PIL import Image, ImageFont, ImageDraw
 from typing import Union
 
 from config import PREFIX, GPT3_WITH_CONTEXT_PRICE, GPT3_WITHOUT_CONTEXT_PRICE
-from modules.additions import (
+from units.additions import (
     get_time, create_emb,
     divide_the_number, get_color, crop,
     prepare_mask, get_promo_code
 )
-from modules.json_logging import Json
-from database.db import Database
+from units.json_logging import Json
 from units.gpt import GTP3Model
 
 __all__ = (
@@ -37,7 +36,7 @@ class UserSlash(commands.Cog):
         "code", "code2", "response", "avatar"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, gpt_token: str, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, gpt_token: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot: commands.Bot = bot

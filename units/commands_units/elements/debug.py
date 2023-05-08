@@ -13,16 +13,15 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from modules.additions import (
+from units.additions import (
     get_time, write_log
 )
-from modules.json_logging import Json
+from units.json_logging import Json
 from config import (
     BOT_EMAIL,
     DEBUG_EMAIL,
     PASSWORD
 )
-from database.db import Database
 
 __all__ = (
     "Debug",
@@ -39,7 +38,7 @@ class Debug(commands.Cog):
         "write_file", "lines"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         self.encoder = kwargs["encoder"]
         del kwargs["encoder"]
 

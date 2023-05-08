@@ -5,7 +5,7 @@ import requests
 
 from PIL import Image, ImageDraw, ImageFont
 
-from additions import prepare_mask, divide_the_number
+from units.additions import prepare_mask, divide_the_number
 
 
 class CardGenerator(object):

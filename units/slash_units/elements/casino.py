@@ -8,13 +8,12 @@ from discord.ext import commands
 from datetime import datetime
 from discord import app_commands
 
-from database.db import Database
-from modules.additions import (
+from units.additions import (
     fail_rand, get_color,
     divide_the_number, casino2ch,
     get_time, choice, total_minutes
 )
-from modules.texts import *
+from units.texts import *
 from config import PREFIX
 
 __all__ = (
@@ -31,7 +30,7 @@ class CasinoSlash(commands.Cog):
         "line3", "texts", "count", "emb", "num"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot: commands.Bot = bot
