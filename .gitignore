@@ -4,11 +4,9 @@
 *__pycache__
 *.vsconfig
 
-.idea
-.json
-.logs
-.intermediate_files
-
-files/gg.png
+**.idea
+**.json
+**.logs
+**.intermediate_files
 
 test.py
