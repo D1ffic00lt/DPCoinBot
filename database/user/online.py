@@ -2,11 +2,11 @@ import sqlalchemy
 
 from database.session import SqlAlchemyBase
 
-__all__ = ("ShopRole",)
+__all__ = ("Online",)
 
 
-class ShopRole(SqlAlchemyBase):
-    __tablename__ = 'shop'
+class Online(SqlAlchemyBase):
+    __tablename__ = 'online'
     id = sqlalchemy.Column(
         sqlalchemy.Integer,
         primary_key=True,
@@ -18,16 +18,7 @@ class ShopRole(SqlAlchemyBase):
         sqlalchemy.Integer,
         nullable=False,
     )
-    item_id = sqlalchemy.Column(
-        sqlalchemy.Integer,
-        nullable=False
-    )
-    item_name = sqlalchemy.Column(
+    time = sqlalchemy.Column(
         sqlalchemy.String,
         nullable=False
-    )
-    item_cost = sqlalchemy.Column(
-        sqlalchemy.BigInteger,
-        nullable=False,
-        default=0
     )

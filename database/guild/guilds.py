@@ -2,11 +2,11 @@ import sqlalchemy
 
 from database.session import SqlAlchemyBase
 
-__all__ = ("ShopRole",)
+__all__ = ("Guild",)
 
 
-class ShopRole(SqlAlchemyBase):
-    __tablename__ = 'shop'
+class Guild(SqlAlchemyBase):
+    __tablename__ = 'guilds'
     id = sqlalchemy.Column(
         sqlalchemy.Integer,
         primary_key=True,
@@ -16,18 +16,14 @@ class ShopRole(SqlAlchemyBase):
     )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
-        nullable=False,
-    )
-    item_id = sqlalchemy.Column(
-        sqlalchemy.Integer,
+        unique=True,
         nullable=False
     )
-    item_name = sqlalchemy.Column(
+    guild_name = sqlalchemy.Column(
         sqlalchemy.String,
         nullable=False
     )
-    item_cost = sqlalchemy.Column(
-        sqlalchemy.BigInteger,
-        nullable=False,
-        default=0
+    members = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        nullable=False
     )

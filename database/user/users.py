@@ -1,6 +1,6 @@
 import sqlalchemy
 
-from ..session import SqlAlchemyBase
+from database.session import SqlAlchemyBase
 
 __all__ = ("User",)
 
