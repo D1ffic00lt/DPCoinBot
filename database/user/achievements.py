@@ -25,84 +25,29 @@ class Achievement(SqlAlchemyBase):
         sqlalchemy.ForeignKey("guilds.guild_id"),
         nullable=False,
     )
-    name = sqlalchemy.Column(
-        sqlalchemy.String,
-        nullable=False
-    )
-    voice_level_1_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
+    voice_achievements_level = sqlalchemy.Column(
+        sqlalchemy.Integer,
         default=False,
         nullable=False
-    )
-    voice_level_2_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
+    )  # [1:8]
+    defeat_achievements_level = sqlalchemy.Column(
+        sqlalchemy.Integer,
         default=False,
         nullable=False
-    )
-    voice_level_3_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
-    voice_level_4_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
-    voice_level_5_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
-    voice_level_6_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
-    voice_level_7_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
-    voice_level_8_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
-    defeat_level_1_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
-    defeat_level_2_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
-    defeat_level_3_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
+    )  # [1:3]
     losses = sqlalchemy.Column(
         sqlalchemy.Integer,
         default=0
     )
-    wins_level_1_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
+    wins = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        default=0
+    )
+    wins_achievement_level = sqlalchemy.Column(
+        sqlalchemy.Integer,
         default=False,
         nullable=False
-    )
-    wins_level_2_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
-    wins_level_3_achievement = sqlalchemy.Column(
-        sqlalchemy.Boolean,
-        default=False,
-        nullable=False
-    )
+    )  # [1:3]
     dropping_zero_in_fail = sqlalchemy.Column(
         sqlalchemy.Boolean,
         default=False,

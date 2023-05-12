@@ -20,10 +20,6 @@ class User(SqlAlchemyBase):
         primary_key=True,
         nullable=False,
     )
-    name = sqlalchemy.Column(
-        sqlalchemy.String,
-        nullable=False
-    )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
         sqlalchemy.ForeignKey("guilds.guild_id"),

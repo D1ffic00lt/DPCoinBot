@@ -16,6 +16,7 @@ class Guild(SqlAlchemyBase):
     )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        primary_key=True,
         unique=True,
         nullable=False
     )

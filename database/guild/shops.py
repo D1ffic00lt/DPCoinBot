@@ -7,7 +7,7 @@ __all__ = ("ShopRole",)
 
 
 class ShopRole(SqlAlchemyBase):
-    __tablename__ = 'shop'
+    __tablename__ = 'shops'
     id = sqlalchemy.Column(
         sqlalchemy.Integer,
         primary_key=True,

@@ -7,7 +7,7 @@ __all__ = ("UserStats",)
 
 
 class UserStats(SqlAlchemyBase):
-    __tablename__ = 'user_stats'
+    __tablename__ = 'users_stats'
     id = sqlalchemy.Column(
         sqlalchemy.Integer,
         primary_key=True,

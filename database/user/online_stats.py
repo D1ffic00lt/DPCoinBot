@@ -3,11 +3,11 @@ from sqlalchemy import orm
 
 from database.session import SqlAlchemyBase
 
-__all__ = ("Inventory",)
+__all__ = ("OnlineStats",)
 
 
-class Inventory(SqlAlchemyBase):
-    __tablename__ = "inventories"
+class OnlineStats(SqlAlchemyBase):
+    __tablename__ = 'online_stats'
     id = sqlalchemy.Column(
         sqlalchemy.Integer,
         primary_key=True,
@@ -25,15 +25,9 @@ class Inventory(SqlAlchemyBase):
         sqlalchemy.ForeignKey("guilds.guild_id"),
         nullable=False,
     )
-    new_year_prises = sqlalchemy.Column(
-        sqlalchemy.Integer,
-        nullable=False,
-        default=0
-    )
-    valentines = sqlalchemy.Column(
-        sqlalchemy.Integer,
-        nullable=False,
-        default=0
+    time = sqlalchemy.Column(
+        sqlalchemy.String,
+        nullable=False
     )
     user = orm.relationship("User")
     guild = orm.relationship("Guild")
