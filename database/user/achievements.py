@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 
 from database.session import SqlAlchemyBase
 
@@ -7,9 +8,22 @@ __all__ = ("Achievement",)
 
 class Achievement(SqlAlchemyBase):
     __tablename__ = 'achievements'
+    id = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        autoincrement=True
+    )
     user_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
         nullable=False
+    )
+    guild_id = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("guilds.guild_id"),
+        nullable=False,
     )
     name = sqlalchemy.Column(
         sqlalchemy.String,
@@ -94,3 +108,5 @@ class Achievement(SqlAlchemyBase):
         default=False,
         nullable=False
     )
+    user = orm.relationship("User")
+    guild = orm.relationship("Guild")

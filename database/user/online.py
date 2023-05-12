@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 
 from database.session import SqlAlchemyBase
 
@@ -14,11 +15,19 @@ class Online(SqlAlchemyBase):
         nullable=False,
         autoincrement=True
     )
+    user_id = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
+        nullable=False
+    )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("guilds.guild_id"),
         nullable=False,
     )
     time = sqlalchemy.Column(
         sqlalchemy.String,
         nullable=False
     )
+    user = orm.relationship("User")
+    guild = orm.relationship("Guild")

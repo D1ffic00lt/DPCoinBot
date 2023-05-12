@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 
 from ..session import SqlAlchemyBase
 
@@ -7,11 +8,19 @@ __all__ = ("ServerSettings",)
 
 class ServerSettings(SqlAlchemyBase):
     __tablename__ = 'server_settings'
+    id = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        autoincrement=True
+    )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("guilds.guild_id"),
         nullable=False
     )
-    administrator_role_if = sqlalchemy.Column(
+    administrator_role_id = sqlalchemy.Column(
         sqlalchemy.Integer,
         nullable=False
     )
@@ -42,3 +51,4 @@ class ServerSettings(SqlAlchemyBase):
         nullable=False,
         default=0
     )
+    guild = orm.relationship("Guild")

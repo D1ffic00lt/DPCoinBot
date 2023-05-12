@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 
 from database.session import SqlAlchemyBase
 
@@ -20,10 +21,12 @@ class Inventory(SqlAlchemyBase):
     )
     user_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
         nullable=False
     )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("guilds.guild_id"),
         nullable=False,
     )
     new_year_prises = sqlalchemy.Column(
@@ -36,3 +39,5 @@ class Inventory(SqlAlchemyBase):
         nullable=False,
         default=0
     )
+    user = orm.relationship("User")
+    guild = orm.relationship("Guild")

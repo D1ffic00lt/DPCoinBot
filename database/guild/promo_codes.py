@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 
 from database.session import SqlAlchemyBase
 
@@ -16,7 +17,13 @@ class PromoCode(SqlAlchemyBase):
     )
     user_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
         nullable=False
+    )
+    guild_id = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("guilds.guild_id"),
+        nullable=False,
     )
     code = sqlalchemy.Column(
         sqlalchemy.String,
@@ -31,3 +38,5 @@ class PromoCode(SqlAlchemyBase):
         default=0,
         nullable=False
     )
+    user = orm.relationship("User")
+    guild = orm.relationship("Guild")

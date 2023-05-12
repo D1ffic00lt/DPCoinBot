@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 
 from database.session import SqlAlchemyBase
 
@@ -16,6 +17,7 @@ class ShopRole(SqlAlchemyBase):
     )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("guilds.guild_id"),
         nullable=False,
     )
     item_id = sqlalchemy.Column(
@@ -31,3 +33,4 @@ class ShopRole(SqlAlchemyBase):
         nullable=False,
         default=0
     )
+    guild = orm.relationship("Guild")

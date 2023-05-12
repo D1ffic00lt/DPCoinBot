@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 
 from database.session import SqlAlchemyBase
 
@@ -16,14 +17,17 @@ class CoinFlip(SqlAlchemyBase):
     )
     first_player_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
         nullable=False
     )
     second_player_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
         nullable=False,
     )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("guilds.guild_id"),
         nullable=False,
     )
     guild_name = sqlalchemy.Column(
@@ -46,3 +50,4 @@ class CoinFlip(SqlAlchemyBase):
         sqlalchemy.String,
         nullable=False
     )
+    guild = orm.relationship("Guild")

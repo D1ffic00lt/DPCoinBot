@@ -17,7 +17,13 @@ class UserStats(SqlAlchemyBase):
     )
     user_id = sqlalchemy.Column(
         sqlalchemy.Integer,
-        sqlalchemy.ForeignKey("users.id")
+        sqlalchemy.ForeignKey("users.id"),
+        nullable=False
+    )
+    guild_id = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("guilds.guild_id"),
+        nullable=False,
     )
     rating_messages = sqlalchemy.Column(
         sqlalchemy.BigInteger,
@@ -140,3 +146,4 @@ class UserStats(SqlAlchemyBase):
         nullable=False
     )
     user = orm.relationship("User")
+    guild = orm.relationship("Guild")

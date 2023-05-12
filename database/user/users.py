@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 
 from database.session import SqlAlchemyBase
 
@@ -7,8 +8,14 @@ __all__ = ("User",)
 
 class User(SqlAlchemyBase):
     __tablename__ = 'users'
-
     id = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        autoincrement=True
+    )
+    user_id = sqlalchemy.Column(
         sqlalchemy.Integer,
         primary_key=True,
         nullable=False,
@@ -19,6 +26,7 @@ class User(SqlAlchemyBase):
     )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("guilds.guild_id"),
         nullable=False
 
     )
@@ -32,8 +40,9 @@ class User(SqlAlchemyBase):
         default=0,
         nullable=False
     )
+    guild = orm.relationship("Guild")
 
     def __str__(self):
         return "User(id={0})".format(
-            self.id
+            self.user_id
         )

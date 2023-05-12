@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 
 from database.session import SqlAlchemyBase
 
@@ -13,6 +14,11 @@ class Card(SqlAlchemyBase):
         unique=True,
         nullable=False,
         autoincrement=True
+    )
+    user_id = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey("users.id"),
+        nullable=False
     )
     verification = sqlalchemy.Column(
         sqlalchemy.Integer,
@@ -34,3 +40,4 @@ class Card(SqlAlchemyBase):
         default=False,
         nullable=False
     )
+    user = orm.relationship("User")
