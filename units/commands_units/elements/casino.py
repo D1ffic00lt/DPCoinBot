@@ -246,13 +246,14 @@ class Casino(commands.Cog):
                             await ctx.reply(embed=emb)
 
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
+
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rust_casinos_count += 1
                                     user_stats.rust_casino_wins_count += 1
@@ -272,13 +273,14 @@ class Casino(commands.Cog):
                             await self._add_lose(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
+
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rust_casinos_count += 1
                                     user_stats.rust_casino_loses_count += 1
@@ -352,13 +354,14 @@ class Casino(commands.Cog):
                             except discord.errors.Forbidden:
                                 pass
                     async with self.session() as session:
-                        user = await session.execute(
-                            select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                        )
-                        user = user.scalars().first()
-                        if not user:
-                            return
                         async with session.begin():
+                            user = await session.execute(
+                                select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                            )
+                            user = user.scalars().first()
+                            if not user:
+                                return
+
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.fails_count += 1
                             user_stats.fails_loses_count += 1
@@ -376,13 +379,14 @@ class Casino(commands.Cog):
                     await self._add_win(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
-                        user = await session.execute(
-                            select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                        )
-                        user = user.scalars().first()
-                        if not user:
-                            return
                         async with session.begin():
+                            user = await session.execute(
+                                select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                            )
+                            user = user.scalars().first()
+                            if not user:
+                                return
+
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.fails_count += 1
                             user_stats.fails_wins_count += 1
@@ -448,13 +452,14 @@ class Casino(commands.Cog):
                     await self._add_win(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
-                        user = await session.execute(
-                            select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                        )
-                        user = user.scalars().first()
-                        if not user:
-                            return
                         async with session.begin():
+                            user = await session.execute(
+                                select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                            )
+                            user = user.scalars().first()
+                            if not user:
+                                return
+
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.three_sevens_count += 1
                             user_stats.three_sevens_wins_count += 1
@@ -477,13 +482,14 @@ class Casino(commands.Cog):
                     await self._add_coins(ctx.author.id, ctx.guild.id, result_bid)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
-                        user = await session.execute(
-                            select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                        )
-                        user = user.scalars().first()
-                        if not user:
-                            return
                         async with session.begin():
+                            user = await session.execute(
+                                select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                            )
+                            user = user.scalars().first()
+                            if not user:
+                                return
+
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.three_sevens_count += 1
                             user_stats.three_sevens_wins_count += 1
@@ -505,13 +511,14 @@ class Casino(commands.Cog):
                     await self._add_lose(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
-                        user = await session.execute(
-                            select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                        )
-                        user = user.scalars().first()
-                        if not user:
-                            return
                         async with session.begin():
+                            user = await session.execute(
+                                select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                            )
+                            user = user.scalars().first()
+                            if not user:
+                                return
+
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.three_sevens_count += 1
                             user_stats.three_sevens_loses_count += 1
@@ -677,13 +684,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -705,13 +712,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -731,13 +738,13 @@ class Casino(commands.Cog):
                             await self._add_lose(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_loses_count += 1
@@ -761,13 +768,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -790,13 +797,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -818,13 +825,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -847,13 +854,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -876,13 +883,13 @@ class Casino(commands.Cog):
                             await ctx.reply(embed=emb)
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -904,13 +911,13 @@ class Casino(commands.Cog):
                             await ctx.reply(embed=emb)
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -932,13 +939,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -960,13 +967,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -988,13 +995,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -1016,13 +1023,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -1043,13 +1050,13 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -1070,13 +1077,14 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
+
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
@@ -1096,13 +1104,14 @@ class Casino(commands.Cog):
                             await self._add_lose(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = await session.execute(
-                                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                                )
-                                user = user.scalars().first()
-                                if not user:
-                                    return
                                 async with session.begin():
+                                    user = await session.execute(
+                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                    )
+                                    user = user.scalars().first()
+                                    if not user:
+                                        return
+
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_loses_count += 1
@@ -1267,20 +1276,20 @@ class Casino(commands.Cog):
             await self._achievement(member.id, ctx.guild.id)
             await self._achievement(ctx.author.id, ctx.guild.id)
             async with self.session() as session:
-                first_user = await session.execute(
-                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                )
-                second_user = await session.execute(
-                    select(User).where(User.user_id == member.id and User.guild_id == ctx.guild.id)
-                )
-                first_user = first_user.scalars().first()
-                second_user = second_user.scalars().first()
-                if not first_user:
-                    return
-                if not second_user:
-                    return
-
                 async with session.begin():
+                    first_user = await session.execute(
+                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                    )
+                    second_user = await session.execute(
+                        select(User).where(User.user_id == member.id and User.guild_id == ctx.guild.id)
+                    )
+                    first_user = first_user.scalars().first()
+                    second_user = second_user.scalars().first()
+                    if not first_user:
+                        return
+                    if not second_user:
+                        return
+
                     first_user_stats: UserStats = first_user.users_stats[0]
                     first_user_stats.coin_flips_count += 1
                     first_user_stats.coin_flips_wins_count += 1
@@ -1304,20 +1313,20 @@ class Casino(commands.Cog):
             await ctx.reply(embed=emb)
             await self._add_coins(member.id, member.guild.id, num * 2)
             async with self.session() as session:
-                first_user = await session.execute(
-                    select(User).where(User.user_id == member.id and User.guild_id == ctx.guild.id)
-                )
-                second_user = await session.execute(
-                    select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
-                )
-                first_user = first_user.scalars().first()
-                second_user = second_user.scalars().first()
-                if not first_user:
-                    return
-                if not second_user:
-                    return
-
                 async with session.begin():
+                    first_user = await session.execute(
+                        select(User).where(User.user_id == member.id and User.guild_id == ctx.guild.id)
+                    )
+                    second_user = await session.execute(
+                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                    )
+                    first_user = first_user.scalars().first()
+                    second_user = second_user.scalars().first()
+                    if not first_user:
+                        return
+                    if not second_user:
+                        return
+
                     first_user_stats: UserStats = first_user.users_stats[0]
                     first_user_stats.coin_flips_count += 1
                     first_user_stats.coin_flips_wins_count += 1
