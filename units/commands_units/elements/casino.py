@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-TODO: achievements losses/wins updating
-TODO: stats updating fix
-TODO: .first() bug fix
-TODO: tab's fix
-"""
 import logging
 import random
 import discord
@@ -58,7 +52,7 @@ class Casino(commands.Cog):
                 return True
             if channel_id in [572705890524725248, 573712070864797706]:
                 return True
-            if server_settings.scalars().first().casino_channel_id == channel_id:
+            if server_settings.scalars().first()[0].casino_channel_id == channel_id:
                 return True
             return False
 
@@ -78,7 +72,7 @@ class Casino(commands.Cog):
             )
             if not user.scalars().first():
                 return
-            user.scalars().first().cash -= count
+            user.scalars().first()[0].cash -= count
             await session.commit()
 
     async def _add_coins(self, user_id: int, guild_id: int, count: int) -> None:
@@ -88,8 +82,28 @@ class Casino(commands.Cog):
             )
             if not user.scalars().first():
                 return
-            user.scalars().first().cash += count
+            user.scalars().first()[0].cash += count
             await session.commit()
+
+    async def _add_lose(self, user_id: int, guild_id: int) -> None:
+        async with self.session() as session:
+            async with session.begin():
+                user = await session.execute(
+                    select(User).where(User.user_id == user_id and User.guild_id == guild_id)
+                )
+                user: User = user.scalars().first()[0]
+                user.achievements[0].losses += 1
+                user.achievements[0].wins = 0
+
+    async def _add_win(self, user_id: int, guild_id: int) -> None:
+        async with self.session() as session:
+            async with session.begin():
+                user = await session.execute(
+                    select(User).where(User.user_id == user_id and User.guild_id == guild_id)
+                )
+                user: User = user.scalars().first()[0]
+                user.achievements[0].losses = 0
+                user.achievements[0].wins += 1
 
     async def _achievement(self, user_id: int, guild_id: int) -> None:
         guild = self.bot.get_guild(guild_id)
@@ -104,7 +118,7 @@ class Casino(commands.Cog):
                 guild_user: Union[User, None] = guild_user.scalars().first()
                 if not guild_user:
                     return
-                user_achievements: Achievement = guild_user.achievements
+                user_achievements: Achievement = guild_user.achievements[0]
                 losses = user_achievements.losses
                 wins = user_achievements.wins
                 if user_achievements.defeat_achievements_level < 1 and losses >= 3:
@@ -231,6 +245,7 @@ class Casino(commands.Cog):
                                       f'DP коинов!',
                                 inline=False
                             )
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
 
                             async with self.session() as session:
@@ -244,7 +259,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rust_casinos_count += 1
                                     user_stats.rust_casino_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += bid
+                                    user_stats.entire_amount_of_winnings += (self.rust_casino[0] * bid) - bid
                                     user_stats.all_wins_count += 1
 
                         elif self.rust_casino[0] != number:
@@ -257,6 +272,7 @@ class Casino(commands.Cog):
                                 value=f'{ctx.author.mention}, выпало число {self.rust_casino[0]}',
                                 inline=False
                             )
+                            await self._add_lose(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -314,6 +330,7 @@ class Casino(commands.Cog):
                         value=f'Выпало число `{dropped_coefficient}`\n{ctx.author}',
                         inline=False
                     )
+                    await self._add_lose(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     if dropped_coefficient == 0:
                         async with self.session() as session:
@@ -323,11 +340,11 @@ class Casino(commands.Cog):
                             if not user.scalars().first():
                                 return
 
-                        if not user.scalars().first().achievements.dropping_zero_in_fail:
+                        if not user.scalars().first()[0].achievements[0].dropping_zero_in_fail:
                             await self._add_coins(ctx.author.id, ctx.guild.id, 4000)
                             async with self.session() as session:
                                 async with session.begin():
-                                    user.scalars().first().achievements.dropping_zero_in_fail = 1
+                                    user.scalars().first()[0].achievements[0].dropping_zero_in_fail = 1
                             try:
                                 await ctx.author.reply(
                                     "Поздравляем, Вы забрали сумму которую поставили. А, нет, не забрали, "
@@ -358,6 +375,7 @@ class Casino(commands.Cog):
                               f'**{divide_the_number(bid + int(bid * coefficient))}** DP коинов!',
                         inline=False
                     )
+                    await self._add_win(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
                         user = session.execute(
@@ -370,7 +388,7 @@ class Casino(commands.Cog):
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.fails_count += 1
                             user_stats.fails_wins_count += 1
-                            user_stats.entire_amount_of_winnings -= bid + int(bid * coefficient)
+                            user_stats.entire_amount_of_winnings += int(bid * coefficient)
                             user_stats.all_wins_count += 1
         else:
             await ctx.reply(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
@@ -431,6 +449,7 @@ class Casino(commands.Cog):
                             inline=False
                         )
                     )
+                    await self._add_win(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
                         user = session.execute(
@@ -443,7 +462,7 @@ class Casino(commands.Cog):
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.three_sevens_count += 1
                             user_stats.three_sevens_wins_count += 1
-                            user_stats.entire_amount_of_winnings = result_bid
+                            user_stats.entire_amount_of_winnings = result_bid - bid
                             user_stats.all_wins_count += 1
 
                 elif line1[2] == line2[1] and line2[1] == line3[0]:
@@ -458,6 +477,7 @@ class Casino(commands.Cog):
                             inline=False
                         )
                     )
+                    await self._add_win(ctx.author.id, ctx.guild.id)
                     await self._add_coins(ctx.author.id, ctx.guild.id, result_bid)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
@@ -471,7 +491,7 @@ class Casino(commands.Cog):
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.three_sevens_count += 1
                             user_stats.three_sevens_wins_count += 1
-                            user_stats.entire_amount_of_winnings = result_bid
+                            user_stats.entire_amount_of_winnings = result_bid - bid
                             user_stats.all_wins_count += 1
 
                 else:
@@ -486,6 +506,7 @@ class Casino(commands.Cog):
                             inline=False
                         )
                     )
+                    await self._add_lose(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
                         user = session.execute(
@@ -498,7 +519,7 @@ class Casino(commands.Cog):
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.three_sevens_count += 1
                             user_stats.three_sevens_loses_count += 1
-                            user_stats.entire_amount_of_winnings = -bid
+                            user_stats.entire_amount_of_winnings -= bid
                             user_stats.all_loses_count += 1
         else:
             await ctx.reply(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
@@ -520,6 +541,7 @@ class Casino(commands.Cog):
                             value=f'{ctx.author.mention}, Вы выиграли **{divide_the_number(count * 2)}** DP коинов!',
                             inline=False
                         )
+                        await self._add_win(ctx.author.id, ctx.guild.id)
                         await ctx.reply(embed=emb)
                         await self._add_coins(ctx.author.id, ctx.guild.id, count * 2)
                         async with self.session() as session:
@@ -533,7 +555,7 @@ class Casino(commands.Cog):
                                 user_stats: UserStats = user.users_stats[0]
                                 user_stats.coin_flips_count += 1
                                 user_stats.coin_flips_wins_count += 1
-                                user_stats.entire_amount_of_winnings = count * 2
+                                user_stats.entire_amount_of_winnings += count
                                 user_stats.all_wins_count += 1
                     else:
                         emb = discord.Embed(title="Вы проиграли:(", colour=color)
@@ -542,6 +564,7 @@ class Casino(commands.Cog):
                             value=f'{ctx.author.mention}, значит в следующий раз',
                             inline=False
                         )
+                        await self._add_lose(ctx.author.id, ctx.guild.id)
                         await ctx.reply(embed=emb)
                         async with self.session() as session:
                             user = session.execute(
@@ -655,6 +678,7 @@ class Casino(commands.Cog):
                                             divide_the_number(count)
                                         ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -667,7 +691,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count - count / 35
                                     user_stats.all_wins_count += 1
 
                         elif int(self.texts[ctx.author.id]) == self.casino[ctx.author.id]["number"][0]:
@@ -682,6 +706,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -693,8 +718,8 @@ class Casino(commands.Cog):
                                 async with session.begin():
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
-                                    user_stats.rolls_loses_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.rolls_wins_count += 1
+                                    user_stats.entire_amount_of_winnings += count - count / 35
                                     user_stats.all_wins_count += 1
                         else:
                             emb = discord.Embed(title="🎰Вы проиграли:(🎰", colour=color)
@@ -707,6 +732,7 @@ class Casino(commands.Cog):
                                             ctx.author.mention
                                         ),
                                 inline=False)
+                            await self._add_lose(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -736,6 +762,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -748,7 +775,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count - count / 3
                                     user_stats.all_wins_count += 1
 
                         elif self.texts[ctx.author.id] == "2nd12" and \
@@ -764,6 +791,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -776,8 +804,8 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
-                                    user_stats.all_loses_count += 1
+                                    user_stats.entire_amount_of_winnings += count - count / 3
+                                    user_stats.all_wins_count += 1
 
                         elif self.texts[ctx.author.id] == "3rd12" and self.casino[ctx.author.id]["number"][0] > 24:
                             count *= 3
@@ -791,6 +819,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -803,7 +832,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count - count / 3
                                     user_stats.all_wins_count += 1
 
                         elif self.texts[ctx.author.id] == "1to18" and \
@@ -819,6 +848,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -831,7 +861,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count / 2
                                     user_stats.all_wins_count += 1
 
                         elif self.texts[ctx.author.id] == "19to36" and \
@@ -848,6 +878,7 @@ class Casino(commands.Cog):
                                 ),
                                 inline=False)
                             await ctx.reply(embed=emb)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             async with self.session() as session:
                                 user = session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
@@ -859,7 +890,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count / 2
                                     user_stats.all_wins_count += 1
 
                         elif self.texts[ctx.author.id] == "2to1" and self.casino[ctx.author.id]["number"][0] in row1:
@@ -875,6 +906,7 @@ class Casino(commands.Cog):
                                 ),
                                 inline=False)
                             await ctx.reply(embed=emb)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             async with self.session() as session:
                                 user = session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
@@ -886,7 +918,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count - count / 3
                                     user_stats.all_wins_count += 1
 
                         elif self.texts[ctx.author.id] == "2to2" and self.casino[ctx.author.id]["number"][0] in row2:
@@ -901,6 +933,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -913,7 +946,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count - count / 3
                                     user_stats.all_wins_count += 1
 
                         elif self.texts[ctx.author.id] == "2to3" and self.casino[ctx.author.id]["number"][0] in row3:
@@ -928,6 +961,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -940,7 +974,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count - count / 3
                                     user_stats.all_wins_count += 1
 
                         elif self.texts[ctx.author.id] == "b" and self.casino[ctx.author.id]["color"][0] == "black":
@@ -955,6 +989,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -967,7 +1002,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count / 2
                                     user_stats.all_wins_count += 1
 
                         elif self.texts[ctx.author.id] == "r" and self.casino[ctx.author.id]["color"][0] == "red":
@@ -982,6 +1017,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -994,7 +1030,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count / 2
                                     user_stats.all_wins_count += 1
                         elif self.texts[ctx.author.id] == "ch" and self.casino[ctx.author.id]["number"][0] % 2 == 0:
                             count *= 2
@@ -1008,6 +1044,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -1020,7 +1057,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count / 2
                                     user_stats.all_wins_count += 1
                         elif self.texts[ctx.author.id] == "nch" and self.casino[ctx.author.id]["number"][0] % 2 == 1:
                             count *= 2
@@ -1034,6 +1071,7 @@ class Casino(commands.Cog):
                                     ctx.author.mention, divide_the_number(count)
                                 ),
                                 inline=False)
+                            await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -1046,7 +1084,7 @@ class Casino(commands.Cog):
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
                                     user_stats.rolls_wins_count += 1
-                                    user_stats.entire_amount_of_winnings += count
+                                    user_stats.entire_amount_of_winnings += count / 2
                                     user_stats.all_wins_count += 1
                         else:
                             emb = discord.Embed(title="🎰Вы проиграли:(🎰", colour=color)
@@ -1059,6 +1097,7 @@ class Casino(commands.Cog):
                                             ctx.author.mention
                                         ),
                                 inline=False)
+                            await self._add_lose(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
                                 user = session.execute(
@@ -1183,7 +1222,7 @@ class Casino(commands.Cog):
                 f"Такой игры не существует, посмотреть все ваши активные игры - {PREFIX}games"
             )
             return
-        coinflip: CoinFlip = coinflip.scalars().first()
+        coinflip: CoinFlip = coinflip.scalars().first()[0]
         if total_minutes(coinflip.date) > 5:
             await ctx.reply(f"Время истекло:(")
 
@@ -1224,11 +1263,11 @@ class Casino(commands.Cog):
                     )
                     first_user: User = first_user.scalars().first()[0]
                     second_user: User = second_user.scalars().first()[0]
-                    first_user.achievements.losses += 1
-                    first_user.achievements.wins = 0
+                    first_user.achievements[0].losses += 1
+                    first_user.achievements[0].wins = 0
 
-                    second_user.achievements.losses = 0
-                    second_user.achievements.wins += 1
+                    second_user.achievements[0].losses = 0
+                    second_user.achievements[0].wins += 1
             await self._achievement(member.id, ctx.guild.id)
             await self._achievement(ctx.author.id, ctx.guild.id)
             async with self.session() as session:
