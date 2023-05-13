@@ -1,6 +1,6 @@
 import sqlalchemy
 
-from database.session import SqlAlchemyBase
+from ..session import SqlAlchemyBase
 
 __all__ = ("Guild",)
 
