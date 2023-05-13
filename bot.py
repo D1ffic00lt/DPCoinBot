@@ -105,5 +105,5 @@ class DPcoinBOT(commands.Bot):
                 await session.execute(delete(Online))
                 await session.execute(delete(CoinFlip))
                 await session.commit()
-
+        await session.close()
         logging.info(f"Bot connected")
