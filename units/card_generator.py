@@ -36,8 +36,8 @@ class CardGenerator(object):
             self, avatar_url: str
     ):
         self.rang_data = {}
-        self.title_font = ImageFont.truetype("../static/fonts/UniSansBold.ttf", size=80)
-        self.font = ImageFont.truetype("../static/fonts/UniSans.ttf", size=70)
+        self.title_font = ImageFont.truetype("./static/fonts/UniSansBold.ttf", size=80)
+        self.font = ImageFont.truetype("./static/fonts/UniSans.ttf", size=70)
         self.img = Image.new("RGBA", (1500, 900), "#323642")
         avatar = requests.get(avatar_url, stream=True)
         avatar = Image.open(io.BytesIO(avatar.content))
@@ -68,7 +68,7 @@ class CardGenerator(object):
             image_draw.text(
                 (320 + 70 + 40, 70),
                 name,
-                font=ImageFont.truetype("../static/fonts/UniSansBold.ttf", size=60)
+                font=ImageFont.truetype("./static/fonts/UniSansBold.ttf", size=60)
             )
         image_draw.text(
             (60, 420),
@@ -103,42 +103,42 @@ class CardGenerator(object):
     ):
         images = []
         if verification != 0:
-            image = Image.open(f"../static/images/check/check_level_{verification}.png")
+            image = Image.open(f"./static/images/check/check_level_{verification}.png")
             image = image.convert("RGBA")
             image = image.resize((80, 80))
             images.append(image)
         if developer == 1:
-            image = Image.open("../static/images/dev.png")
+            image = Image.open("./static/images/dev.png")
             image = image.convert("RGBA")
             image = image.resize((80, 80))
             images.append(image)
         if coder == 1:
-            image = Image.open("../static/images/cmd.png")
+            image = Image.open("./static/images/cmd.png")
             image = image.convert("RGBA")
             image = image.resize((80, 80))
             images.append(image)
         if coin == 1:
-            image = Image.open("../static/images/coin.png")
+            image = Image.open("./static/images/coin.png")
             image = image.convert("RGBA")
             image = image.resize((80, 80))
             images.append(image)
         if fail == 1:
-            image = Image.open("../static/images/fail.png")
+            image = Image.open("./static/images/fail.png")
             image = image.convert("RGBA")
             image = image.resize((80, 80))
             images.append(image)
         if minutes_pin != 0:
-            image = Image.open(f"../static/images/minutes/{minutes_pin}_minutes.png")
+            image = Image.open(f"./static/images/minutes/{minutes_pin}_minutes.png")
             image = image.convert("RGBA")
             image = image.resize((80, 80))
             images.append(image)
         if wins_pin != 0:
-            image = Image.open(f"../static/images/wins/{wins_pin}_wins.png")
+            image = Image.open(f"./static/images/wins/{wins_pin}_wins.png")
             image = image.convert("RGBA")
             image = image.resize((80, 80))
             images.append(image)
         if loses_pin != 0:
-            image = Image.open(f"../static/images/loses/{loses_pin}_loses.png")
+            image = Image.open(f"./static/images/loses/{loses_pin}_loses.png")
             image = image.convert("RGBA")
             image = image.resize((80, 80))
             images.append(image)

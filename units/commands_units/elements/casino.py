@@ -290,9 +290,9 @@ class Casino(commands.Cog):
 
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rust_casinos_count += 1
-                                    user_stats.rust_casino_loses_count += 1
+                                    user_stats.rust_casino_losses_count += 1
                                     user_stats.entire_amount_of_winnings -= bid
-                                    user_stats.all_loses_count += 1
+                                    user_stats.all_losses_count += 1
                     else:
                         await ctx.reply(
                             f"{ctx.author.mention}, Вы должны поставить либо 1, либо 3, либо 5, либо 10, либо 20!"
@@ -371,9 +371,9 @@ class Casino(commands.Cog):
 
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.fails_count += 1
-                            user_stats.fails_loses_count += 1
+                            user_stats.fails_losses_count += 1
                             user_stats.entire_amount_of_winnings -= bid
-                            user_stats.all_loses_count += 1
+                            user_stats.all_losses_count += 1
                 else:
                     await self._add_coins(ctx.author.id, ctx.guild.id, bid + int(bid * coefficient))
                     emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=color)
@@ -528,9 +528,9 @@ class Casino(commands.Cog):
 
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.three_sevens_count += 1
-                            user_stats.three_sevens_loses_count += 1
+                            user_stats.three_sevens_losses_count += 1
                             user_stats.entire_amount_of_winnings -= bid
-                            user_stats.all_loses_count += 1
+                            user_stats.all_losses_count += 1
         else:
             await ctx.reply(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
@@ -588,7 +588,7 @@ class Casino(commands.Cog):
                                 user_stats.coin_flips_count += 1
                                 user_stats.coin_flips_losses_count += 1
                                 user_stats.entire_amount_of_winnings -= count
-                                user_stats.all_loses_count += 1
+                                user_stats.all_losses_count += 1
 
             elif member is not None:
                 if count <= 9:
@@ -760,9 +760,9 @@ class Casino(commands.Cog):
                                         return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
-                                    user_stats.rolls_loses_count += 1
+                                    user_stats.rolls_losses_count += 1
                                     user_stats.entire_amount_of_winnings -= count
-                                    user_stats.all_loses_count += 1
+                                    user_stats.all_losses_count += 1
                 except ValueError:
                     if self.texts[ctx.author.id] in roll_types:
                         await self._take_coins(ctx.author.id, ctx.guild.id, count)
@@ -1153,9 +1153,9 @@ class Casino(commands.Cog):
 
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
-                                    user_stats.rolls_loses_count += 1
+                                    user_stats.rolls_losses_count += 1
                                     user_stats.entire_amount_of_winnings -= count
-                                    user_stats.all_loses_count += 1
+                                    user_stats.all_losses_count += 1
 
                     else:
                         await ctx.reply(f"{ctx.author.mention}, Такого атрибута не существует! ")
@@ -1341,7 +1341,7 @@ class Casino(commands.Cog):
                     second_user_stats.coin_flips_count += 1
                     second_user_stats.coin_flips_losses_count += 1
                     second_user_stats.entire_amount_of_winnings -= num
-                    second_user_stats.all_loses_count += 1
+                    second_user_stats.all_losses_count += 1
         else:
             await self._achievement(member.id, ctx.guild.id)
             await self._achievement(ctx.author.id, ctx.guild.id)
@@ -1378,7 +1378,7 @@ class Casino(commands.Cog):
                     second_user_stats.coin_flips_count += 1
                     second_user_stats.coin_flips_losses_count += 1
                     second_user_stats.entire_amount_of_winnings -= num
-                    second_user_stats.all_loses_count += 1
+                    second_user_stats.all_losses_count += 1
         async with self.session() as session:
             async with session.begin():
                 coin_flips = await session.execute(
