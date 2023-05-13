@@ -246,7 +246,7 @@ class Casino(commands.Cog):
                             await ctx.reply(embed=emb)
 
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -272,7 +272,7 @@ class Casino(commands.Cog):
                             await self._add_lose(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -352,7 +352,7 @@ class Casino(commands.Cog):
                             except discord.errors.Forbidden:
                                 pass
                     async with self.session() as session:
-                        user = session.execute(
+                        user = await session.execute(
                             select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                         )
                         user = user.scalars().first()
@@ -376,7 +376,7 @@ class Casino(commands.Cog):
                     await self._add_win(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
-                        user = session.execute(
+                        user = await session.execute(
                             select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                         )
                         user = user.scalars().first()
@@ -395,8 +395,6 @@ class Casino(commands.Cog):
     @commands.command(aliases=['777'])
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino777(self, ctx: commands.context.Context, bid: int = None) -> None:
-        if ctx.author.id != 0:
-            return
         if self._is_the_casino_allowed(ctx.message.channel.id):
             if bid is None:
                 await ctx.reply(f"{ctx.author.mention}, Вы не ввели вашу ставку")
@@ -450,7 +448,7 @@ class Casino(commands.Cog):
                     await self._add_win(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
-                        user = session.execute(
+                        user = await session.execute(
                             select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                         )
                         user = user.scalars().first()
@@ -479,7 +477,7 @@ class Casino(commands.Cog):
                     await self._add_coins(ctx.author.id, ctx.guild.id, result_bid)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
-                        user = session.execute(
+                        user = await session.execute(
                             select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                         )
                         user = user.scalars().first()
@@ -507,7 +505,7 @@ class Casino(commands.Cog):
                     await self._add_lose(ctx.author.id, ctx.guild.id)
                     await ctx.reply(embed=emb)
                     async with self.session() as session:
-                        user = session.execute(
+                        user = await session.execute(
                             select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                         )
                         user = user.scalars().first()
@@ -679,7 +677,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -707,7 +705,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -733,7 +731,7 @@ class Casino(commands.Cog):
                             await self._add_lose(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -763,7 +761,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -792,7 +790,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -820,7 +818,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -849,7 +847,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -878,7 +876,7 @@ class Casino(commands.Cog):
                             await ctx.reply(embed=emb)
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -906,7 +904,7 @@ class Casino(commands.Cog):
                             await ctx.reply(embed=emb)
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -934,7 +932,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -962,7 +960,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -990,7 +988,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -1018,7 +1016,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -1045,7 +1043,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -1072,7 +1070,7 @@ class Casino(commands.Cog):
                             await self._add_win(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -1098,7 +1096,7 @@ class Casino(commands.Cog):
                             await self._add_lose(ctx.author.id, ctx.guild.id)
                             await ctx.reply(embed=emb)
                             async with self.session() as session:
-                                user = session.execute(
+                                user = await session.execute(
                                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                                 )
                                 user = user.scalars().first()
@@ -1269,10 +1267,10 @@ class Casino(commands.Cog):
             await self._achievement(member.id, ctx.guild.id)
             await self._achievement(ctx.author.id, ctx.guild.id)
             async with self.session() as session:
-                first_user = session.execute(
+                first_user = await session.execute(
                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                 )
-                second_user = session.execute(
+                second_user = await session.execute(
                     select(User).where(User.user_id == member.id and User.guild_id == ctx.guild.id)
                 )
                 first_user = first_user.scalars().first()
@@ -1306,10 +1304,10 @@ class Casino(commands.Cog):
             await ctx.reply(embed=emb)
             await self._add_coins(member.id, member.guild.id, num * 2)
             async with self.session() as session:
-                first_user = session.execute(
+                first_user = await session.execute(
                     select(User).where(User.user_id == member.id and User.guild_id == ctx.guild.id)
                 )
-                second_user = session.execute(
+                second_user = await session.execute(
                     select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
                 )
                 first_user = first_user.scalars().first()
