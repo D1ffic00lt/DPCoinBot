@@ -26,7 +26,7 @@ async def global_init(db_file):
     from . import __all_models
 
     async with engine.begin() as conn:
-        await conn.run_sync(SqlAlchemyBase.metadata.drop_all)
+        # await conn.run_sync(SqlAlchemyBase.metadata.drop_all)
         await conn.run_sync(SqlAlchemyBase.metadata.create_all)
 
 

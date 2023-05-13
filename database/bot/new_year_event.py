@@ -16,10 +16,6 @@ class NewYearEvent(SqlAlchemyBase):
         nullable=False,
         autoincrement=True
     )
-    name = sqlalchemy.Column(
-        sqlalchemy.String,
-        nullable=False,
-    )
     user_id = sqlalchemy.Column(
         sqlalchemy.Integer,
         sqlalchemy.ForeignKey("users.user_id"),
@@ -85,5 +81,5 @@ class NewYearEvent(SqlAlchemyBase):
         nullable=False,
         default=0
     )
-    user = orm.relationship("User")
+    user = orm.relationship("User", back_populates="new_year_events")
     guild = orm.relationship("Guild")

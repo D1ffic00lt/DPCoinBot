@@ -54,5 +54,5 @@ class Achievement(SqlAlchemyBase):
         default=False,
         nullable=False
     )
-    user = orm.relationship("User")
+    user = orm.relationship("User", back_populates="achievements")
     guild = orm.relationship("Guild")

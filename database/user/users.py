@@ -31,6 +31,11 @@ class User(SqlAlchemyBase):
         nullable=False
     )
     guild = orm.relationship("Guild")
+    achievements = orm.relationship("Achievement", back_populates="user", lazy="selectin")
+    inventories = orm.relationship("Inventory", back_populates="user", lazy="selectin")
+    new_year_events = orm.relationship("NewYearEvent", back_populates="user", lazy="selectin")
+    users_stats = orm.relationship("UserStats", back_populates="user", lazy="selectin")
+    cards = orm.relationship("Card", back_populates="user", lazy="selectin")
 
     def __str__(self):
         return "User(id={0})".format(

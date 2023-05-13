@@ -41,4 +41,14 @@ class Card(SqlAlchemyBase):
         default=False,
         nullable=False
     )
-    user = orm.relationship("User")
+    user = orm.relationship("User", back_populates="cards")
+
+    def __repr__(self=None):
+        return "Card(verification={0}, developer={1}, coder={2}, coin={3})".format(
+            self.verification, self.developer, self.coder, self.coin
+        )
+
+    def __str__(self=None):
+        return "Card(verification={0}, developer={1}, coder={2}, coin={3})".format(
+            self.verification, self.developer, self.coder, self.coin
+        )

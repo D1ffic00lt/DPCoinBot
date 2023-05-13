@@ -36,5 +36,5 @@ class Inventory(SqlAlchemyBase):
         nullable=False,
         default=0
     )
-    user = orm.relationship("User")
+    user = orm.relationship("User", back_populates="inventories")
     guild = orm.relationship("Guild")

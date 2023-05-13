@@ -146,5 +146,5 @@ class UserStats(SqlAlchemyBase):
         default=0,
         nullable=False
     )
-    user = orm.relationship("User")
+    user = orm.relationship("User", back_populates="users_stats")
     guild = orm.relationship("Guild")
