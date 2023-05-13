@@ -56,6 +56,11 @@ class UserStats(SqlAlchemyBase):
         default=0,
         nullable=False
     )
+    coin_flips_losses_count = sqlalchemy.Column(
+        sqlalchemy.Integer,
+        default=0,
+        nullable=False
+    )
     rust_casinos_count = sqlalchemy.Column(
         sqlalchemy.Integer,
         default=0,

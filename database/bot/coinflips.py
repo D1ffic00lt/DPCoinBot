@@ -35,14 +35,6 @@ class CoinFlip(SqlAlchemyBase):
         sqlalchemy.String,
         nullable=False
     )
-    first_player_name = sqlalchemy.Column(
-        sqlalchemy.String,
-        nullable=False
-    )
-    second_player_name = sqlalchemy.Column(
-        sqlalchemy.String,
-        nullable=False
-    )
     cash = sqlalchemy.Column(
         sqlalchemy.BigInteger,
         nullable=False
