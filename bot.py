@@ -6,9 +6,9 @@ import math
 from discord.ext import commands
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from config import PREFIX
 from typing import Callable
 
+from config import PREFIX
 from database.user.online_stats import OnlineStats
 from database.user.online import Online
 from database.user.users import User
