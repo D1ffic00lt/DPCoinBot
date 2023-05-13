@@ -4,10 +4,10 @@ from sqlalchemy import orm
 
 from ..session import SqlAlchemyBase
 
-__all__ = ("ShopRole",)
+__all__ = ("ShopItem",)
 
 
-class ShopRole(SqlAlchemyBase):
+class ShopItem(SqlAlchemyBase):
     __tablename__ = 'item_shops'
     id = sqlalchemy.Column(
         sqlalchemy.Integer,
