@@ -56,7 +56,7 @@ class Casino(commands.Cog):
             user = await session.execute(
                 select(User).where(User.user_id == user_id and User.guild_id == guild_id)
             )
-            user = user.scalars().first()
+            user: User = user.scalars().first()
             if not user:
                 return 0
             return user.cash
@@ -211,13 +211,13 @@ class Casino(commands.Cog):
             self, ctx: commands.context.Context,
             bid: int = None, number: int = None
     ) -> None:
-
+        self.casino_rust = casino_rust.copy()
         if self._is_the_casino_allowed(ctx.message.channel.id):
             if bid is None:
                 await ctx.reply("Вы ну ввели Вашу ставку!")
             elif bid <= 0:
                 await ctx.reply("Вы не можете поставить ставку, которая меньше 1!")
-            elif self._get_cash(ctx.author.id, ctx.guild.id) < bid:
+            elif await self._get_cash(ctx.author.id, ctx.guild.id) < bid:
                 await ctx.reply("У Вас не достаточно денег для этой ставки!")
             else:
                 if number is None:
@@ -230,6 +230,8 @@ class Casino(commands.Cog):
                         await self._take_coins(ctx.author.id, ctx.guild.id, bid)
 
                         if self.rust_casino[0] == number:
+                            if self.rust_casino[0] == 1:
+                                self.rust_casino[0] = 2
                             await self._add_coins(ctx.author.id, ctx.guild.id, (self.rust_casino[0] * bid))
                             emb = discord.Embed(
                                 title="🎰Вы выиграли!🎰",
@@ -248,7 +250,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -261,6 +265,7 @@ class Casino(commands.Cog):
                                     user_stats.all_wins_count += 1
 
                         elif self.rust_casino[0] != number:
+
                             emb = discord.Embed(
                                 title="🎰Вы проиграли!🎰",
                                 colour=color
@@ -275,7 +280,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -312,7 +319,7 @@ class Casino(commands.Cog):
                 await ctx.reply(f"{ctx.author.mention}, Вы не можете поставить на коэффициент ниже 0.07")
             elif coefficient > 10:
                 await ctx.reply(f"{ctx.author.mention}, Вы не можете поставить на коэффициент больше 10")
-            elif self._get_cash(ctx.author.id, ctx.guild.id) < bid:
+            elif await self._get_cash(ctx.author.id, ctx.guild.id) < bid:
                 await ctx.reply(f"{ctx.author.mention}, У Вас недостаточно средств")
             else:
                 await self._take_coins(ctx.author.id, ctx.guild.id, bid)
@@ -590,9 +597,9 @@ class Casino(commands.Cog):
                     await ctx.reply("Вы не можете играть с самим собой")
                 elif count is None:
                     await ctx.reply(f"{ctx.author.mention}, Вы не ввели вашу ставку")
-                elif self._get_cash(ctx.author.id, ctx.guild.id) < count:
+                elif await self._get_cash(ctx.author.id, ctx.guild.id) < count:
                     await ctx.reply(f"{ctx.author.mention}, У Вас недостаточно средств")
-                elif self._get_cash(member.id, ctx.guild.id) < count:
+                elif await self._get_cash(member.id, ctx.guild.id) < count:
                     await ctx.reply(f"{ctx.author.mention}, У Вашего оппонента недостаточно средств")
                 else:
                     async with self.session() as session:
@@ -686,7 +693,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -714,7 +723,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -740,7 +751,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -770,7 +783,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -799,7 +814,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -827,7 +844,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -856,7 +875,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -885,7 +906,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -913,7 +936,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -941,7 +966,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -969,7 +996,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -997,7 +1026,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -1025,7 +1056,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -1052,7 +1085,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -1079,7 +1114,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -1106,7 +1143,9 @@ class Casino(commands.Cog):
                             async with self.session() as session:
                                 async with session.begin():
                                     user = await session.execute(
-                                        select(User).where(User.user_id == ctx.author.id and User.guild_id == ctx.guild.id)
+                                        select(User).where(
+                                            User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                                        )
                                     )
                                     user = user.scalars().first()
                                     if not user:
@@ -1196,10 +1235,12 @@ class Casino(commands.Cog):
                     CoinFlip.second_player_id == ctx.author.id
                 )
             )
-        if not games.scalars().first():
+        games = games.scalars()
+        if not games.first():
             await ctx.reply("У Вас нет активных игр")
+            return
         emb = discord.Embed(title="Активные коинфлипы")
-        for row in games.scalars():
+        for row in games:
 
             emb.add_field(
                 name=f'{self.bot.get_user(row.first_player_id).name} и {self.bot.get_user(row.second_player_id).name}',
@@ -1237,10 +1278,10 @@ class Casino(commands.Cog):
                         delete(coinflip)
                     )
             return
-        if self._get_cash(coinflip.first_player_id, ctx.guild.id) < coinflip.cash:
+        if await self._get_cash(coinflip.first_player_id, ctx.guild.id) < coinflip.cash:
             await ctx.reply(f"{self.bot.get_user(coinflip.first_player_id).mention}, У Вас недостаточно средств!")
             return
-        if self._get_cash(coinflip.second_player_id, ctx.guild.id) < coinflip.cash:
+        if await self._get_cash(coinflip.second_player_id, ctx.guild.id) < coinflip.cash:
             await ctx.reply(f"{self.bot.get_user(coinflip.second_player_id).mention}, У Вас недостаточно средств!")
             return
         num = coinflip.cash
