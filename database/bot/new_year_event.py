@@ -22,7 +22,7 @@ class NewYearEvent(SqlAlchemyBase):
     )
     user_id = sqlalchemy.Column(
         sqlalchemy.Integer,
-        sqlalchemy.ForeignKey("users.id"),
+        sqlalchemy.ForeignKey("users.user_id"),
         nullable=False
     )
     guild_id = sqlalchemy.Column(

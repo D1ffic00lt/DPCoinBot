@@ -1,4 +1,3 @@
-import sqlalchemy.orm as orm
 import sqlalchemy.ext.declarative as dec
 
 from sqlalchemy.ext.asyncio.engine import create_async_engine
@@ -10,7 +9,7 @@ __factory: Union[Callable, None] = None
 SqlAlchemyBase = dec.declarative_base()
 
 
-def global_init(db_file):
+async def global_init(db_file):
     global __factory
 
     if __factory:
@@ -19,15 +18,16 @@ def global_init(db_file):
     if not db_file or not db_file.strip():
         raise Exception("no db file name")
 
-    conn_str = f'sqlite:///{db_file.strip()}?check_same_thread=False'
-    print(f"connecting to {conn_str}")
+    conn_str = f'sqlite+aiosqlite:///{db_file.strip()}?check_same_thread=False'
 
-    engine = create_async_engine(conn_str, echo=False, pool_size=30, max_overflow=0)
+    engine = create_async_engine(conn_str, echo=False)
     __factory = async_sessionmaker(engine)
 
     from . import __all_models
 
-    SqlAlchemyBase.metadata.create_all(engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(SqlAlchemyBase.metadata.drop_all)
+        await conn.run_sync(SqlAlchemyBase.metadata.create_all)
 
 
 def create_session() -> Session:
