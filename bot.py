@@ -15,6 +15,7 @@ from database.user.users import User
 from database.user.cards import Card
 from database.user.achievements import Achievement
 from database.user.inventories import Inventory
+from .database.user.stats import UserStats
 from database.bot.new_year_event import NewYearEvent
 from database.bot.levels import Level
 from database.bot.coinflips import CoinFlip
@@ -85,6 +86,12 @@ class DPcoinBOT(commands.Bot):
                     new_year_event = NewYearEvent()
                     new_year_event.guild_id = guild.id
                     new_year_event.user_id = member.id
+                    session.add(new_year_event)
+
+                    user_stats = UserStats()
+                    user_stats.user_id = member.id
+                    user_stats.guild_id = guild.id
+                    session.add(user_stats)
 
                     await session.commit()
 
