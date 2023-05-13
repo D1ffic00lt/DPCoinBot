@@ -604,7 +604,7 @@ class User(commands.Cog):
     async def __gpt(self, ctx: commands.context.Context, message: str) -> None:
         if ctx.guild is not None:
             if self.db.get_cash(ctx.author.id, ctx.guild.id) < 10000:
-                await ctx.reply("NO MAMA")
+                await ctx.reply(f"{ctx.author.mention}, у вас недостаточно средств!")
                 return
             if ctx.author.id not in self.gpt_users.keys():
                 self.gpt_users[ctx.author.id] = GTP3Model(self.gpt_token)
@@ -618,7 +618,7 @@ class User(commands.Cog):
     async def __gpt(self, ctx: commands.context.Context, message: str) -> None:
         if ctx.guild is not None:
             if self.db.get_cash(ctx.author.id, ctx.guild.id) < 20000:
-                await ctx.reply("NO MAMA")
+                await ctx.reply(f"{ctx.author.mention}, у вас недостаточно средств!")
                 return
             if ctx.author.id not in self.gpt_users.keys():
                 self.gpt_users[ctx.author.id] = GTP3Model(self.gpt_token)
