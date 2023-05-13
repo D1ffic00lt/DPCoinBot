@@ -76,7 +76,7 @@ class DPcoinBOT(commands.Bot):
                     achievements = Achievement()
                     achievements.guild_id = guild.id
                     achievements.user_id = member.id
-                    session.add(card)
+                    session.add(achievements)
 
                     inventory = Inventory()
                     inventory.guild_id = guild.id
