@@ -23,7 +23,7 @@ from database.guild.guilds import Guild
 from database.guild.servers import ServerSettings
 
 
-class DPCoinBOT(commands.Bot):
+class DPCoinBot(commands.Bot):
     __slots__ = (
         "lvl", "session"
     )
