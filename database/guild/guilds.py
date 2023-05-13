@@ -13,10 +13,6 @@ class Guild(SqlAlchemyBase):
         unique=True,
         nullable=False
     )
-    guild_name = sqlalchemy.Column(
-        sqlalchemy.String,
-        nullable=False
-    )
     members = sqlalchemy.Column(
         sqlalchemy.Integer,
         nullable=False
