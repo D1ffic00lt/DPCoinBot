@@ -9,13 +9,6 @@ __all__ = ("User",)
 
 class User(SqlAlchemyBase):
     __tablename__ = 'users'
-    id = sqlalchemy.Column(
-        sqlalchemy.Integer,
-        primary_key=True,
-        unique=True,
-        nullable=False,
-        autoincrement=True
-    )
     user_id = sqlalchemy.Column(
         sqlalchemy.Integer,
         primary_key=True,

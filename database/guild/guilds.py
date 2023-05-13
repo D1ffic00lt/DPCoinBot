@@ -7,13 +7,6 @@ __all__ = ("Guild",)
 
 class Guild(SqlAlchemyBase):
     __tablename__ = 'guilds'
-    id = sqlalchemy.Column(
-        sqlalchemy.Integer,
-        primary_key=True,
-        unique=True,
-        nullable=False,
-        autoincrement=True
-    )
     guild_id = sqlalchemy.Column(
         sqlalchemy.Integer,
         primary_key=True,
