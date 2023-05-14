@@ -7,7 +7,6 @@ import os
 import discord
 import logging
 
-import sqlalchemy
 from discord.ext import commands
 from typing import Union, Callable
 
@@ -221,7 +220,8 @@ class User(commands.Cog):
                             emb.add_field(
                                 name=f'# {counter} | `{name.name}`',
                                 value=f'**{divide_the_number(user.users_stats[0].minutes_in_voice_channels)} минут '
-                                      f'({divide_the_number(user.users_stats[0].minutes_in_voice_channels / 60)} часов)**',
+                                      f'({divide_the_number(user.users_stats[0].minutes_in_voice_channels / 60)} '
+                                      f'часов)**',
                                 inline=False
                             )
                             index += 1
@@ -633,7 +633,7 @@ class User(commands.Cog):
                     cash = promo_code.cash
                     user.cash += cash
                     await session.execute(
-                        delete(promo_code)
+                        delete(PromoCode).where(PromoCode.code == promo_code.code)
                     )
                     emb = discord.Embed(title="Промокод", colour=get_color(ctx.author.roles))
                     emb.add_field(
@@ -735,6 +735,7 @@ class User(commands.Cog):
                         new_promo_code.user_id = ctx.author.id
                         new_promo_code.guild_id = ctx.guild.id
                         new_promo_code.cash = cash
+                        new_promo_code.code = code
                         new_promo_code.global_status = 1
                         session.add(new_promo_code)
                     else:
@@ -742,6 +743,7 @@ class User(commands.Cog):
                         new_promo_code.user_id = ctx.author.id
                         new_promo_code.guild_id = ctx.guild.id
                         new_promo_code.cash = cash
+                        new_promo_code.code = code
                         new_promo_code.global_status = 0
                         session.add(new_promo_code)
                         user.cash -= cash
@@ -774,47 +776,3 @@ class User(commands.Cog):
                             inline=False
                         )
                         await ctx.reply(embed=emb)
-
-    @commands.command(aliases=["gpt"])
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def __gpt(self, ctx: commands.context.Context, message: str) -> None:
-        async with self.session() as session:
-            async with session.begin():
-                user = await session.execute(
-                    select(DBUser).where(
-                        DBUser.user_id == ctx.author.id and DBUser.guild_id == ctx.guild.id
-                    )
-                )
-                user: DBUser = user.scalars().first()
-                if ctx.guild is not None:
-                    if user.cash < 10000:
-                        await ctx.reply(f"{ctx.author.mention}, у вас недостаточно средств!")
-                        return
-                    if ctx.author.id not in self.gpt_users.keys():
-                        self.gpt_users[ctx.author.id] = GTP3Model(self.gpt_token)
-                    user.cash -= 10000
-                    await ctx.reply(self.gpt_users[ctx.author.id].answer(message))
-                else:
-                    await ctx.reply(f"{ctx.author.mention}, эту команду нельзя использовать в личных сообщениях бота")
-
-    @commands.command(aliases=["gpt-context"])
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def __gpt(self, ctx: commands.context.Context, message: str) -> None:
-        async with self.session() as session:
-            async with session.begin():
-                user = await session.execute(
-                    select(DBUser).where(
-                        DBUser.user_id == ctx.author.id and DBUser.guild_id == ctx.guild.id
-                    )
-                )
-                user: DBUser = user.scalars().first()
-                if ctx.guild is not None:
-                    if user.cash < 20000:
-                        await ctx.reply(f"{ctx.author.mention}, у вас недостаточно средств!")
-                        return
-                    if ctx.author.id not in self.gpt_users.keys():
-                        self.gpt_users[ctx.author.id] = GTP3Model(self.gpt_token)
-                    user.cash -= 20000
-                    await ctx.reply(self.gpt_users[ctx.author.id].answer_with_context(message))
-                else:
-                    await ctx.reply(f"{ctx.author.mention}, эту команду нельзя использовать в личных сообщениях бота")
