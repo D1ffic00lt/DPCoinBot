@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
+"""
+TODO: bank message fix
+TODO: lb fix
+"""
 import os
 import discord
 import logging
 
+import sqlalchemy
 from discord.ext import commands
 from typing import Union, Callable
 
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from io import BytesIO
 
@@ -15,6 +20,7 @@ from database.guild.item_shops import ShopItem
 from database.guild.promo_codes import PromoCode
 from database.guild.servers import ServerSettings
 from database.guild.shops import ShopRole
+from database.user.stats import UserStats
 from units.additions import (
     divide_the_number, create_emb,
     get_color,
@@ -56,7 +62,7 @@ class User(commands.Cog):
             return
         async with self.session() as session:
             user = await session.execute(
-                select(User).where(DBUser.user_id == ctx.author.id and DBUser.guild_id == ctx.guild.id)
+                select(DBUser).where(DBUser.user_id == ctx.author.id and DBUser.guild_id == ctx.guild.id)
             )
             user: DBUser = user.scalars().first()
             if not user:
@@ -100,17 +106,17 @@ class User(commands.Cog):
                 )
                 users = users.scalars()
 
-        for user in users:
-            name = self.bot.get_user(user.user_id)
-            if name is not None and not name.bot:
-                for member in ctx.guild.members:
-                    if name.id == member.id:
-                        if name.id == 401555829620211723 and \
-                                ctx.guild.id == 493970394374471680 and js["slb"] is False:
-                            pass
-                        else:
-                            all_cash += user.cash
-                        break
+                for user in users:
+                    name = self.bot.get_user(user.user_id)
+                    if name is not None and not name.bot:
+                        for member in ctx.guild.members:
+                            if name.id == member.id:
+                                if name.id == 401555829620211723 and \
+                                        ctx.guild.id == 493970394374471680 and js["slb"] is False:
+                                    pass
+                                else:
+                                    all_cash += user.cash
+                                break
         await ctx.reply(
             embed=create_emb(
                 title="Общий баланс сервера:",
@@ -143,31 +149,30 @@ class User(commands.Cog):
                 async with session.begin():
                     users = await session.execute(
                         select(DBUser).where(
-                            DBUser.user_id == ctx.guild.id
-                        ).order_by(DBUser.cash).limit(10)
+                            DBUser.guild_id == ctx.guild.id
+                        ).order_by(desc(DBUser.cash))
                     )
-                    users = users.scalars()
-            for user in users:
-                user: DBUser = user
-                if index == 10:
-                    break
-                name = self.bot.get_user(user.user_id)
+                    users = users.scalars().all()
+                    for user in users:
+                        user: DBUser = user
+                        if index == 10:
+                            break
+                        name = self.bot.get_user(user.user_id)
 
-                if not name.bot:
-                    if name.id == 401555829620211723 and ctx.guild.id == 493970394374471680 \
-                            and js["lb"] is False:
-                        continue
-                    else:
-                        counter += 1
-                        emb.add_field(
-                            name=f'# {counter} | `{name.name}` | lvl `{user.users_stats.chat_lvl}`',
-                            value=f'Баланс: {divide_the_number(user.cash)}',
-                            inline=False
-                        )
-                        index += 1
-                    break
+                        if not name.bot:
+                            if name.id == 401555829620211723 and ctx.guild.id == 493970394374471680 \
+                                    and js["lb"] is False:
+                                continue
+                            else:
+                                counter += 1
+                                emb.add_field(
+                                    name=f'# {counter} | `{name.name}` | lvl `{user.users_stats[0].chat_lvl}`',
+                                    value=f'Баланс: {divide_the_number(user.cash)}',
+                                    inline=False
+                                )
+                                index += 1
 
-            await ctx.reply(embed=emb)
+                    await ctx.reply(embed=emb)
         elif type_ == "chat":
             emb = discord.Embed(title="Топ 10 сервера по левелу")
             async with self.session() as session:
@@ -175,51 +180,53 @@ class User(commands.Cog):
                     users = await session.execute(
                         select(DBUser).where(
                             DBUser.guild_id == ctx.guild.id
-                        ).order_by(DBUser.users_stats.xp).limit(10)
+                        ).join(UserStats, DBUser.users_stats).order_by(desc(UserStats.xp))
                     )
                     users = users.scalars()
-            for user in users:
-                if index == 10:
-                    break
-                name = self.bot.get_user(user.user_id)
+                    for user in users:
+                        if index == 10:
+                            break
+                        name = self.bot.get_user(user.user_id)
 
-                if not name.bot:
-                    counter += 1
-                    emb.add_field(
-                        name=f'# {counter} | `{name.name}` | chat lvl `{user.users_stats.chat_lvl}`',
-                        value=f'xp: **{divide_the_number(user.users_stats.xp)}**',
-                        inline=False
-                    )
-                    index += 1
+                        if not name.bot:
+                            counter += 1
+                            emb.add_field(
+                                name=f'# {counter} | `{name.name}` | chat lvl `{user.users_stats[0].chat_lvl}`',
+                                value=f'xp: **{divide_the_number(user.users_stats[0].xp)}**',
+                                inline=False
+                            )
+                            index += 1
 
-            await ctx.reply(embed=emb)
+                    await ctx.reply(embed=emb)
         elif type_ == "voice":
             emb = discord.Embed(title="Топ 10 сервера по времени в голосовых каналах")
             async with self.session() as session:
                 async with session.begin():
                     users = await session.execute(
                         select(DBUser).where(
-                            DBUser.guild_id == ctx.guild.id).order_by(
-                                DBUser.users_stats.minutes_in_voice_channels
-                        ).limit(10)
+                            DBUser.guild_id == ctx.guild.id).join(
+                            UserStats, DBUser.users_stats
+                        ).order_by(
+                                desc(UserStats.minutes_in_voice_channels)
+                        )
                     )
                     users = users.scalars()
-            for user in users:
-                if index == 10:
-                    break
-                name = self.bot.get_user(user.user_id)
+                    for user in users:
+                        if index == 10:
+                            break
+                        name = self.bot.get_user(user.user_id)
 
-                if not name.bot:
-                    counter += 1
-                    emb.add_field(
-                        name=f'# {counter} | `{name.name}`',
-                        value=f'**{divide_the_number(user.users_stats.minutes_in_voice_channels)} минут '
-                              f'({divide_the_number(user.users_stats.minutes_in_voice_channels / 60)} часов)**',
-                        inline=False
-                    )
-                    index += 1
+                        if not name.bot:
+                            counter += 1
+                            emb.add_field(
+                                name=f'# {counter} | `{name.name}`',
+                                value=f'**{divide_the_number(user.users_stats[0].minutes_in_voice_channels)} минут '
+                                      f'({divide_the_number(user.users_stats[0].minutes_in_voice_channels / 60)} часов)**',
+                                inline=False
+                            )
+                            index += 1
 
-            await ctx.reply(embed=emb)
+                    await ctx.reply(embed=emb)
         elif type_ == "rep":
             emb = discord.Embed(title="Топ 10 сервера")
             async with self.session() as session:
@@ -227,19 +234,19 @@ class User(commands.Cog):
                     users = await session.execute(
                         select(DBUser).where(
                             DBUser.guild_id == ctx.guild.id).order_by(
-                                DBUser.users_stats.reputation
+                                DBUser.users_stats[0].reputation
                         ).limit(10)
                     )
                     users = users.scalars()
-            counter = 0
-            for user in users:
-                counter += 1
-                emb.add_field(
-                    name=f'# {counter} | `{self.bot.get_user(user.user_id).name}`',
-                    value=f'Репутация: {user.users_stats.reputation}',
-                    inline=False
-                )
-            await ctx.reply(embed=emb)
+                    counter = 0
+                    for user in users:
+                        counter += 1
+                        emb.add_field(
+                            name=f'# {counter} | `{self.bot.get_user(user.user_id).name}`',
+                            value=f'Репутация: {user.users_stats[0].reputation}',
+                            inline=False
+                        )
+                    await ctx.reply(embed=emb)
 
     @commands.command(aliases=["cash"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -252,37 +259,37 @@ class User(commands.Cog):
                 async with self.session() as session:
                     async with session.begin():
                         user = await session.execute(
-                            select(User).where(
+                            select(DBUser).where(
                                 DBUser.user_id == ctx.author.id and DBUser.guild_id == ctx.guild.id
                             )
                         )
-                user = user.scalars().first()
-                await ctx.reply(
-                    embed=create_emb(
-                        title="Баланс",
-                        description=f"Баланс пользователя ```{ctx.author}``` составляет "
-                                    f"```{divide_the_number(user.cash)}``` "
-                                    f"DP коинов"
-                    )
-                )
+                        user = user.scalars().first()
+                        await ctx.reply(
+                            embed=create_emb(
+                                title="Баланс",
+                                description=f"Баланс пользователя ```{ctx.author}``` составляет "
+                                            f"```{divide_the_number(user.cash)}``` "
+                                            f"DP коинов"
+                            )
+                        )
             except TypeError:
                 logging.error(f"TypeError: user.py 226 cash")
         else:
             async with self.session() as session:
                 async with session.begin():
                     user = await session.execute(
-                        select(User).where(
+                        select(DBUser).where(
                             DBUser.user_id == member.id and DBUser.guild_id == ctx.guild.id
                         )
                     )
-            user = user.scalars().first()
-            await ctx.reply(
-                embed=create_emb(
-                    title="Баланс",
-                    description=f"Баланс пользователя ```{member}``` составляет "
-                                f"```{divide_the_number(user.cash)}``` DP коинов"
-                )
-            )
+                    user = user.scalars().first()
+                    await ctx.reply(
+                        embed=create_emb(
+                            title="Баланс",
+                            description=f"Баланс пользователя ```{member}``` составляет "
+                                        f"```{divide_the_number(user.cash)}``` DP коинов"
+                        )
+                    )
 
     @commands.command(aliases=["bank"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -293,7 +300,7 @@ class User(commands.Cog):
         async with self.session() as session:
             async with session.begin():
                 user = await session.execute(
-                    select(User).where(
+                    select(DBUser).where(
                         DBUser.user_id == ctx.author.id and DBUser.guild_id == ctx.guild.id
                     )
                 )
@@ -344,30 +351,30 @@ class User(commands.Cog):
                     select(ShopItem).where(ShopItem.guild_id == ctx.guild.id).order_by(ShopItem.item_cost)
                 )
                 item_shops = item_shops.scalars()
-        for role in shops:
-            if ctx.guild.get_role(role.role_id) is not None:
-                emb.add_field(
-                    name=f'Роль {ctx.guild.get_role(role.role_id).mention}',
-                    value=f'Стоимость: **{role.role_cost} DP коинов**',
-                    inline=False
-                )
-        emb.add_field(name="**Как купить роль?**",
-                           value=f'''```diff\n- {PREFIX}buy <Упоминание роли>\n```''')
-        if item_shops is not None:
-            emb.add_field(name='**Другое:**\n', value="Сообщение о покупке придет администрации!", inline=False)
-            for item in item_shops:
-                item: ShopItem = item
-                emb.add_field(
-                    name=f'**{item.item_name}**',
-                    value=f'Стоимость: **{item.item_cost} DP коинов**\n'
-                          f'Чтобы купить {PREFIX}buy_item {item.item_id}',
-                    inline=False
-                )
+                for role in shops:
+                    if ctx.guild.get_role(role.role_id) is not None:
+                        emb.add_field(
+                            name=f'Роль {ctx.guild.get_role(role.role_id).mention}',
+                            value=f'Стоимость: **{role.role_cost} DP коинов**',
+                            inline=False
+                        )
+                emb.add_field(name="**Как купить роль?**",
+                                   value=f'''```diff\n- {PREFIX}buy <Упоминание роли>\n```''')
+                if item_shops.first() is not None:
+                    emb.add_field(name='**Другое:**\n', value="Сообщение о покупке придет администрации!", inline=False)
+                    for item in item_shops:
+                        item: ShopItem = item
+                        emb.add_field(
+                            name=f'**{item.item_name}**',
+                            value=f'Стоимость: **{item.item_cost} DP коинов**\n'
+                                  f'Чтобы купить {PREFIX}buy_item {item.item_id}',
+                            inline=False
+                        )
 
-        emb.add_field(
-            name="**Чтобы купить роль:**",
-            value=f"```diff\n- {PREFIX}buy @роль, которую Вы хотите купить\n```")
-        await ctx.reply(embed=emb)
+                emb.add_field(
+                    name="**Чтобы купить роль:**",
+                    value=f"```diff\n- {PREFIX}buy @роль, которую Вы хотите купить\n```")
+                await ctx.reply(embed=emb)
 
     @commands.command(aliases=["buy_item"])
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -476,80 +483,80 @@ class User(commands.Cog):
                     )
                 )
                 user: DBUser = user.scalars().first()
-                lvl = user.users_stats.chat_lvl
-                all_xp = user.users_stats.xp
+                lvl = user.users_stats[0].chat_lvl
+                all_xp = user.users_stats[0].xp
                 xp = await session.execute(
                     select(Level).where(
                         Level.level == lvl + 1
                     )
                 )
                 xp = xp.scalars().first().xp - all_xp
-        await ctx.reply(
-            embed=create_emb(
-                title="Статистика {}".format(ctx.author if member is None else member),
-                args=[
-                    {
-                        "name": f'Coinflips - {user.users_stats.coin_flips_count}',
-                        "value": f'Wins - {user.users_stats.coin_flips_wins_count}\n '
-                                 f'Loses - {user.users_stats.coin_flips_defeats_count}',
-                        "inline": True
-                    },
-                    {
-                        "name": f'Rust casinos - {user.users_stats.rust_casinos_count}',
-                        "value": f'Wins - {user.users_stats.rust_casinos_wins_count}\n '
-                                 f'Loses - {user.users_stats.rolls_defeats_count}',
-                        "inline": True
-                    },
-                    {
-                        "name": f'Rolls - {user.users_stats.rolls_count}',
-                        "value": f'Wins - {user.users_stats.rolls_wins_count}\n '
-                                 f'Loses - {user.users_stats.rolls_wins_count}',
-                        "inline": True
-                    },
-                    {
-                        "name": f'Fails - {user.users_stats.fails_count}',
-                        "value": f'Wins - {user.users_stats.fails_wins_count}\n '
-                                 f'Loses - {user.users_stats.fails_defeats_count}',
-                        "inline": True
-                    },
-                    {
-                        "name": f'777s - {user.users_stats.three_sevens_count}',
-                        "value": f'Wins - {user.users_stats.three_sevens_wins_count}\n '
-                                 f'Loses - {user.users_stats.three_sevens_defeats_count}',
-                        "inline": True
-                    },
-                    {
-                        "name": 'Побед/Поражений всего',
-                        "value": f'Wins - {user.users_stats.all_wins_count}\n '
-                                 f'Loses - {user.users_stats.all_defeats_count}',
-                        "inline": True
-                    },
-                    {
-                        "name": 'Выиграно всего',
-                        "value": divide_the_number(
-                            user.users_stats.entire_amount_of_winnings
-                        ),
-                        "inline": True
-                    },
-                    {
-                        "name": 'Минут в голосовых каналах',
-                        "value": f'{user.users_stats.minutes_in_voice_channels} минут',
-                        "inline": True
-                    },
-                    {
-                        "name": 'Сообщений в чате',
-                        "value": f'{user.users_stats.messages_count} сообщений в чате',
-                        "inline": True
-                    },
-                    {
-                        "name": f'{lvl} левел в чате',
-                        "value": f'{divide_the_number(xp)} опыта до следующего левела, '
-                                 f'{divide_the_number(all_xp)} опыта всего',
-                        "inline": True
-                    }
-                ]
-            )
-        )
+                await ctx.reply(
+                    embed=create_emb(
+                        title="Статистика {}".format(ctx.author if member is None else member),
+                        args=[
+                            {
+                                "name": f'Coinflips - {user.users_stats[0].coin_flips_count}',
+                                "value": f'Wins - {user.users_stats[0].coin_flips_wins_count}\n '
+                                         f'Loses - {user.users_stats[0].coin_flips_defeats_count}',
+                                "inline": True
+                            },
+                            {
+                                "name": f'Rust casinos - {user.users_stats[0].rust_casinos_count}',
+                                "value": f'Wins - {user.users_stats[0].rust_casinos_wins_count}\n '
+                                         f'Loses - {user.users_stats[0].rolls_defeats_count}',
+                                "inline": True
+                            },
+                            {
+                                "name": f'Rolls - {user.users_stats[0].rolls_count}',
+                                "value": f'Wins - {user.users_stats[0].rolls_wins_count}\n '
+                                         f'Loses - {user.users_stats[0].rolls_wins_count}',
+                                "inline": True
+                            },
+                            {
+                                "name": f'Fails - {user.users_stats[0].fails_count}',
+                                "value": f'Wins - {user.users_stats[0].fails_wins_count}\n '
+                                         f'Loses - {user.users_stats[0].fails_defeats_count}',
+                                "inline": True
+                            },
+                            {
+                                "name": f'777s - {user.users_stats[0].three_sevens_count}',
+                                "value": f'Wins - {user.users_stats[0].three_sevens_wins_count}\n '
+                                         f'Loses - {user.users_stats[0].three_sevens_defeats_count}',
+                                "inline": True
+                            },
+                            {
+                                "name": 'Побед/Поражений всего',
+                                "value": f'Wins - {user.users_stats[0].all_wins_count}\n '
+                                         f'Loses - {user.users_stats[0].all_defeats_count}',
+                                "inline": True
+                            },
+                            {
+                                "name": 'Выиграно всего',
+                                "value": divide_the_number(
+                                    user.users_stats[0].entire_amount_of_winnings
+                                ),
+                                "inline": True
+                            },
+                            {
+                                "name": 'Минут в голосовых каналах',
+                                "value": f'{user.users_stats[0].minutes_in_voice_channels} минут',
+                                "inline": True
+                            },
+                            {
+                                "name": 'Сообщений в чате',
+                                "value": f'{user.users_stats[0].messages_count} сообщений в чате',
+                                "inline": True
+                            },
+                            {
+                                "name": f'{lvl} левел в чате',
+                                "value": f'{divide_the_number(xp)} опыта до следующего левела, '
+                                         f'{divide_the_number(all_xp)} опыта всего',
+                                "inline": True
+                            }
+                        ]
+                    )
+                )
 
     @commands.command(aliases=["card"])
     @commands.cooldown(1, 10, commands.BucketType.user)
