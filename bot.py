@@ -94,8 +94,8 @@ class DPCoinBot(commands.Bot):
                     session.add(user_stats)
 
                     await session.commit()
-
-            if not session.get(Level, 1):
+            first_level = await session.execute(select(Level).where(Level.level == 1))
+            if not first_level.scalars().first():
                 lvl = 1
                 for i in range(1, 405):
                     level = Level()
@@ -105,7 +105,7 @@ class DPCoinBot(commands.Bot):
                     session.add(level)
                     lvl += 1
                 max_level = await session.execute(select(Level).where(Level.level == 404))
-                max_level = max_level.scalars().first()[0]
+                max_level = max_level.scalars().first()
                 max_level.award = 1500000
 
                 await session.execute(delete(OnlineStats))
