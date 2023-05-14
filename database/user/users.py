@@ -41,3 +41,8 @@ class User(SqlAlchemyBase):
         return "User(id={0})".format(
             self.user_id
         )
+
+    def __repr__(self):
+        return "User(id={0}, guild_id={1})".format(
+            self.user_id, self.guild_id
+        )

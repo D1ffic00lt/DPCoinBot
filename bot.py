@@ -33,12 +33,7 @@ class DPCoinBot(commands.Bot):
         self.session: Callable[[], AsyncSession] = kwargs["db"]
         self.remove_command('help')
 
-    async def on_ready(self) -> None:
-        await self.wait_until_ready()
-        await self.change_presence(
-            status=discord.Status.online,
-            activity=discord.Game(f"{PREFIX}help")
-        )
+    async def add_server(self):
         session = self.session()
         for guild in self.guilds:
             discord_guild = await session.execute(select(Guild).where(Guild.guild_id == guild.id))
@@ -59,7 +54,7 @@ class DPCoinBot(commands.Bot):
                 start_cash = start_cash.scalars().first()[0].starting_balance
             for member in guild.members:
                 guild_member = await session.execute(
-                        select(User).where(User.user_id == member.id and User.guild_id == guild.id)
+                    select(User).where(User.user_id == member.id and User.guild_id == guild.id)
                 )
                 if not guild_member.scalars().first():
                     new_user = User()
@@ -113,4 +108,12 @@ class DPCoinBot(commands.Bot):
                 await session.execute(delete(CoinFlip))
                 await session.commit()
         await session.close()
+
+    async def on_ready(self) -> None:
+        await self.wait_until_ready()
+        await self.change_presence(
+            status=discord.Status.online,
+            activity=discord.Game(f"{PREFIX}help")
+        )
+        await self._add_server()
         logging.info(f"Bot connected")
