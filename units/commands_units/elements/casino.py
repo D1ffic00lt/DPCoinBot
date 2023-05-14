@@ -1168,13 +1168,16 @@ class Casino(commands.Cog):
         if member is None:
             async with self.session() as session:
                 async with session.begin():
-                    coin_flips = await session.execute(
-                        select(CoinFlip).where(
-                            CoinFlip.first_player_id == ctx.author.id or CoinFlip.second_player_id == ctx.author.id
-                        )
-                    )
                     await session.execute(
-                        delete(coin_flips)
+                        delete(CoinFlip).where(
+                            (
+                                CoinFlip.first_player_id == ctx.author.id
+                                or
+                                CoinFlip.second_player_id == ctx.author.id
+                            )
+                            and
+                            CoinFlip.guild_id == ctx.guild.id
+                        )
                     )
             await ctx.message.add_reaction('✅')
         else:
@@ -1182,13 +1185,16 @@ class Casino(commands.Cog):
                 await ctx.reply("Ты чё ку-ку? Тебе так нельзя.")
             async with self.session() as session:
                 async with session.begin():
-                    coin_flips = await session.execute(
-                        select(CoinFlip).where(
-                            CoinFlip.first_player_id == member.id or CoinFlip.second_player_id == member.id
-                        )
-                    )
                     await session.execute(
-                        delete(coin_flips)
+                        delete(CoinFlip).where(
+                            (
+                                    CoinFlip.first_player_id == member.id
+                                    or
+                                    CoinFlip.second_player_id == member.id
+                            )
+                            and
+                            CoinFlip.guild_id == ctx.guild.id
+                        )
                     )
             await ctx.message.add_reaction('✅')
 
@@ -1211,8 +1217,8 @@ class Casino(commands.Cog):
                     (CoinFlip.first_player_id == member.id and CoinFlip.second_player_id == ctx.author.id)
                 )
             )
-
-        if not games.scalars().first():
+        games = games.scalars().first()
+        if not games:
             await ctx.reply(
                 f"Такой игры не существует, посмотреть все ваши активные игры - {PREFIX}games"
             )
@@ -1220,7 +1226,13 @@ class Casino(commands.Cog):
         async with self.session() as session:
             async with session.begin():
                 await session.execute(
-                    delete(games)
+                    delete(CoinFlip).where(
+                        CoinFlip.first_player_id == games.first_player_id
+                        and
+                        CoinFlip.second_player_id == games.second_player_id
+                        and
+                        CoinFlip.guild_id == ctx.guild.id
+                    )
                 )
         await ctx.message.add_reaction('✅')
 
@@ -1275,7 +1287,13 @@ class Casino(commands.Cog):
             async with self.session() as session:
                 async with session.begin():
                     await session.execute(
-                        delete(coinflip)
+                        delete(CoinFlip).where(
+                            CoinFlip.first_player_id == coinflip.first_player_id
+                            and
+                            CoinFlip.second_player_id == coinflip.second_player_id
+                            and
+                            CoinFlip.guild_id == ctx.guild.id
+                        )
                     )
             return
         if await self._get_cash(coinflip.first_player_id, ctx.guild.id) < coinflip.cash:
@@ -1381,13 +1399,22 @@ class Casino(commands.Cog):
                     second_user_stats.all_defeats_count += 1
         async with self.session() as session:
             async with session.begin():
-                coin_flips = await session.execute(
-                    select(CoinFlip).where(
-                        (CoinFlip.first_player_id == ctx.author.id and CoinFlip.second_player_id == member.id)
-                        or
-                        (CoinFlip.first_player_id == member.id and CoinFlip.second_player_id == ctx.author.id)
+                await session.execute(
+                    delete(CoinFlip).where(
+                        (
+                            (
+                                CoinFlip.first_player_id == ctx.author.id
+                                and
+                                CoinFlip.second_player_id == member.id
+                            )
+                            or
+                            (
+                                    CoinFlip.first_player_id == member.id
+                                    and
+                                    CoinFlip.second_player_id == ctx.author.id
+                            )
+                        )
+                        and
+                        CoinFlip.guild_id == ctx.guild.id
                     )
                 )
-            await session.execute(
-                delete(coin_flips)
-            )
