@@ -38,7 +38,7 @@ class CardGenerator(object):
         self.rang_data = {}
         self.title_font = ImageFont.truetype("./static/fonts/UniSansBold.ttf", size=80)
         self.font = ImageFont.truetype("./static/fonts/UniSans.ttf", size=70)
-        self.img = Image.new("RGBA", (1500, 900), "#323642")
+        self.img = Image.new("RGBA", (1500, 900), "#2d313a")
         avatar = requests.get(avatar_url, stream=True)
         avatar = Image.open(io.BytesIO(avatar.content))
         avatar = avatar.convert("RGBA")
@@ -213,7 +213,7 @@ class CardGenerator(object):
         )
         draw.ellipse(
             (x + size, y + size, x + total_size - size, y + total_size - size),
-            "#323642"
+            "#2d313a"
         )
         if len(level) == 3:
             draw.text(
