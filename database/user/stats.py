@@ -56,7 +56,7 @@ class UserStats(SqlAlchemyBase):
         default=0,
         nullable=False
     )
-    coin_flips_losses_count = sqlalchemy.Column(
+    coin_flips_defeats_count = sqlalchemy.Column(
         sqlalchemy.Integer,
         default=0,
         nullable=False
@@ -71,7 +71,7 @@ class UserStats(SqlAlchemyBase):
         default=0,
         nullable=False
     )
-    rust_casino_loses_count = sqlalchemy.Column(
+    rust_casino_defeats_count = sqlalchemy.Column(
         sqlalchemy.Integer,
         default=0,
         nullable=False
@@ -86,7 +86,7 @@ class UserStats(SqlAlchemyBase):
         default=0,
         nullable=False
     )
-    rolls_loses_count = sqlalchemy.Column(
+    rolls_defeats_count = sqlalchemy.Column(
         sqlalchemy.Integer,
         default=0,
         nullable=False
@@ -101,7 +101,7 @@ class UserStats(SqlAlchemyBase):
         default=0,
         nullable=False
     )
-    fails_loses_count = sqlalchemy.Column(
+    fails_defeats_count = sqlalchemy.Column(
         sqlalchemy.Integer,
         default=0,
         nullable=False
@@ -116,7 +116,7 @@ class UserStats(SqlAlchemyBase):
         default=0,
         nullable=False
     )
-    three_sevens_loses_count = sqlalchemy.Column(
+    three_sevens_defeats_count = sqlalchemy.Column(
         sqlalchemy.Integer,
         default=0,
         nullable=False
@@ -126,7 +126,7 @@ class UserStats(SqlAlchemyBase):
         default=0,
         nullable=False
     )
-    all_loses_count = sqlalchemy.Column(
+    all_defeats_count = sqlalchemy.Column(
         sqlalchemy.Integer,
         default=0,
         nullable=False

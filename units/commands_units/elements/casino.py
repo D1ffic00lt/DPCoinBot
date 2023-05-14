@@ -90,7 +90,7 @@ class Casino(commands.Cog):
                     select(User).where(User.user_id == user_id and User.guild_id == guild_id)
                 )
                 user: User = user.scalars().first()
-                user.achievements[0].losses += 1
+                user.achievements[0].defeats += 1
                 user.achievements[0].wins = 0
 
     async def _add_win(self, user_id: int, guild_id: int) -> None:
@@ -100,7 +100,7 @@ class Casino(commands.Cog):
                     select(User).where(User.user_id == user_id and User.guild_id == guild_id)
                 )
                 user: User = user.scalars().first()
-                user.achievements[0].losses = 0
+                user.achievements[0].defeats = 0
                 user.achievements[0].wins += 1
 
     async def _achievement(self, user_id: int, guild_id: int) -> None:
@@ -117,9 +117,9 @@ class Casino(commands.Cog):
                 if not guild_user:
                     return
                 user_achievements: Achievement = guild_user.achievements[0]
-                losses = user_achievements.losses
+                defeats = user_achievements.defeats
                 wins = user_achievements.wins
-                if user_achievements.defeat_achievements_level < 1 and losses >= 3:
+                if user_achievements.defeat_achievements_level < 1 and defeats >= 3:
                     guild_user.cash += 400
                     user_achievements.defeat_achievements_level = 1
                     await user.send(
@@ -127,14 +127,14 @@ class Casino(commands.Cog):
                         f"получено достижение «Азартный человек»!\nВам начислено 400 коинов!"
                     )
 
-                if user_achievements.defeat_achievements_level < 2 and losses >= 10:
+                if user_achievements.defeat_achievements_level < 2 and defeats >= 10:
                     guild_user.cash += 3000
                     user_achievements.defeat_achievements_level = 2
                     await user.send(
                         f"На сервере {guild.name} "
                         f"получено достижение «Сумасшедший»!\nВам начислено 3000 коинов!"
                     )
-                if user_achievements.defeat_achievements_level < 3 and losses >= 20:
+                if user_achievements.defeat_achievements_level < 3 and defeats >= 20:
                     guild_user.cash += 10000
                     user_achievements.defeat_achievements_level = 3
                     await user.send(
@@ -290,9 +290,9 @@ class Casino(commands.Cog):
 
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rust_casinos_count += 1
-                                    user_stats.rust_casino_losses_count += 1
+                                    user_stats.rust_casino_defeats_count += 1
                                     user_stats.entire_amount_of_winnings -= bid
-                                    user_stats.all_losses_count += 1
+                                    user_stats.all_defeats_count += 1
                     else:
                         await ctx.reply(
                             f"{ctx.author.mention}, Вы должны поставить либо 1, либо 3, либо 5, либо 10, либо 20!"
@@ -371,9 +371,9 @@ class Casino(commands.Cog):
 
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.fails_count += 1
-                            user_stats.fails_losses_count += 1
+                            user_stats.fails_defeats_count += 1
                             user_stats.entire_amount_of_winnings -= bid
-                            user_stats.all_losses_count += 1
+                            user_stats.all_defeats_count += 1
                 else:
                     await self._add_coins(ctx.author.id, ctx.guild.id, bid + int(bid * coefficient))
                     emb = discord.Embed(title="🎰Вы выиграли!🎰", colour=color)
@@ -528,9 +528,9 @@ class Casino(commands.Cog):
 
                             user_stats: UserStats = user.users_stats[0]
                             user_stats.three_sevens_count += 1
-                            user_stats.three_sevens_losses_count += 1
+                            user_stats.three_sevens_defeats_count += 1
                             user_stats.entire_amount_of_winnings -= bid
-                            user_stats.all_losses_count += 1
+                            user_stats.all_defeats_count += 1
         else:
             await ctx.reply(f"{ctx.author.mention}, Вы можете играть в казино только в специальном канале!")
 
@@ -586,9 +586,9 @@ class Casino(commands.Cog):
                                     return
                                 user_stats: UserStats = user.users_stats[0]
                                 user_stats.coin_flips_count += 1
-                                user_stats.coin_flips_losses_count += 1
+                                user_stats.coin_flips_defeats_count += 1
                                 user_stats.entire_amount_of_winnings -= count
-                                user_stats.all_losses_count += 1
+                                user_stats.all_defeats_count += 1
 
             elif member is not None:
                 if count <= 9:
@@ -760,9 +760,9 @@ class Casino(commands.Cog):
                                         return
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
-                                    user_stats.rolls_losses_count += 1
+                                    user_stats.rolls_defeats_count += 1
                                     user_stats.entire_amount_of_winnings -= count
-                                    user_stats.all_losses_count += 1
+                                    user_stats.all_defeats_count += 1
                 except ValueError:
                     if self.texts[ctx.author.id] in roll_types:
                         await self._take_coins(ctx.author.id, ctx.guild.id, count)
@@ -1153,9 +1153,9 @@ class Casino(commands.Cog):
 
                                     user_stats: UserStats = user.users_stats[0]
                                     user_stats.rolls_count += 1
-                                    user_stats.rolls_losses_count += 1
+                                    user_stats.rolls_defeats_count += 1
                                     user_stats.entire_amount_of_winnings -= count
-                                    user_stats.all_losses_count += 1
+                                    user_stats.all_defeats_count += 1
 
                     else:
                         await ctx.reply(f"{ctx.author.mention}, Такого атрибута не существует! ")
@@ -1309,10 +1309,10 @@ class Casino(commands.Cog):
                     )
                     first_user: User = first_user.scalars().first()
                     second_user: User = second_user.scalars().first()
-                    first_user.achievements[0].losses += 1
+                    first_user.achievements[0].defeats += 1
                     first_user.achievements[0].wins = 0
 
-                    second_user.achievements[0].losses = 0
+                    second_user.achievements[0].defeats = 0
                     second_user.achievements[0].wins += 1
             await self._achievement(member.id, ctx.guild.id)
             await self._achievement(ctx.author.id, ctx.guild.id)
@@ -1339,9 +1339,9 @@ class Casino(commands.Cog):
 
                     second_user_stats: UserStats = second_user.users_stats[0]
                     second_user_stats.coin_flips_count += 1
-                    second_user_stats.coin_flips_losses_count += 1
+                    second_user_stats.coin_flips_defeats_count += 1
                     second_user_stats.entire_amount_of_winnings -= num
-                    second_user_stats.all_losses_count += 1
+                    second_user_stats.all_defeats_count += 1
         else:
             await self._achievement(member.id, ctx.guild.id)
             await self._achievement(ctx.author.id, ctx.guild.id)
@@ -1376,9 +1376,9 @@ class Casino(commands.Cog):
 
                     second_user_stats: UserStats = second_user.users_stats[0]
                     second_user_stats.coin_flips_count += 1
-                    second_user_stats.coin_flips_losses_count += 1
+                    second_user_stats.coin_flips_defeats_count += 1
                     second_user_stats.entire_amount_of_winnings -= num
-                    second_user_stats.all_losses_count += 1
+                    second_user_stats.all_defeats_count += 1
         async with self.session() as session:
             async with session.begin():
                 coin_flips = await session.execute(

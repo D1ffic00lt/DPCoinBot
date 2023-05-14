@@ -36,7 +36,7 @@ class Achievement(SqlAlchemyBase):
         default=False,
         nullable=False
     )  # [1:3]
-    losses = sqlalchemy.Column(
+    defeats = sqlalchemy.Column(
         sqlalchemy.Integer,
         default=0
     )

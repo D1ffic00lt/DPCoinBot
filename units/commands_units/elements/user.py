@@ -465,13 +465,13 @@ class User(commands.Cog):
                     {
                         "name": f'Coinflips - {user.users_stats.coin_flips_count}',
                         "value": f'Wins - {user.users_stats.coin_flips_wins_count}\n '
-                                 f'Loses - {user.users_stats.coin_flips_losses_count}',
+                                 f'Loses - {user.users_stats.coin_flips_defeats_count}',
                         "inline": True
                     },
                     {
                         "name": f'Rust casinos - {user.users_stats.rust_casinos_count}',
                         "value": f'Wins - {user.users_stats.rust_casinos_wins_count}\n '
-                                 f'Loses - {user.users_stats.rolls_losses_count}',
+                                 f'Loses - {user.users_stats.rolls_defeats_count}',
                         "inline": True
                     },
                     {
@@ -483,19 +483,19 @@ class User(commands.Cog):
                     {
                         "name": f'Fails - {user.users_stats.fails_count}',
                         "value": f'Wins - {user.users_stats.fails_wins_count}\n '
-                                 f'Loses - {user.users_stats.fails_losses_count}',
+                                 f'Loses - {user.users_stats.fails_defeats_count}',
                         "inline": True
                     },
                     {
                         "name": f'777s - {user.users_stats.three_sevens_count}',
                         "value": f'Wins - {user.users_stats.three_sevens_wins_count}\n '
-                                 f'Loses - {user.users_stats.three_sevens_losses_count}',
+                                 f'Loses - {user.users_stats.three_sevens_defeats_count}',
                         "inline": True
                     },
                     {
                         "name": 'Побед/Поражений всего',
                         "value": f'Wins - {user.users_stats.all_wins_count}\n '
-                                 f'Loses - {user.users_stats.all_losses_count}',
+                                 f'Loses - {user.users_stats.all_defeats_count}',
                         "inline": True
                     },
                     {
@@ -544,7 +544,7 @@ class User(commands.Cog):
                 generator.add_stats(
                     name=str(ctx.author),
                     wins=user.users_stats[0].all_wins_count,
-                    loses=user.users_stats[0].all_losses_count,
+                    loses=user.users_stats[0].all_defeats_count,
                     minutes_in_voice=user.users_stats[0].minutes_in_voice_channels,
                     messages=user.users_stats[0].messages_count,
                     xp=user.users_stats[0].xp
