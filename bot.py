@@ -4,20 +4,110 @@ import discord
 import math
 
 from discord.ext import commands
+from sqlalchemy import select, delete
+from sqlalchemy.ext.asyncio.session import AsyncSession
+from typing import Callable
 
 from config import PREFIX
-from database.db import Database
+from database.user.online_stats import OnlineStats
+from database.user.online import Online
+from database.user.users import User
+from database.user.cards import Card
+from database.user.achievements import Achievement
+from database.user.inventories import Inventory
+from database.user.stats import UserStats
+from database.bot.new_year_event import NewYearEvent
+from database.bot.levels import Level
+from database.bot.coinflips import CoinFlip
+from database.guild.guilds import Guild
+from database.guild.servers import ServerSettings
 
 
-class DPcoinBOT(commands.Bot):
+class DPCoinBot(commands.Bot):
     __slots__ = (
-        "lvl", "db"
+        "lvl", "session"
     )
 
     def __init__(self, command_prefix: str, *, intents: discord.Intents, **kwargs) -> None:
         super().__init__(command_prefix, intents=intents, **kwargs)
-        self.db: Database = kwargs["db"]
+        self.session: Callable[[], AsyncSession] = kwargs["db"]
         self.remove_command('help')
+
+    async def add_server(self):
+        session = self.session()
+        for guild in self.guilds:
+            discord_guild = await session.execute(select(Guild).where(Guild.guild_id == guild.id))
+            if not discord_guild.scalars().first():
+                new_guild = Guild()
+                new_guild.guild_id = guild.id
+                new_guild.members = guild.member_count
+                session.add(new_guild)
+                await session.commit()
+
+            server_guild = await session.execute(select(ServerSettings).where(ServerSettings.guild_id == guild.id))
+            if not server_guild.scalars().first():
+                start_cash = 0
+            else:
+                start_cash = await session.execute(
+                    select(ServerSettings).where(ServerSettings.guild_id == guild.id)
+                )
+                start_cash = start_cash.scalars().first()[0].starting_balance
+            for member in guild.members:
+                guild_member = await session.execute(
+                    select(User).where(User.user_id == member.id and User.guild_id == guild.id)
+                )
+                if not guild_member.scalars().first():
+                    new_user = User()
+                    new_user.user_id = member.id
+                    new_user.guild_id = guild.id
+                    new_user.cash = start_cash
+                    session.add(new_user)
+                    await session.commit()
+
+                    card = Card()
+                    card.user_id = member.id
+                    session.add(card)
+
+                    achievements = Achievement()
+                    achievements.guild_id = guild.id
+                    achievements.user_id = member.id
+                    session.add(achievements)
+
+                    inventory = Inventory()
+                    inventory.guild_id = guild.id
+                    inventory.user_id = member.id
+                    session.add(inventory)
+
+                    new_year_event = NewYearEvent()
+                    new_year_event.guild_id = guild.id
+                    new_year_event.user_id = member.id
+                    session.add(new_year_event)
+
+                    user_stats = UserStats()
+                    user_stats.user_id = member.id
+                    user_stats.guild_id = guild.id
+                    session.add(user_stats)
+
+                    await session.commit()
+            first_level = await session.execute(select(Level).where(Level.level == 1))
+            if not first_level.scalars().first():
+                lvl = 1
+                for i in range(1, 405):
+                    level = Level()
+                    level.level = i
+                    level.xp = int(math.pow((lvl * 32), 1.4))
+                    level.award = i * int(math.pow(lvl, 1.2))
+                    session.add(level)
+                    lvl += 1
+                max_level = await session.execute(select(Level).where(Level.level == 404))
+                max_level = max_level.scalars().first()
+                max_level.award = 1500000
+
+                await session.execute(delete(OnlineStats))
+                await session.execute(delete(Online))
+                await session.execute(delete(CoinFlip))
+                await session.commit()
+        await session.close()
 
     async def on_ready(self) -> None:
         await self.wait_until_ready()
@@ -25,16 +115,5 @@ class DPcoinBOT(commands.Bot):
             status=discord.Status.online,
             activity=discord.Game(f"{PREFIX}help")
         )
-        self.db.server_add(self)
-        if not self.db.checking_for_levels_existence_in_table():
-            lvl = 1
-            for i in range(1, 405):
-                self.db.insert_into_levels(i, int(math.pow((lvl * 32), 1.4)), i * int(math.pow(lvl, 1.2)))
-                lvl += 1
-            self.db.cursor.execute("UPDATE `Levels` SET `Award` = 1500000 WHERE `Level` = 404")
-            self.db.cursor.execute("DELETE FROM `OnlineStats`")
-            self.db.cursor.execute("DELETE FROM `Online`")
-            self.db.connection.commit()
-
-        self.db.clear_coinflip()
+        await self._add_server()
         logging.info(f"Bot connected")

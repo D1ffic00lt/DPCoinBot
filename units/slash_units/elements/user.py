@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
-import io
 import os
 import logging
 import discord
-import requests
 
 from discord.ext import commands
 from discord import app_commands
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageDraw
 from typing import Union
 
 from config import PREFIX, GPT3_WITH_CONTEXT_PRICE, GPT3_WITHOUT_CONTEXT_PRICE
-from modules.additions import (
+from units.additions import (
     get_time, create_emb,
-    divide_the_number, get_color, crop,
-    prepare_mask, get_promo_code
+    divide_the_number, get_color,
+    get_promo_code
 )
-from modules.json_logging import Json
-from database.db import Database
+from units.card_generator import CardGenerator
+from units.json_logging import Json
 from units.gpt import GTP3Model
 
 __all__ = (
@@ -37,7 +35,7 @@ class UserSlash(commands.Cog):
         "code", "code2", "response", "avatar"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, gpt_token: str, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, gpt_token: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.bot: commands.Bot = bot
@@ -486,101 +484,21 @@ class UserSlash(commands.Cog):
     @app_commands.command(name="card", description="Карточка сервера (в разработке)")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __card(self, inter: discord.Interaction) -> None:
-        self.img = Image.new("RGBA", (500, 300), "#323642")
-        self.response = requests.get(str(inter.user.avatar.url)[:-10], stream=True)
-        self.response = Image.open(io.BytesIO(self.response.content))
-        self.response = self.response.convert("RGBA")
-        self.response = self.response.resize((100, 100), Image.ANTIALIAS)
-        self.response.save(f".intermediate_files/avatar{inter.user.id}.png")
+        user_data = self.db.get_card(inter.user.id, inter.guild.id)[0]
+        generator = CardGenerator(str(inter.user.avatar.url)[:-10])
+        generator.add_stats(
+            name=str(inter.user),
+            wins=user_data[0],
+            loses=user_data[1],
+            minutes_in_voice=user_data[2],
+            messages=user_data[3],
+            xp=user_data[4]
+        )
+        verification, developer, coder = self.db.get_from_card(inter.user.id, "Verification", "Developer", "Coder")
 
-        self.avatar = Image.open(f'.intermediate_files/avatar{inter.user.id}.png')
-        self.avatar = crop(self.avatar, (100, 100))
-        self.avatar.putalpha(prepare_mask((100, 100), 4))
-        self.avatar.save(f'.intermediate_files/out_avatar{inter.user.id}.png')
+        generator.add_badges(verification=verification, developer=developer, coder=coder)
 
-        self.img.alpha_composite(
-            self.response, (15, 15)
-        )
-
-        self.image_draw = ImageDraw.Draw(self.img)
-        self.wins = 0
-        self.loses = 0
-        self.minutes_in_voice = 0
-        self.messages = 0
-
-        for i in self.db.get_card(inter.user.id, inter.guild.id):
-            self.wins += i[0]
-            self.loses += i[1]
-            self.minutes_in_voice += i[2]
-            self.messages += i[3]
-
-        self.image_draw.text(
-            (130, 15),
-            f"{inter.user.name}#{inter.user.discriminator}",
-            font=ImageFont.truetype('calibri.ttf', size=30)
-        )
-        self.image_draw.text(
-            (130, 45),
-            f"ID: {inter.user.id}",
-            font=ImageFont.truetype("calibri.ttf", size=20)
-        )
-        self.image_draw.text(
-            (15, 125),
-            f"Wins: {self.wins}",
-            font=ImageFont.truetype("calibrib.ttf", size=25)
-        )
-        self.image_draw.text(
-            (15, 160),
-            f"Loses: {divide_the_number(self.loses)}",
-            font=ImageFont.truetype("calibrib.ttf", size=25)
-        )
-        self.image_draw.text(
-            (15, 195),
-            f"Minutes in voice: {divide_the_number(self.minutes_in_voice)}",
-            font=ImageFont.truetype("calibrib.ttf", size=25)
-        )
-        self.image_draw.text(
-            (15, 230),
-            f"Messages: {divide_the_number(self.messages)}",
-            font=ImageFont.truetype("calibrib.ttf", size=25)
-        )
-        self.images = []
-        self.verification, self.developer, self.coder = \
-            self.db.get_from_card(inter.user.id, "Verification", "Developer", "Coder")
-        if int(self.verification) == 1:
-            self.image = Image.open("files/green_galka.png")
-            self.image = self.image.convert("RGBA")
-            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
-            self.images.append(self.image)
-        elif int(self.verification) == 2:
-            self.image = Image.open("files/galka.png")
-            self.image = self.image.convert("RGBA")
-            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
-            self.images.append(self.image)
-        if int(self.developer) == 1:
-            self.image = Image.open("files/developer.png")
-            self.image = self.image.convert("RGBA")
-            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
-            self.images.append(self.image)
-        if int(self.coder) == 1:
-            self.image = Image.open("files/cmd.png")
-            self.image = self.image.convert("RGBA")
-            self.image = self.image.resize((30, 30), Image.ANTIALIAS)
-            self.images.append(self.image)
-        if len(self.images) != 0:
-            self.x = 128
-            for i in range(len(self.images)):
-                self.img.alpha_composite(self.images[i], (self.x, 70))
-                self.x += 35
-
-        self.img.save(f'.intermediate_files/user_card{inter.user.id}.png')
-
-        await inter.response.send_message(
-            file=discord.File(fp=f'.intermediate_files/user_card{inter.user.id}.png')
-        )
-        os.remove(f".intermediate_files/user_card{inter.user.id}.png")
-        os.remove(f".intermediate_files/avatar{inter.user.id}.png")
-        os.remove(f".intermediate_files/out_avatar{inter.user.id}.png")
+        await inter.response.send_message(file=discord.File(fp=generator.img))
 
     @app_commands.command(name="promo", description="Активировать промокод")
     @commands.cooldown(1, 5, commands.BucketType.user)

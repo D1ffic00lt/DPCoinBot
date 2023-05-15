@@ -6,7 +6,6 @@ from discord.ext import commands
 from discord.utils import get
 from discord import app_commands
 
-from database.db import Database
 
 __all__ = (
     "AdminSlash",
@@ -20,9 +19,9 @@ class AdminSlash(commands.Cog):
         "db", "bot"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.db: Database = db
+        self.db = db
         self.bot = bot
         logging.info(f"Admin (Slash) connected")
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from units.commands_units.elements import *
-from units.commands_units.global_events import *
+from .elements import *
+from .global_events import *
 
 __all__ = (
     "Admin", "Casino", "Debug",

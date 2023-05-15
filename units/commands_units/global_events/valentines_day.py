@@ -6,7 +6,6 @@ from datetime import datetime
 from discord.ext import commands
 from typing import Union
 
-from database.db import Database
 from config import (
     VALENTINES_DAY_MIN_PRIZE,
     VALENTINES_DAY_MAX_PRIZE
@@ -23,7 +22,7 @@ class ValentinesDay(commands.Cog):
         "bot", "db", "prize", "valentine"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
         self.db = db

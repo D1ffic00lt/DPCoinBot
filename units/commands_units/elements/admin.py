@@ -6,7 +6,6 @@ from typing import Union
 from discord.ext import commands
 from discord.utils import get
 
-from database.db import Database
 
 __all__ = (
     "Admin",
@@ -20,9 +19,9 @@ class Admin(commands.Cog):
         "db", "bot"
     )
 
-    def __init__(self, bot: commands.Bot, db: Database, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.db: Database = db
+        self.db = db
         self.bot = bot
         logging.info(f"Admin connected")
 
