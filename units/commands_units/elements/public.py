@@ -207,8 +207,7 @@ class Public(commands.Cog):
                           inline=False)
             emb.add_field(name=f'**{PREFIX}foodshop**',
                           value='Магазин еды', inline=False)
-            emb.add_field(name=f'**{PREFIX}food**',
-                          value='Ваша еда', inline=False)
+
             emb.add_field(name=f'**{PREFIX}use <Номер из foodshop>**',
                           value='Использовать еду', inline=False)
             emb.add_field(name=f'**{PREFIX}buyfood <Номер из foodshop> <Количество>**',
