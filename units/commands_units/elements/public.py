@@ -16,11 +16,6 @@ __all__ = (
 class Public(commands.Cog):
     NAME = 'public module'
 
-    __slots__ = (
-        "db", "bot", "row12",
-        "row22", "row32", "month", "day"
-    )
-
     def __init__(self, bot: commands.Bot, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
