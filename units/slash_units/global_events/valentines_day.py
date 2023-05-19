@@ -12,12 +12,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import VALENTINES_DAY_MIN_PRIZE, VALENTINES_DAY_MAX_PRIZE
+from database.user.users import User
 
 __all__ = (
     "ValentinesDaySlash",
 )
-
-from database.user.users import User
 
 
 class ValentinesDaySlash(commands.Cog):
