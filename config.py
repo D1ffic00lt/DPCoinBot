@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__version__ = "2.0.2pre"
+__version__ = "2.1.0-beta"
 
 GPT_TOKEN = b'gAAAAABkK8t7F-WKCUbXBQYB3fL4zMgUwgsIv81ytVuEZIDvkLs0-fE' \
             b'1J7NJvdY4h1WLFyOAtB0ASLZBDLolxgB4TUbIbmlOsKoDTw3nWA4XAZ' \
@@ -37,7 +37,7 @@ OWNER_ID = None
 NAME = 'DPcoin BOT'
 PREFIX = "//"
 TESTERS_PREFIX = "&"
-TESTING_MODE = False
+TESTING_MODE = True
 
 NEW_YEAR_MIN_PRIZE = 100
 NEW_YEAR_MAX_PRIZE = 1000

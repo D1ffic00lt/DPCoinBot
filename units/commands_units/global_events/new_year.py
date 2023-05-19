@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
+""" TODO: /food """
 import logging
 import discord
 import random
 
 from datetime import datetime
 from discord.ext import commands
-from typing import Union
+from typing import Union, Callable
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from database.user.inventories import Inventory
+from database.user.users import User
 from units.texts import *
 from config import (
     PREFIX,
@@ -22,216 +28,222 @@ __all__ = (
 class NewYear(commands.Cog):
     NAME = 'NewYear module'
 
-    __slots__ = (
-        "bot", "db", "month", "day",
-        "index", "index2", "emb", "xp",
-        "level_in_chat", "items"
-    )
-
-    def __init__(self, bot: commands.Bot, db, *args, **kwargs) -> None:
+    def __init__(self, bot: commands.Bot, session, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot: commands.Bot = bot
-        self.db = db
-        self.emb: discord.Embed
-        self.month: int = 0
-        self.day: int = 0
-        self.index: int = 0
-        self.index2: int = 0
-        self.prize: int = 0
-        self.present: int = 0
-        self.items: tuple = ()
-        self.xp: Union[int, float] = 0
-        self.level_in_chat: Union[int, float] = 0
+        self.session: Callable[[], AsyncSession] = session
         logging.info(f"NewYear event connected")
 
     @commands.command(aliases=["use"])
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __use(self, ctx: commands.context.Context, item: int = None) -> None:
-        self.month = int(datetime.today().strftime('%m'))
-        self.day = int(datetime.today().strftime('%d'))
-        if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
-                if item is None:
-                    await ctx.reply(f'{ctx.author.mention}, Вы не ввели предмет')
-                else:
-                    if item in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
-                        self.index = 0
-                        for i in new_year:
-                            if new_year[i]['index'] == item:
-                                self.index = i
-                                break
-                        if self.db.get_from_new_year_event(ctx.author.id, ctx.guild.id, self.index) == 0:
-                            await ctx.reply(f"{ctx.author.mention}, у Вас нет этого:(")
-                        else:
-                            self.emb = discord.Embed(title=f"Использовано {new_year[self.index]['name']}!")
-                            self.db.update_new_year_event(
-                                ctx.author.id, ctx.guild.id,
-                                "MoodCount", new_year[self.index]['mood']
-                            )
-                            self.emb.add_field(
-                                name=f"Получено настроения",
-                                value=f'Получено - {new_year[self.index]["mood"]}'
-                            )
-                            if random.randint(1, 101) >= new_year[self.index]['ylt_%']:
-                                self.db.update_stat(ctx.author.id, ctx.guild.id, "Xp", new_year[self.index]['xp'])
-                                self.emb.add_field(
-                                    name=f"Получено опыта",
-                                    value=f'Получено - {new_year[self.index]["xp"]}')
-                                self.xp = self.db.get_stat(ctx.author.id, ctx.guild.id, "Xp")
-                                self.level_in_chat = self.db.get_stat(ctx.author.id, ctx.guild.id, "ChatLevel")
-                                for i in self.db.get_from_levels("XP", "Level", "Award"):
-                                    if i[0] <= self.xp and i[1] > self.level_in_chat:
-                                        self.db.update_stat(ctx.author.id, ctx.guild.id, "ChatLevel", 1)
-                                        self.db.add_coins(ctx.author.id, ctx.guild.id, i[2])
-                                        try:
-                                            await ctx.author.send(
-                                                f"{ctx.author.mention}, поздравляем с "
-                                                f"{i[1]} левелом!\n"
-                                                f"Вот тебе немного коинов! (**{i[2]}**)\n"
-                                                f"Опыта для следующего левела - "
-                                                f"**{self.db.get_xp(i[1] + 1) - self.xp}**, "
-                                                f"{self.xp} опыта всего"
-                                            )
-                                        except discord.errors.Forbidden:
-                                            pass
-                                        break
-                            self.db.update_new_year_event(ctx.author.id, ctx.guild.id, self.index, -1)
-                            await ctx.reply(embed=self.emb)
+        month = int(datetime.today().strftime('%m'))
+        day = int(datetime.today().strftime('%d'))
+        if not month > 11 or month == 1:
+            return
+        if not (month == 12 and day > 10) or (month == 1 and day < 15):
+            return
+        if item is None:
+            await ctx.reply(f'{ctx.author.mention}, Вы не ввели предмет')
+            return
+        if item not in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+            return
+
+        index = 0
+        for i in new_year:
+            if new_year[i]['index'] == item:
+                index = i
+                break
+        async with self.session() as session:
+            async with session.begin():
+                user: User | None = session.execute(
+                    select(User).where(
+                        User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                    )
+                )
+                if not user:
+                    return
+                if user.new_year_events[0][index] == 0:
+                    await ctx.reply(f"{ctx.author.mention}, у Вас нет этого:(")
+                    return
+                emb = discord.Embed(title=f"Использовано {new_year[index]['name']}!")
+                user.new_year_events[0].mood_count = new_year[index]['mood']
+                emb.add_field(
+                    name=f"Получено настроения",
+                    value=f'Получено - {new_year[index]["mood"]}'
+                )
+                if random.randint(1, 101) >= new_year[index]['ylt_%']:
+                    user.users_stats[0].xp += new_year[index]['xp']
+                    emb.add_field(
+                        name=f"Получено опыта",
+                        value=f'Получено - {new_year[index]["xp"]}')
+                user.new_year_events[0].update(index, -1)
+                await ctx.reply(embed=emb)
 
     @commands.command(aliases=["buy_food"])
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __buy_food(self, ctx: commands.context.Context, number: int = 0, count: int = 1):
-        self.month = int(datetime.today().strftime('%m'))
-        self.day = int(datetime.today().strftime('%d'))
-        if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
-                if not 10 > number >= 0:
-                    await ctx.reply(f"{ctx.author.mention}, аргумент не верен!")
-                elif count <= 0:
-                    await ctx.reply("Вы не можете указать количество меньше 0!")
-                elif count > 10:
-                    await ctx.reply("Вы не можете указать количество больше 10!")
-                else:
-                    for i in new_year:
-                        if new_year[i]['index'] == int(number):
-                            self.index = i
-                            break
-                    if (new_year[self.index]['price'] * count) > self.db.get_cash(ctx.author.id, ctx.guild.id):
-                        await ctx.reply(f"{ctx.author.mention}, у Вас недостаточно средств!")
-                    else:
-                        self.db.take_coins(ctx.author.id, ctx.guild.id, new_year[self.index]['price'] * count)
-                        self.db.update_new_year_event(ctx.author.id, ctx.guild.id, self.index, count)
-                        await ctx.message.add_reaction('✅')
+        month = int(datetime.today().strftime('%m'))
+        day = int(datetime.today().strftime('%d'))
+        if month > 11 or month == 1:
+            return
+        if (month == 12 and day > 10) or (month == 1 and day < 15):
+            return
+        if not 10 > number >= 0:
+            await ctx.reply(f"{ctx.author.mention}, аргумент не верен!")
+            return
+        if count <= 0:
+            await ctx.reply("Вы не можете указать количество меньше 0!")
+            return
+        if count > 10:
+            await ctx.reply("Вы не можете указать количество больше 10!")
+            return
+        index = 0
+        for i in new_year:
+            if new_year[i]['index'] == int(number):
+                index = i
+                break
+        async with self.session() as session:
+            async with session.begin():
+                user = await session.execute(
+                    select(User).where(
+                        User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                    )
+                )
+                user: User | None = user.scalars().first()
+                if not user:
+                    return
+                if (new_year[index]['price'] * count) > user.cash:
+                    await ctx.reply(f"{ctx.author.mention}, у Вас недостаточно средств!")
+                    return
+                user.cash -= new_year[index]['price'] * count
+                user.new_year_events[0].update(index, count)
+                await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["send_present"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def __send_present(self, ctx: commands.context.Context, member: discord.Member = None, amount: int = None):
         if member is None:
-            await ctx.reply(f"""{ctx.author.mention}, укажите пользователя, которому Вы хотите перевести коины""")
-        else:
-            if amount is None:
-                await ctx.reply(f"""{ctx.author.mention}, Вы не ввели сумму!""")
-            elif amount > self.db.get_from_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises"):
-                await ctx.reply(f"""{ctx.author.mention}, у Вас недостаточно подарков для перевода""")
-            elif amount < 1:
-                await ctx.reply(f"""{ctx.author.mention}, Вы не можете ввести число меньше 1!""")
-            else:
+            await ctx.reply(f"""{ctx.author.mention}, укажите пользователя, которому Вы хотите отправить подарки""")
+            return
+        if amount is None:
+            await ctx.reply(f"""{ctx.author.mention}, Вы не ввели сумму!""")
+            return
+        async with self.session() as session:
+            async with session.begin():
+                sender = await session.execute(
+                    select(User).where(
+                        User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                    )
+                )
+                sender: None | User = sender.scalars().first()
+                recipient = await session.execute(
+                    select(User).where(
+                        User.user_id == member.id and User.guild_id == ctx.guild.id
+                    )
+                )
+                recipient: None | User = recipient.scalars().first()
+                if not recipient or not sender:
+                    return
+                if amount > sender.inventories[0].new_year_prises:
+                    await ctx.reply(f"""{ctx.author.mention}, у Вас недостаточно подарков для перевода""")
+                    return
+                if amount < 1:
+                    await ctx.reply(f"""{ctx.author.mention}, Вы не можете ввести число меньше 1!""")
+                    return
                 if member.id == ctx.author.id:
-                    await ctx.reply(f"""{ctx.author}, Вы не можете перевести деньги себе""")
-                else:
-                    self.db.update_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises", -amount)
-                    self.db.update_inventory(member.id, member.guild.id, "NewYearPrises", amount)
+                    await ctx.reply(f"""{ctx.author}, Вы не можете перевести подарки себе""")
+                sender.inventories[0].new_year_prises -= amount
+                recipient.inventories[0].new_year_prises += amount
 
                 await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=["open"])
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __open(self, ctx: commands.context.Context, count: Union[int, str] = None) -> None:
-        self.month = int(datetime.today().strftime('%m'))
-        self.day = int(datetime.today().strftime('%d'))
-        if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
-                self.present = self.db.get_from_inventory(ctx.author.id, ctx.guild.id, "NewYearPrises")
-                if self.present == 0:
+        month = int(datetime.today().strftime('%m'))
+        day = int(datetime.today().strftime('%d'))
+        if month > 11 or month == 1:
+            return
+        if (month == 12 and day > 10) or (month == 1 and day < 15):
+            return
+        async with self.session() as session:
+            async with session.begin():
+                user = await session.execute(
+                    select(User).where(
+                        User.user_id == ctx.author.id and User.guild_id == ctx.guild.id
+                    )
+                )
+                user: User | None = user.scalars().first()
+                if not user:
+                    return
+                presents = user.inventories[0].new_year_prises
+                if presents == 0:
                     await ctx.reply("У Вас нет подарков:(")
                     return
                 if isinstance(count, int):
-                    if int(count) > self.present:
-                        await ctx.reply("У Вас недостаточно подарков:(\nУ Вас {} подарков".format(self.present))
+                    if int(count) > presents:
+                        await ctx.reply("У Вас недостаточно подарков:(\nУ Вас {} подарков".format(presents))
                         return
                     elif int(count) <= 0:
                         await ctx.reply(f"Вы не можете отрыть 0(ну или меньше) подарков:)")
                         return
                 if count is None:
-                    self.prize = random.randint(NEW_YEAR_MIN_PRIZE, NEW_YEAR_MAX_PRIZE)
-                    self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
-                    self.db.take_present(1, ctx.author.id, ctx.guild.id)
-                    await ctx.reply(f"Из подарка выпало {self.prize} коинов! Поздравляем!")
+                    prize = random.randint(NEW_YEAR_MIN_PRIZE, NEW_YEAR_MAX_PRIZE)
+                    user.cash += prize
+                    user.inventories[0].new_year_prises -= 1
+                    await ctx.reply(f"Из подарка выпало {prize} коинов! Поздравляем!")
+                    return
                 elif count == "all":
-                    self.prize = random.randint(NEW_YEAR_MIN_PRIZE * self.present, NEW_YEAR_MAX_PRIZE * self.present)
-                    self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
-                    self.db.take_present(self.present, ctx.author.id, ctx.guild.id)
-                    await ctx.reply(f"Из подарков выпало {self.prize} коинов! Поздравляем!")
-                else:
-                    try:
-                        self.prize = random.randint(NEW_YEAR_MIN_PRIZE * int(count), NEW_YEAR_MAX_PRIZE * int(count))
-                        self.db.add_coins(ctx.author.id, ctx.guild.id, self.prize)
-                        self.db.take_present(count, ctx.author.id, ctx.guild.id)
-                        await ctx.reply(f"Из подарков выпало {self.prize} коинов! Поздравляем!")
-                    except TypeError:
-                        pass
+                    prize = random.randint(NEW_YEAR_MIN_PRIZE * presents, NEW_YEAR_MAX_PRIZE * presents)
+                    user.cash += prize
+                    user.inventories[0].new_year_prises -= presents
+                    await ctx.reply(f"Из подарков выпало {prize} коинов! Поздравляем!")
+                    return
+                try:
+                    prize = random.randint(NEW_YEAR_MIN_PRIZE * int(count), NEW_YEAR_MAX_PRIZE * int(count))
+                    user.cash += prize
+                    user.inventories[0].new_year_prises -= count
+                    await ctx.reply(f"Из подарков выпало {prize} коинов! Поздравляем!")
+                except TypeError:
+                    pass
 
     @commands.command(aliases=["presents"])
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __presents(self, ctx: commands.context.Context) -> None:
-        self.month = int(datetime.today().strftime('%m'))
-        self.day = int(datetime.today().strftime('%d'))
-        if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
-                await ctx.reply(
-                    f"{ctx.author.mention}\n```У Вас "
-                    f"{self.db.get_from_inventory(ctx.author.id, ctx.guild.id, 'NewYearPrises')} подарков```"
-                )
+        month = int(datetime.today().strftime('%m'))
+        day = int(datetime.today().strftime('%d'))
+        if month > 11 or month == 1:
+            if (month == 12 and day > 10) or (month == 1 and day < 15):
+                async with self.session() as session:
+                    async with session.begin():
+                        inventory = await session.execute(
+                            select(Inventory).where(
+                                Inventory.user_id == ctx.author.id and Inventory.guild_id == ctx.guild.id
+                            )
+                        )
+                        inventory: Inventory | None = inventory.scalars().first()
+                        if not inventory:
+                            return
+                        await ctx.reply(
+                            f"{ctx.author.mention}\n```У Вас "
+                            f"{inventory.new_year_prises} подарков```"
+                        )
 
     @commands.command(aliases=["foodshop"])
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def __nwp(self, ctx: commands.context.Context) -> None:
-        self.month = int(datetime.today().strftime('%m'))
-        self.day = int(datetime.today().strftime('%d'))
-        if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
-                self.emb = discord.Embed(title="Магазин Еды!")
+        month = int(datetime.today().strftime('%m'))
+        day = int(datetime.today().strftime('%d'))
+        if month > 11 or month == 1:
+            if (month == 12 and day > 10) or (month == 1 and day < 15):
+                emb = discord.Embed(title="Магазин Еды!")
                 for i in new_year:
-                    self.emb.add_field(
+                    emb.add_field(
                         name=f"{new_year[i]['name']} ({new_year[i]['index']})",
                         value=f'{new_year[i]["price"]} DP коинов\n')
-                self.emb.add_field(
+                emb.add_field(
                     name="Покупка еды",
                     value=f'Чтобы купить - {PREFIX}buyfood <индекс товара>'
                           f'<количество>')
-                await ctx.reply(embed=self.emb)
-
-    @commands.command(aliases=["food"])
-    @commands.cooldown(1, 4, commands.BucketType.user)
-    async def __food_e(self, ctx: commands.context.Context) -> None:
-        self.month = int(datetime.today().strftime('%m'))
-        self.day = int(datetime.today().strftime('%d'))
-        if self.month > 11 or self.month == 1:
-            if (self.month == 12 and self.day > 10) or (self.month == 1 and self.day < 15):
-                self.emb = discord.Embed(title=f"Еда {ctx.author}")
-                self.emb.set_thumbnail(url=ctx.author.avatar.url)
-                self.index2 = 3
-                self.items = tuple(self.db.get_from_new_year_event(ctx.author.id, ctx.guild.id, "*"))
-                for t in range(len(self.items) - 3):
-                    if self.items[self.index2] != 0:
-                        for j in new_year:
-                            if (new_year[j]["index"] + 3) == self.index2:
-                                self.emb.add_field(
-                                    name=f"{new_year[j]['name']}",
-                                    value=f'Количество - {self.items[self.index2]}\n'
-                                          f'({j} или {new_year[j]["index"]})')
-                    self.index2 += 1
-                self.emb.add_field(
-                    name=f"Настроение",
-                    value=f'{self.items[-1]}')
-                await ctx.reply(embed=self.emb)
+                await ctx.reply(embed=emb)

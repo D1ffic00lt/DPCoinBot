@@ -20,7 +20,6 @@ from database.user.online import Online
 from database.user.online_stats import OnlineStats
 from database.user.users import User
 from units.additions import get_time, datetime_to_str
-
 from units.json_logging import Json
 
 __all__ = (
