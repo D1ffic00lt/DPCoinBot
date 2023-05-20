@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
-from typing import Callable
-
 import discord
 import random
+import numpy as np
 
 from datetime import datetime
-
-import numpy as np
 from discord.ext import commands
+from typing import Callable
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from toxicityclassifier import ToxicityClassificator

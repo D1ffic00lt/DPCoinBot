@@ -7,7 +7,6 @@ from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
 from typing import Callable
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

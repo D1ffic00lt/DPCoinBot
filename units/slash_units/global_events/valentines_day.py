@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 import random
+import discord
 
 from datetime import datetime
 from typing import Callable
-
-import discord
 from discord import app_commands
 from discord.ext import commands
 from sqlalchemy import select

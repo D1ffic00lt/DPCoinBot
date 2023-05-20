@@ -9,7 +9,6 @@ import logging
 
 from discord.ext import commands
 from typing import Union, Callable
-
 from sqlalchemy import select, delete, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from io import BytesIO
