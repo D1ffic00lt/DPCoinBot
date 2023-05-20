@@ -42,7 +42,6 @@ class User(commands.Cog):
         super().__init__(*args, **kwargs)
         self.session: Callable[[], AsyncSession] = session
         self.gpt_token = gpt_token
-        server: Union[discord.Guild, type(None)]
         self.bot: commands.Bot = bot
         self.gpt_users: dict[int, GTP3Model] = {}
         logging.info(f"User connected")
