@@ -115,5 +115,5 @@ class DPCoinBot(commands.Bot):
             status=discord.Status.online,
             activity=discord.Game(f"{PREFIX}help")
         )
-        await self._add_server()
+        await self.add_server()
         logging.info(f"Bot connected")
