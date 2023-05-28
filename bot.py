@@ -51,7 +51,7 @@ class DPCoinBot(commands.Bot):
                 start_cash = await session.execute(
                     select(ServerSettings).where(ServerSettings.guild_id == guild.id)
                 )
-                start_cash = start_cash.scalars().first()[0].starting_balance
+                start_cash = start_cash.scalars().first().starting_balance
             for member in guild.members:
                 guild_member = await session.execute(
                     select(User).where(User.user_id == member.id and User.guild_id == guild.id)
