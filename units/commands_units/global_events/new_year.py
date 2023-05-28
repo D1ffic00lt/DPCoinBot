@@ -7,7 +7,6 @@ import random
 from datetime import datetime
 from discord.ext import commands
 from typing import Union, Callable
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

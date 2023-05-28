@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
-from typing import Callable, Union
-
 import discord
 
 from discord.ext import commands
 from discord.utils import get
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Callable, Union
 
 from database.guild.servers import ServerSettings
 from database.user.users import User

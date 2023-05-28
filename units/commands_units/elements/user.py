@@ -9,7 +9,6 @@ import logging
 
 from discord.ext import commands
 from typing import Union, Callable
-
 from sqlalchemy import select, delete, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from io import BytesIO
@@ -26,7 +25,7 @@ from units.additions import (
     get_promo_code
 )
 from units.json_logging import Json
-from units.gpt.gpt3 import GTP3Model
+from units.gpt.gpt3 import GPT3Model
 from units.card_generator import CardGenerator
 from database.user.users import User as DBUser
 from config import PREFIX
@@ -43,9 +42,8 @@ class User(commands.Cog):
         super().__init__(*args, **kwargs)
         self.session: Callable[[], AsyncSession] = session
         self.gpt_token = gpt_token
-        server: Union[discord.Guild, type(None)]
         self.bot: commands.Bot = bot
-        self.gpt_users: dict[int, GTP3Model] = {}
+        self.gpt_users: dict[int, GPT3Model] = {}
         logging.info(f"User connected")
 
     async def _check_cash(

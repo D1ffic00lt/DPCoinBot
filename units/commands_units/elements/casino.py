@@ -205,7 +205,7 @@ class Casino(commands.Cog):
                     return True
         return False
 
-    @commands.command(aliases=['rust_casino'])
+    @commands.command(aliases=['wheel'])
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def __casino_3(
             self, ctx: commands.context.Context,

@@ -1,7 +1,7 @@
 import openai_async
 
 
-class GTP3Model(object):
+class GPT3Model(object):
     def __init__(self, token: str, model: str = "gpt-3.5-turbo-0301") -> None:
         self.token = token
         self.model = model
