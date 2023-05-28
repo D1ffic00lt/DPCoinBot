@@ -841,22 +841,20 @@ class UserSlash(commands.Cog):
         if inter.guild is None:
             await inter.response.send_message("no guild")
             return
-        match model.value:
-            case "gpt3":
-                match context.value:
-                    case "yes":
-                        await inter.response.send_message("Please, wait...")
-                        if inter.user.id not in self.gpt_users.keys():
-                            self.gpt_users[inter.user.id] = GPT3Model(self.gpt_token)
-                        await inter.edit_original_response(
-                            content=f"```\n{await self.gpt_users[inter.user.id].answer_with_context(message)}\n```"
-                        )
-                    case "not":
-                        if inter.user.id not in self.gpt_users.keys():
-                            self.gpt_users[inter.user.id] = GPT3Model(self.gpt_token)
-                        await inter.response.send_message("Please, wait...")
-                        await inter.edit_original_response(
-                            content=f"```\n{await self.gpt_users[inter.user.id].answer(message)}\n```"
-                        )
-            case "gpt4":
-                await inter.response.send_message("soon...")
+        if model.value == "gpt3":
+            if context.value == "yes":
+                await inter.response.send_message("Please, wait...")
+                if inter.user.id not in self.gpt_users.keys():
+                    self.gpt_users[inter.user.id] = GPT3Model(self.gpt_token)
+                await inter.edit_original_response(
+                    content=f"```\n{await self.gpt_users[inter.user.id].answer_with_context(message)}\n```"
+                )
+            elif context.value == "not":
+                if inter.user.id not in self.gpt_users.keys():
+                    self.gpt_users[inter.user.id] = GPT3Model(self.gpt_token)
+                await inter.response.send_message("Please, wait...")
+                await inter.edit_original_response(
+                    content=f"```\n{await self.gpt_users[inter.user.id].answer(message)}\n```"
+                )
+        elif model.value == "gpt4":
+            await inter.response.send_message("soon...")

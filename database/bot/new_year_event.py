@@ -100,24 +100,23 @@ class NewYearEvent(SqlAlchemyBase):
         return _all[item]
 
     def update(self, item, count):
-        match item:
-            case 0:
-                self.mandarins_count += count
-            case 1:
-                self.olivier_salad_count += count
-            case 2:
-                self.caesar_salad_count += count
-            case 3:
-                self.red_caviar_count += count
-            case 4:
-                self.black_caviar_count += count
-            case 5:
-                self.sliced_meat_count += count
-            case 6:
-                self.ducks_count += count
-            case 7:
-                self.salted_red_fish_count += count
-            case 8:
-                self.dobry_juice_count += count
-            case 9:
-                self.baby_champagne_count += count
+        if item == 0:
+            self.mandarins_count += count
+        if item == 1:
+            self.olivier_salad_count += count
+        if item == 2:
+            self.caesar_salad_count += count
+        if item == 3:
+            self.red_caviar_count += count
+        if item == 4:
+            self.black_caviar_count += count
+        if item == 5:
+            self.sliced_meat_count += count
+        if item == 6:
+            self.ducks_count += count
+        if item == 7:
+            self.salted_red_fish_count += count
+        if item == 8:
+            self.dobry_juice_count += count
+        if item == 9:
+            self.baby_champagne_count += count
