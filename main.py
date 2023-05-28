@@ -7,8 +7,8 @@ import logging
 
 from asyncio import run
 
-from bot import DPcoinBOT
-from database.db import Database
+from bot import DPCoinBot
+from database.session import create_session, global_init
 from units import *
 from units.json_logging import Json
 from units.encoding import Encoder
@@ -21,6 +21,8 @@ from config import (
 )
 
 logging.basicConfig(format=FORMAT, datefmt=DATE_FORMAT, level=logging.INFO)
+if not os.path.isdir(LOG_PATH.split("/")[0]):
+    os.mkdir(LOG_PATH.split("/")[0])
 handler = logging.FileHandler(LOG_PATH, mode='+a')
 handler.setFormatter(logging.Formatter(FORMAT))
 logging.getLogger().addHandler(handler)
@@ -52,32 +54,33 @@ async def main() -> None:
         encoder = Encoder(file.read())
 
     logging.info(f"Encoder connected")
-    db = Database("database/server.db", encoder=encoder)
+    await global_init("database/server.db")
     logging.info(f"Database connected")
-    BOT: DPcoinBOT = DPcoinBOT(
+
+    BOT: DPCoinBot = DPCoinBot(
         command_prefix=PREFIX if not TESTING_MODE else TESTERS_PREFIX,
         intents=intents,
-        db=db, case_insensitive=True
+        db=create_session, case_insensitive=True
     )
     logging.info("version: {}".format(__version__))
 
-    await BOT.add_cog(Casino(BOT, db))
-    await BOT.add_cog(Debug(BOT, db, encoder=encoder))
-    await BOT.add_cog(User(BOT, db, encoder.decrypt(GPT_TOKEN)))
-    await BOT.add_cog(Events(BOT, db))
-    await BOT.add_cog(Guild(BOT, db))
-    await BOT.add_cog(Admin(BOT, db))
-    await BOT.add_cog(Public(BOT, db))
-    await BOT.add_cog(NewYear(BOT, db))
-    await BOT.add_cog(ValentinesDay(BOT, db))
+    await BOT.add_cog(Casino(BOT, create_session))
+    await BOT.add_cog(Debug(BOT, create_session, encoder=encoder))
+    await BOT.add_cog(User(BOT, create_session, encoder.decrypt(GPT_TOKEN)))
+    await BOT.add_cog(Events(BOT, create_session))
+    await BOT.add_cog(Guild(BOT, create_session))
+    await BOT.add_cog(Admin(BOT, create_session))
+    await BOT.add_cog(Public(BOT))
+    await BOT.add_cog(NewYear(BOT, create_session))
+    await BOT.add_cog(ValentinesDay(BOT, create_session))
 
-    await BOT.add_cog(CasinoSlash(BOT, db))
-    await BOT.add_cog(UserSlash(BOT, db, encoder.decrypt(GPT_TOKEN)))
-    await BOT.add_cog(GuildSlash(BOT, db))
-    await BOT.add_cog(AdminSlash(BOT, db))
-    await BOT.add_cog(PublicSlash(BOT, db))
-    await BOT.add_cog(NewYearSlash(BOT, db))
-    await BOT.add_cog(ValentinesDaySlash(BOT, db))
+    await BOT.add_cog(CasinoSlash(BOT, create_session))
+    await BOT.add_cog(UserSlash(BOT, create_session, encoder.decrypt(GPT_TOKEN)))
+    await BOT.add_cog(GuildSlash(BOT, create_session))
+    await BOT.add_cog(AdminSlash(BOT, create_session))
+    await BOT.add_cog(PublicSlash(BOT))
+    await BOT.add_cog(NewYearSlash(BOT, create_session))
+    await BOT.add_cog(ValentinesDaySlash(BOT, create_session))
 
     BOT.run(encoder.decrypt(TOKEN))
 
