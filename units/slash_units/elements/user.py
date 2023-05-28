@@ -26,7 +26,7 @@ from units.additions import (
 )
 from units.card_generator import CardGenerator
 from units.json_logging import Json
-from units.gpt import GTP3Model
+from units.gpt import GPT3Model
 from database.user.users import User as DBUser
 __all__ = (
     "UserSlash",
@@ -51,7 +51,7 @@ class UserSlash(commands.Cog):
         self.bot: commands.Bot = bot
         self.gpt_token = gpt_token
         self.bot: commands.Bot = bot
-        self.gpt_users: dict[int, GTP3Model] = {}
+        self.gpt_users: dict[int, GPT3Model] = {}
         logging.info(f"User (slash) connected")
 
     async def _check_cash(
@@ -847,13 +847,13 @@ class UserSlash(commands.Cog):
                     case "yes":
                         await inter.response.send_message("Please, wait...")
                         if inter.user.id not in self.gpt_users.keys():
-                            self.gpt_users[inter.user.id] = GTP3Model(self.gpt_token)
+                            self.gpt_users[inter.user.id] = GPT3Model(self.gpt_token)
                         await inter.edit_original_response(
                             content=f"```\n{await self.gpt_users[inter.user.id].answer_with_context(message)}\n```"
                         )
                     case "not":
                         if inter.user.id not in self.gpt_users.keys():
-                            self.gpt_users[inter.user.id] = GTP3Model(self.gpt_token)
+                            self.gpt_users[inter.user.id] = GPT3Model(self.gpt_token)
                         await inter.response.send_message("Please, wait...")
                         await inter.edit_original_response(
                             content=f"```\n{await self.gpt_users[inter.user.id].answer(message)}\n```"
