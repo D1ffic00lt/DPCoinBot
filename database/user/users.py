@@ -9,9 +9,15 @@ __all__ = ("User",)
 
 class User(SqlAlchemyBase):
     __tablename__ = 'users'
-    user_id = sqlalchemy.Column(
+    id = sqlalchemy.Column(
         sqlalchemy.Integer,
         primary_key=True,
+        unique=True,
+        nullable=False,
+        autoincrement=True
+    )
+    user_id = sqlalchemy.Column(
+        sqlalchemy.Integer,
         nullable=False,
     )
     guild_id = sqlalchemy.Column(
