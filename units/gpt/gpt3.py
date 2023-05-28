@@ -16,17 +16,17 @@ class GPT3Model(object):
                 "messages": [{"role": "user", "content": message}],
             },
         )
-        return response.json()["choices"][0]["message"]["content"]
+        return response.json()["choices"][0]["message"]
 
     async def answer_with_context(self, message: str) -> str:
         self.content.append({"role": "user", "content": message})
         response = await openai_async.chat_complete(
             self.token,
-            timeout=100,
+            timeout=1000,
             payload={
                 "model": self.model,
                 "messages": self.content,
             },
         )
-        self.content.append({"role": "system", "content": response.json()["choices"][0]["message"]})
+        self.content.append({"role": "assistant", "content": response.json()["choices"][0]["message"]["content"]})
         return response.json()["choices"][0]["message"]["content"]

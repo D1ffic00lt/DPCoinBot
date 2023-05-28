@@ -26,11 +26,6 @@ class UserStats(SqlAlchemyBase):
         sqlalchemy.ForeignKey("guilds.guild_id"),
         nullable=False,
     )
-    rating_messages = sqlalchemy.Column(
-        sqlalchemy.BigInteger,
-        default=0,
-        nullable=False
-    )
     reputation = sqlalchemy.Column(
         sqlalchemy.Double,
         default=5,
