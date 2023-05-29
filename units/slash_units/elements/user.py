@@ -525,8 +525,8 @@ class UserSlash(commands.Cog):
                             },
                             {
                                 "name": f'Rust casinos - {user.users_stats[0].rust_casinos_count}',
-                                "value": f'Wins - {user.users_stats[0].rust_casinos_wins_count}\n '
-                                         f'Loses - {user.users_stats[0].rolls_defeats_count}',
+                                "value": f'Wins - {user.users_stats[0].rust_casino_wins_count}\n '
+                                         f'Loses - {user.users_stats[0].rust_casino_defeats_count}',
                                 "inline": True
                             },
                             {

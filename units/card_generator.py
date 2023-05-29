@@ -219,6 +219,11 @@ class CardGenerator(object):
                 (x + 35 + total_size / 6, y + 60 + total_size / 6),
                 level, font=self.title_font
             )
+        elif len(level) == 1:
+            draw.text(
+                (x + 77 + total_size / 6, y + 65 + total_size / 6),
+                level, font=self.title_font
+            )
         else:
             draw.text(
                 (x + 60 + total_size / 6, y + 60 + total_size / 6),
