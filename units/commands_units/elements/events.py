@@ -279,7 +279,7 @@ class Events(commands.Cog):
                     if (day > data["day"] and month == data["month"]) or \
                             (day < data["day"] and month > data["month"]) or \
                             (month == 1 and day == 1 and day < data["day"]):
-                        # self.db.send_files()
+                        # self.db.send_files() # TODO
                         Json(".json/last_save.json").json_dump(
                             {
                                 "day": day,
@@ -287,6 +287,9 @@ class Events(commands.Cog):
                             }
                         )
                 await self.bot.process_commands(message)
+                if not user:
+                    return
+                user.users_stats[0].messages_count += 1
                 try:  # когда-нибудь я это уберу
                     if self.last_message[message.author.id] is None:
                         self.last_message[message.author.id] = {"message": "", "date": get_time()}
@@ -313,7 +316,6 @@ class Events(commands.Cog):
                     if text != self.last_message[message.author.id]["message"]:
                         self.last_message[message.author.id]["message"] = text
                         if len(text) > 7 and message.author is not None and message.guild is not None:
-                            user.users_stats[0].messages_count += 1
                             if time > 60 or time == 0:
                                 user.users_stats[0].xp += random.randint(1, 15)
                                 xp = user.users_stats[0].xp
@@ -351,4 +353,4 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         await self.bot.add_server()
-        logging.info(f"{member} add to the database")
+        logging.info(f"{member} added to the database")
