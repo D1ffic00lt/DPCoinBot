@@ -16,7 +16,7 @@ class GPT3Model(object):
                 "messages": [{"role": "user", "content": message}],
             },
         )
-        return response.json()["choices"][0]["message"]
+        return response.json()["choices"][0]["message"]["content"]
 
     async def answer_with_context(self, message: str) -> str:
         self.content.append({"role": "user", "content": message})
