@@ -202,14 +202,11 @@ class Debug(commands.Cog):
     async def on_command_error(
             self, ctx: commands.context.Context, error: Exception
     ) -> None:
-        print(error)
-        # raise error
         if isinstance(error, commands.CommandOnCooldown):
             pass
         elif isinstance(error, commands.CommandNotFound):
             pass
         else:
-            raise error
             logging.error(error)
             try:
                 write_log(f"error: {str(ctx.author)} ({ctx.author.id}) "
